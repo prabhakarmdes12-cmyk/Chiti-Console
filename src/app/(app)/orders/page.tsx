@@ -5,7 +5,7 @@ import ChitiStatusBadge from "@/components/ui/ChitiStatusBadge";
 import ChitiButton from "@/components/ui/ChitiButton";
 import { createOrder, updateOrderStatus, deleteOrder } from "@/lib/actions/orders";
 import Link from "next/link";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Download } from "lucide-react";
 
 export default async function OrdersPage() {
   const projectId = await getProjectId();
@@ -21,7 +21,11 @@ export default async function OrdersPage() {
         title="Orders"
         description="Manage and track all orders."
         actions={
-          <details className="relative">
+          <div className="flex items-center gap-2">
+            <a href="/api/export?entity=orders">
+              <ChitiButton variant="secondary" size="sm" icon={<Download className="w-4 h-4" />}>Export CSV</ChitiButton>
+            </a>
+            <details className="relative">
             <summary className="list-none">
               <ChitiButton size="sm" icon={<Plus className="w-4 h-4" />}>New Order</ChitiButton>
             </summary>
@@ -47,6 +51,7 @@ export default async function OrdersPage() {
               </form>
             </div>
           </details>
+          </div>
         }
       />
 

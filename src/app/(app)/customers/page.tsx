@@ -4,7 +4,7 @@ import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiButton from "@/components/ui/ChitiButton";
 import { createCustomer, deleteCustomer } from "@/lib/actions/customers";
 import Link from "next/link";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Download } from "lucide-react";
 
 export default async function CustomersPage() {
   const projectId = await getProjectId();
@@ -19,7 +19,11 @@ export default async function CustomersPage() {
         title="Customers"
         description="View and manage your customer base."
         actions={
-          <details className="relative">
+          <div className="flex items-center gap-2">
+            <a href="/api/export?entity=customers">
+              <ChitiButton variant="secondary" size="sm" icon={<Download className="w-4 h-4" />}>Export CSV</ChitiButton>
+            </a>
+            <details className="relative">
             <summary className="list-none">
               <ChitiButton size="sm" icon={<Plus className="w-4 h-4" />}>New Customer</ChitiButton>
             </summary>
@@ -41,6 +45,7 @@ export default async function CustomersPage() {
               </form>
             </div>
           </details>
+          </div>
         }
       />
 

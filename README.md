@@ -75,17 +75,25 @@ src/
 ├── app/
 │   ├── layout.tsx               # Root layout (fonts, dark theme)
 │   ├── page.tsx                 # Root — redirects to /dashboard or /login
-│   ├── middleware.ts            # Auth guard middleware
+│   ├── proxy.ts                 # Auth guard proxy (Next.js 16)
 │   ├── (app)/                   # Authenticated routes
-│   │   ├── layout.tsx           # App layout (Sidebar + TopNav + main)
+│   │   ├── layout.tsx           # App layout (Sidebar + TopNav + ToastProvider)
 │   │   ├── error.tsx            # Error boundary for all app pages
 │   │   ├── loading.tsx          # Loading skeleton for all app pages
 │   │   ├── not-found.tsx        # 404 for all app pages
 │   │   ├── dashboard/page.tsx
-│   │   ├── orders/page.tsx
-│   │   ├── customers/page.tsx
-│   │   ├── products/page.tsx
-│   │   ├── leads/page.tsx
+│   │   ├── orders/
+│   │   │   ├── page.tsx         # Order list with create/delete/status advance
+│   │   │   └── [id]/page.tsx    # Order detail + timeline + status actions
+│   │   ├── customers/
+│   │   │   ├── page.tsx         # Customer grid with create/delete
+│   │   │   └── [id]/page.tsx    # Customer detail + edit + recent orders
+│   │   ├── products/
+│   │   │   ├── page.tsx         # Product table with create/delete
+│   │   │   └── [id]/page.tsx    # Product detail + stock adjust + edit
+│   │   ├── leads/
+│   │   │   ├── page.tsx         # Kanban board with create/delete/status
+│   │   │   └── [id]/page.tsx    # Lead detail + status update
 │   │   ├── analytics/page.tsx
 │   │   ├── whatsapp/page.tsx
 │   │   ├── content/page.tsx
@@ -126,13 +134,17 @@ PROJECT_JOURNAL.md               # Session log, decisions, known issues
 
 ## Pages
 
-| Route | Description | Status |
-|---|---|---|
+| Route | Description | Features |
+|---|---|---|---|
 | `/dashboard` | Overview — revenue, orders, customers, conversion rate | ✅ Live |
-| `/orders` | Order list — order#, customer, amount, status, source | ✅ Live |
-| `/customers` | Customer cards — name, orders, spend, tags | ✅ Live |
-| `/products` | Product table — name, SKU, category, price, stock | ✅ Live |
-| `/leads` | Kanban board — NEW → CONTACTED → QUALIFIED → PROPOSAL → WON → LOST | ✅ Live |
+| `/orders` | Order list + create, status advance, delete | ✅ Live |
+| `/orders/[id]` | Order detail — items, timeline, status actions, delete | ✅ Live |
+| `/customers` | Customer grid + create, delete | ✅ Live |
+| `/customers/[id]` | Customer detail — stats, edit form, recent orders | ✅ Live |
+| `/products` | Product table + create, delete | ✅ Live |
+| `/products/[id]` | Product detail — stock adjust, edit, movements | ✅ Live |
+| `/leads` | Kanban board + create, status shortcuts, delete | ✅ Live |
+| `/leads/[id]` | Lead detail — status update, contact info, message | ✅ Live |
 | `/analytics` | Metrics — revenue, orders, AOV, source distribution | ✅ Live |
 | `/whatsapp` | Conversation list — contact, preview, unread count | ✅ Live |
 | `/content` | Content entries — title, type, status, updated | ✅ Live |
@@ -173,15 +185,25 @@ See `.env.example` for the full list with comments. Key variables:
 
 ## Current Status
 
-The project is in **Phase 1** (Production Foundation). See `PROJECT_JOURNAL.md` for the full session log.
+The project is in **Phase 2** (CRUD & Detail Pages). See `PROJECT_JOURNAL.md` for the full session log.
+
+**What works:**
+- Browse all data (orders, customers, products, leads, etc.)
+- Create new orders, products, customers, leads via inline forms
+- Edit products, customers via detail pages
+- Update order status, lead status with one click
+- Delete records
+- View detailed info on dedicated detail pages
+- Stock adjustments with movement history tracking
 
 **Known limitations:**
-- All pages are read-only (no create/edit/delete)
-- No search, filters, or pagination
-- No REST API for external integrations
+- No search, filters, or pagination on any list
+- No REST API for external integrations yet
+- No webhook receiver for real-time order sync from store
 - Prisma Postgres (WASM) data is ephemeral — lost on restart, must re-seed
 - Google OAuth requires test user setup in Google Cloud Console
 - Analytics uses CSS bar charts (Recharts not yet implemented)
+- WhatsApp, Content, Settings pages are still read-only / static
 
 ---
 

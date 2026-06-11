@@ -72,7 +72,80 @@
 
 **Build verified:** 0 errors, 0 warnings, 15 routes all dynamic, Proxy recognized correctly.
 
-**Next steps (Phases 2-4):**
-- Phase 2: CRUD operations, detail pages, server actions, form components (ChitiModal, ChitiSelect, ChitiTextarea, ChitiToast)
-- Phase 3: REST API, webhooks (Bighi Brothers store integration), Recharts charts, CSV/PDF export
+### Session: Phase 2 — CRUD & Detail Pages
+
+**Goal:** Make pages interactive — add create, edit, delete, and detail views.
+
+**Done:**
+- **4 new UI components:** ChitiModal, ChitiToast (with provider + context), ChitiSelect, ChitiTextarea
+- **ToastProvider** integrated in `(app)/layout.tsx` — available on all authenticated pages
+- **4 server action files:**
+  - `src/lib/actions/orders.ts` — createOrder, updateOrderStatus, deleteOrder
+  - `src/lib/actions/products.ts` — createProduct, updateProduct, deleteProduct, adjustStock
+  - `src/lib/actions/customers.ts` — createCustomer, updateCustomer, deleteCustomer
+  - `src/lib/actions/leads.ts` — createLead, updateLeadStatus, deleteLead
+- **4 detail pages:**
+  - `/orders/[id]` — order info, items table, customer card, timeline, status action buttons, delete
+  - `/products/[id]` — product info, stock movements, stock adjustment form, edit form, delete
+  - `/customers/[id]` — customer info, stats, edit form, recent orders linked to order detail
+  - `/leads/[id]` — lead info, contact card, message, status update form, quick status buttons, delete
+- **4 list pages enhanced** with: New [Entity] dropdown forms, row links to detail pages, delete buttons, status advancement on click, lead kanban column status change shortcuts
+
+**Build verified:** 0 errors, 0 warnings, 4 new routes (`/[id]`), 17 total routes.
+**Git commit:** `8b8b8b7` — "Phase 2: CRUD operations, detail pages, server actions, new UI components" (18 files)
+
+**Key decisions:**
+- Server actions return `void` (not objects) so they work directly as form `action` props
+- "New" forms use `<details>` popover pattern (no JS required) — clean dropdown without modals
+- Detail pages are server components with form actions bound via `.bind()`; no client state needed
+- Stock adjustment uses a dedicated action that also creates StockMovement records
+
+**Next steps (Phases 3-4):**
+- Phase 3: REST API routes, webhook receiver for Bighi Brothers store sync, Recharts on Analytics, CSV/PDF export
 - Phase 4: Dockerfile + docker-compose, Sentry, GitHub Actions CI, rate limiting, security hardening
+
+---
+
+### Session: Phase 3 — REST API, Webhooks, Recharts, CSV Export
+
+**Goal:** Make data accessible programmatically, visualize with real charts, enable export.
+
+**Done:**
+- **API auth helper** (`src/lib/api/auth.ts`) — `authenticateApiKey()` validates `x-api-key` header against `Project.apiKey`
+- **Health endpoint** (`GET /api/health`) — returns `{ status: "ok" }` or `503`
+- **REST API routes** (all require `x-api-key` header):
+  - `GET /api/orders` — list with `?status=`, `?limit=`, `?offset=`, includes customer + items
+  - `POST /api/orders` — create order with optional items array
+  - `GET /api/orders/[id]` — single order with full relations
+  - `PATCH /api/orders/[id]` — update status/paymentStatus
+  - `DELETE /api/orders/[id]` — delete order
+  - `GET /api/products` — list with `?category=`, pagination
+  - `POST /api/products` — create with `externalId` for store sync
+  - `GET /api/customers` — list with pagination
+  - `POST /api/customers` — create
+  - `GET /api/leads` — list with `?status=`, pagination
+  - `POST /api/leads` — create
+- **Webhook receiver** (`POST /api/webhook/order`):
+  - Accepts order data from external store via API key
+  - Matches products by `externalId`, customers by `phone`
+  - Creates order with items + timeline entry
+- **Recharts on Analytics:**
+  - `MonthlyRevenueChart` — AreaChart with gradient fill, revenue by month
+  - `SourcePieChart` — Donut chart with legend, order sources distribution
+  - Both replace the old CSS bar approach
+- **CSV export** (`GET /api/export?entity=orders|products|customers`):
+  - Uses session auth (not API key)
+  - Returns downloadable CSV with proper headers
+  - Export buttons added to Orders, Products, Customers pages
+
+**Build verified:** 0 errors, 0 warnings, 25 total routes (+8 API routes).
+**New routes:** `api/health`, `api/orders`, `api/orders/[id]`, `api/products`, `api/customers`, `api/leads`, `api/export`, `api/webhook/order`
+
+**Key decisions:**
+- API routes use `x-api-key` header auth (not session) — for external integration
+- Export routes use session auth — since they're accessed from browser
+- Webhook receiver is same endpoint as API but semantically separate at `/api/webhook/order`
+- Recharts components are separate client components (not inlined in page) for cleaner code splitting
+- CSV is generated manually (no library) — keeps deps minimal
+
+**Next step (Phase 4):** Docker, Sentry, CI/CD, rate limiting, security hardening

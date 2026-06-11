@@ -4,7 +4,7 @@ import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiButton from "@/components/ui/ChitiButton";
 import { createProduct, deleteProduct } from "@/lib/actions/products";
 import Link from "next/link";
-import { Plus, Trash2, ExternalLink } from "lucide-react";
+import { Plus, Trash2, ExternalLink, Download } from "lucide-react";
 
 export default async function ProductsPage() {
   const projectId = await getProjectId();
@@ -19,7 +19,11 @@ export default async function ProductsPage() {
         title="Products"
         description="Inventory and product catalog."
         actions={
-          <details className="relative">
+          <div className="flex items-center gap-2">
+            <a href="/api/export?entity=products">
+              <ChitiButton variant="secondary" size="sm" icon={<Download className="w-4 h-4" />}>Export CSV</ChitiButton>
+            </a>
+            <details className="relative">
             <summary className="list-none">
               <ChitiButton size="sm" icon={<Plus className="w-4 h-4" />}>New Product</ChitiButton>
             </summary>
@@ -53,6 +57,7 @@ export default async function ProductsPage() {
               </form>
             </div>
           </details>
+          </div>
         }
       />
 
