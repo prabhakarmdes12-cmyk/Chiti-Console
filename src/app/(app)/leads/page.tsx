@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
-import { getProjectId } from "@/lib/db/queries";
+import { getProjectId, projectFilter } from "@/lib/db/queries";
 import { Prisma } from "@/generated/prisma/client";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiButton from "@/components/ui/ChitiButton";
@@ -35,7 +35,7 @@ export default async function LeadsPage({
   const projectId = await getProjectId();
   const { q, source } = await searchParams;
 
-  const where: Prisma.LeadWhereInput = { projectId };
+  const where: Prisma.LeadWhereInput = { ...projectFilter(projectId) };
 
   if (q) {
     where.OR = [

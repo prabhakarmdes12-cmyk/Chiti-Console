@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
-import { getProjectId } from "@/lib/db/queries";
+import { getProjectId, projectFilter } from "@/lib/db/queries";
 import ChitiCard from "@/components/ui/ChitiCard";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiStatusBadge from "@/components/ui/ChitiStatusBadge";
@@ -13,7 +13,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   const { id } = await params;
   const projectId = await getProjectId();
   const order = await prisma.order.findFirst({
-    where: { id, projectId },
+    where: { id, ...projectFilter(projectId) },
     include: { customer: true, items: true, timeline: { orderBy: { createdAt: "desc" } } },
   });
 

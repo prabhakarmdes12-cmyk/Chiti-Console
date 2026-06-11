@@ -430,6 +430,129 @@ async function main() {
     },
   });
 
+  const project2 = await prisma.project.upsert({
+    where: { slug: "giriraj-handicrafts" },
+    update: {},
+    create: {
+      name: "House of Giriraj",
+      slug: "giriraj-handicrafts",
+      type: "B2B_CATALOG",
+      domain: "girirajcrafts.com",
+      integrationType: "CMS",
+      isActive: true,
+    },
+  });
+
+  await Promise.all([
+    prisma.product.upsert({
+      where: { id: "gh-murti-001" },
+      update: {},
+      create: {
+        id: "gh-murti-001",
+        projectId: project2.id,
+        name: "Marble Ganesh Murti",
+        sku: "GH-MUR-001",
+        category: "Idols",
+        price: 2499,
+        stock: 12,
+        lowStockThreshold: 3,
+        isActive: true,
+      },
+    }),
+    prisma.product.upsert({
+      where: { id: "gh-lamp-002" },
+      update: {},
+      create: {
+        id: "gh-lamp-002",
+        projectId: project2.id,
+        name: "Brass Diya Lamp",
+        sku: "GH-LMP-002",
+        category: "Decor",
+        price: 899,
+        stock: 25,
+        lowStockThreshold: 5,
+        isActive: true,
+      },
+    }),
+  ]);
+
+  await Promise.all([
+    prisma.customer.upsert({
+      where: { id: "gh-cust-sunil" },
+      update: {},
+      create: {
+        id: "gh-cust-sunil",
+        projectId: project2.id,
+        name: "Sunil Mehta",
+        phone: "+91 98765 01111",
+        email: "sunil@example.com",
+        totalOrders: 4,
+        totalSpent: 15980,
+      },
+    }),
+    prisma.customer.upsert({
+      where: { id: "gh-cust-neha" },
+      update: {},
+      create: {
+        id: "gh-cust-neha",
+        projectId: project2.id,
+        name: "Neha Kapoor",
+        phone: "+91 98765 02222",
+        email: "neha@example.com",
+        totalOrders: 2,
+        totalSpent: 4998,
+      },
+    }),
+  ]);
+
+  await prisma.lead.create({
+    data: {
+      projectId: project2.id,
+      name: "Rohit Agarwal",
+      company: "Temple Decor",
+      email: "rohit@templedecor.in",
+      source: "WEBSITE_FORM",
+      status: "NEW",
+      products: ["Marble idols"],
+      message: "Looking for custom marble murtis for temple renovation",
+    },
+  });
+
+  await prisma.contentEntry.create({
+    data: {
+      projectId: project2.id,
+      title: "About House of Giriraj",
+      type: "Page",
+      status: "Published",
+      body: "House of Giriraj specializes in handcrafted marble and brass decor for temples and homes. Established in 2010, we serve over 200 retail partners across India.",
+    },
+  });
+
+  await prisma.whatsAppConversation.create({
+    data: {
+      projectId: project2.id,
+      waContactId: "919876501111",
+      status: "ACTIVE",
+      unreadCount: 1,
+      lastMessageAt: new Date(),
+      messages: {
+        create: [
+          { direction: "INBOUND", content: "Hi, do you have marble Ganesh idols in stock?", messageType: "text", createdAt: new Date(Date.now() - 1200000) },
+        ],
+      },
+    },
+  });
+
+  await prisma.userProject.upsert({
+    where: { userId_projectId: { userId: adminUser.id, projectId: project2.id } },
+    update: {},
+    create: {
+      userId: adminUser.id,
+      projectId: project2.id,
+      role: "ADMIN",
+    },
+  });
+
   console.log("Seeded Bighi Brothers project with:");
   console.log(`  Project: ${project.name} (${project.id})`);
   console.log(`  Products: ${products.length}`);
@@ -438,6 +561,9 @@ async function main() {
   console.log(`  Leads: ${leads.length}`);
   console.log(`  Content: ${contentEntries.length}`);
   console.log(`  WhatsApp Conversations: ${whatsappConversations.length}`);
+  console.log("");
+  console.log("Seeded House of Giriraj project:");
+  console.log(`  Products: 2, Customers: 2, Leads: 1, Content: 1, WhatsApp: 1`);
   console.log(`  Users: 1 (admin@chiti.com)`);
 }
 

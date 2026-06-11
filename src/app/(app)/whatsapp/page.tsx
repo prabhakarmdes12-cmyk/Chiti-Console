@@ -1,12 +1,12 @@
 import { prisma } from "@/lib/db/prisma";
-import { getProjectId } from "@/lib/db/queries";
+import { getProjectId, projectFilter } from "@/lib/db/queries";
 import Link from "next/link";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 
 export default async function WhatsappPage() {
   const projectId = await getProjectId();
   const conversations = await prisma.whatsAppConversation.findMany({
-    where: { projectId },
+    where: { ...projectFilter(projectId) },
     orderBy: { lastMessageAt: "desc" },
     include: { customer: true, messages: { take: 1, orderBy: { createdAt: "desc" } } },
   });

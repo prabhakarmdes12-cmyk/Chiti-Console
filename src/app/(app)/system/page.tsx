@@ -1,32 +1,41 @@
 import { prisma } from "@/lib/db/prisma";
-import { getProjectId } from "@/lib/db/queries";
+import { getProjectId, projectFilter } from "@/lib/db/queries";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 
 export default async function SystemPage() {
   const projectId = await getProjectId();
-  const project = projectId ? await prisma.project.findUnique({ where: { id: projectId } }) : null;
 
-  const [orderCount, customerCount] = projectId ? await Promise.all([
-    prisma.order.count({ where: { projectId } }),
-    prisma.customer.count({ where: { projectId } }),
-  ]) : [0, 0];
+  const projectList = projectId
+    ? await prisma.project.findMany({ where: { id: projectId } })
+    : await prisma.project.findMany({ orderBy: { name: "asc" } });
 
-  const projects = project ? [{
-    name: project.name,
-    type: project.type,
-    domain: project.domain || "—",
-    status: project.isActive ? "Online" : "Offline",
-    integration: project.integrationType,
-    orders: orderCount,
-    revenue: "—",
-  }] : [];
+  const projectData = await Promise.all(
+    projectList.map(async (p) => {
+      const [orderCount, customerCount] = await Promise.all([
+        prisma.order.count({ where: { projectId: p.id } }),
+        prisma.customer.count({ where: { projectId: p.id } }),
+      ]);
+      return {
+        name: p.name,
+        type: p.type,
+        domain: p.domain || "—",
+        status: p.isActive ? "Online" : "Offline",
+        integration: p.integrationType,
+        orders: orderCount,
+        customers: customerCount,
+      };
+    }),
+  );
 
   return (
     <div className="space-y-6">
       <ChitiPageHeader title="System" description="Project overview and system status." />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {projects.map((p) => (
+        {projectData.length === 0 && (
+          <div className="col-span-full p-12 text-center text-text-muted text-sm">No projects found</div>
+        )}
+        {projectData.map((p) => (
           <div key={p.name} className="bg-surface-1 border border-white/10 rounded-xl p-5 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -58,7 +67,7 @@ export default async function SystemPage() {
               </div>
               <div>
                 <p className="text-xs text-text-muted">Customers</p>
-                <p className="text-text-main font-medium mt-0.5">{customerCount.toLocaleString()}</p>
+                <p className="text-text-main font-medium mt-0.5">{p.customers.toLocaleString()}</p>
               </div>
             </div>
           </div>

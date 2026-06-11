@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
-import { getProjectId } from "@/lib/db/queries";
+import { getProjectId, projectFilter } from "@/lib/db/queries";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiButton from "@/components/ui/ChitiButton";
 import ChitiBadge from "@/components/ui/ChitiBadge";
@@ -10,7 +10,7 @@ import { Plus, Trash2, ExternalLink } from "lucide-react";
 export default async function ContentPage() {
   const projectId = await getProjectId();
   const entries = await prisma.contentEntry.findMany({
-    where: { projectId },
+    where: { ...projectFilter(projectId) },
     orderBy: { createdAt: "desc" },
   });
 

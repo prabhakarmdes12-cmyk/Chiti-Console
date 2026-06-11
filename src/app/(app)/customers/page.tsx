@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
-import { getProjectId } from "@/lib/db/queries";
+import { getProjectId, projectFilter } from "@/lib/db/queries";
 import { Prisma } from "@/generated/prisma/client";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiButton from "@/components/ui/ChitiButton";
@@ -21,7 +21,7 @@ export default async function CustomersPage({
   const { q, tier, page } = await searchParams;
   const currentPage = Math.max(1, parseInt(page || "1", 10));
 
-  const where: Prisma.CustomerWhereInput = { projectId };
+  const where: Prisma.CustomerWhereInput = { ...projectFilter(projectId) };
 
   if (q) {
     where.OR = [

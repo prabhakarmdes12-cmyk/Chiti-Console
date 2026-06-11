@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
-import { getProjectId } from "@/lib/db/queries";
+import { getProjectId, projectFilter } from "@/lib/db/queries";
 import { notFound } from "next/navigation";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiButton from "@/components/ui/ChitiButton";
@@ -10,7 +10,7 @@ import { ArrowLeft, Trash2 } from "lucide-react";
 export default async function ContentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const projectId = await getProjectId();
-  const entry = await prisma.contentEntry.findFirst({ where: { id, projectId } });
+  const entry = await prisma.contentEntry.findFirst({ where: { id, ...projectFilter(projectId) } });
   if (!entry) notFound();
 
   return (

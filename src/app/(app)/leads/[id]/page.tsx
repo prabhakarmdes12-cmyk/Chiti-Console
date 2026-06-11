@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
-import { getProjectId } from "@/lib/db/queries";
+import { getProjectId, projectFilter } from "@/lib/db/queries";
 import ChitiCard from "@/components/ui/ChitiCard";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiButton from "@/components/ui/ChitiButton";
@@ -13,7 +13,7 @@ const statusOptions = ["NEW", "CONTACTED", "QUALIFIED", "PROPOSAL", "WON", "LOST
 export default async function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const projectId = await getProjectId();
-  const lead = await prisma.lead.findFirst({ where: { id, projectId } });
+  const lead = await prisma.lead.findFirst({ where: { id, ...projectFilter(projectId) } });
 
   if (!lead) notFound();
 

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
-import { getProjectId } from "@/lib/db/queries";
+import { getProjectId, projectFilter } from "@/lib/db/queries";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiCard from "@/components/ui/ChitiCard";
 import MonthlyRevenueChart from "@/components/charts/MonthlyRevenueChart";
@@ -8,16 +8,16 @@ import SourcePieChart from "@/components/charts/SourcePieChart";
 export default async function AnalyticsPage() {
   const projectId = await getProjectId();
 
-  const [totalRevenue, orderCount, customerCount, orders] = projectId ? await Promise.all([
-    prisma.order.aggregate({ where: { projectId }, _sum: { totalAmount: true } }),
-    prisma.order.count({ where: { projectId } }),
-    prisma.customer.count({ where: { projectId } }),
+  const [totalRevenue, orderCount, customerCount, orders] = await Promise.all([
+    prisma.order.aggregate({ where: { ...projectFilter(projectId) }, _sum: { totalAmount: true } }),
+    prisma.order.count({ where: { ...projectFilter(projectId) } }),
+    prisma.customer.count({ where: { ...projectFilter(projectId) } }),
     prisma.order.findMany({
-      where: { projectId },
+      where: { ...projectFilter(projectId) },
       orderBy: { createdAt: "asc" },
       select: { totalAmount: true, createdAt: true, source: true },
     }),
-  ]) : [{ _sum: { totalAmount: 0 } }, 0, 0, []];
+  ]);
 
   const revenue = Number(totalRevenue._sum.totalAmount ?? 0);
   const avgOrder = orderCount > 0 ? revenue / orderCount : 0;

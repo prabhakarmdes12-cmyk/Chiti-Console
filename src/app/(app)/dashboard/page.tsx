@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
 import { ShoppingCart, TrendingUp, Users, DollarSign } from "lucide-react";
 import { prisma } from "@/lib/db/prisma";
-import { getProjectId } from "@/lib/db/queries";
+import { getProjectId, projectFilter } from "@/lib/db/queries";
 import ChitiStatCard from "@/components/ui/ChitiStatCard";
 import ChitiCard from "@/components/ui/ChitiCard";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
@@ -18,15 +18,15 @@ export default async function DashboardPage() {
 
   const [orderCount, revenue, customerCount, recentOrders, projects] = await Promise.all([
     prisma.order.count({
-      where: { projectId, createdAt: { gte: today } },
+      where: { ...projectFilter(projectId), createdAt: { gte: today } },
     }),
     prisma.order.aggregate({
-      where: { projectId },
+      where: { ...projectFilter(projectId) },
       _sum: { totalAmount: true },
     }),
-    prisma.customer.count({ where: { projectId } }),
+    prisma.customer.count({ where: { ...projectFilter(projectId) } }),
     prisma.order.findMany({
-      where: { projectId },
+      where: { ...projectFilter(projectId) },
       orderBy: { createdAt: "desc" },
       take: 4,
       include: { customer: true },

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
-import { getProjectId } from "@/lib/db/queries";
+import { getProjectId, projectFilter } from "@/lib/db/queries";
 import { Prisma } from "@/generated/prisma/client";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiButton from "@/components/ui/ChitiButton";
@@ -21,7 +21,7 @@ export default async function ProductsPage({
   const { q, stock, page } = await searchParams;
   const currentPage = Math.max(1, parseInt(page || "1", 10));
 
-  const where: Prisma.ProductWhereInput = { projectId };
+  const where: Prisma.ProductWhereInput = { ...projectFilter(projectId) };
 
   if (q) {
     where.OR = [
@@ -34,7 +34,7 @@ export default async function ProductsPage({
   if (stock === "out") where.stock = 0;
 
   const categories = await prisma.product.findMany({
-    where: { projectId },
+    where: { ...projectFilter(projectId) },
     select: { category: true },
     distinct: ["category"],
   });
