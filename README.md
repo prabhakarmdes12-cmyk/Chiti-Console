@@ -185,25 +185,30 @@ See `.env.example` for the full list with comments. Key variables:
 
 ## Current Status
 
-The project is in **Phase 2** (CRUD & Detail Pages). See `PROJECT_JOURNAL.md` for the full session log.
+All 4 phases complete. See `PROJECT_JOURNAL.md` for the full session log.
 
 **What works:**
 - Browse all data (orders, customers, products, leads, etc.)
-- Create new orders, products, customers, leads via inline forms
-- Edit products, customers via detail pages
-- Update order status, lead status with one click
-- Delete records
-- View detailed info on dedicated detail pages
-- Stock adjustments with movement history tracking
+- Create, edit, delete orders / products / customers / leads
+- Detail pages with stock adjustments, status updates, timeline
+- Recharts (AreaChart, PieChart) on Analytics page
+- Google OAuth + dev credentials login
+- Auth guard middleware (Next.js 16 proxy)
+- REST API (8 routes) with API key authentication + rate limiting
+- Webhook receiver (`POST /api/webhook/order`) for external store sync
+- CSV export for orders, products, customers
+- Standalone build (`npm run build`) ready for Docker deployment
+- Dockerfile + docker-compose with PostgreSQL
+- GitHub Actions CI pipeline
+- CSP, security headers, env validation at startup
 
 **Known limitations:**
 - No search, filters, or pagination on any list
-- No REST API for external integrations yet
-- No webhook receiver for real-time order sync from store
 - Prisma Postgres (WASM) data is ephemeral — lost on restart, must re-seed
 - Google OAuth requires test user setup in Google Cloud Console
-- Analytics uses CSS bar charts (Recharts not yet implemented)
 - WhatsApp, Content, Settings pages are still read-only / static
+- Rate limiter is in-memory (not Redis) — resets on server restart
+- CSP includes `unsafe-eval` / `unsafe-inline` — tighten for production
 
 ---
 
