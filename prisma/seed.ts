@@ -357,6 +357,59 @@ async function main() {
     }),
   ]);
 
+  const whatsappConversations = await Promise.all([
+    prisma.whatsAppConversation.create({
+      data: {
+        projectId: project.id,
+        customerId: "cust-anita",
+        waContactId: "919876543210",
+        status: "ACTIVE",
+        unreadCount: 2,
+        lastMessageAt: new Date(),
+        messages: {
+          create: [
+            { direction: "INBOUND", content: "Hi, I wanted to check if the Premium Incense Sticks are back in stock?", messageType: "text", createdAt: new Date(Date.now() - 3600000) },
+            { direction: "OUTBOUND", content: "Yes, Anita! We just restocked them. Would you like to place an order?", messageType: "text", createdAt: new Date(Date.now() - 3000000) },
+            { direction: "INBOUND", content: "Great! Please add 2 packs to my order BB-0042.", messageType: "text", createdAt: new Date(Date.now() - 2400000) },
+            { direction: "OUTBOUND", content: "Done! I've updated your order. You'll receive a confirmation shortly.", messageType: "text", createdAt: new Date(Date.now() - 1800000) },
+          ],
+        },
+      },
+    }),
+    prisma.whatsAppConversation.create({
+      data: {
+        projectId: project.id,
+        waContactId: "919988776655",
+        status: "ACTIVE",
+        unreadCount: 1,
+        lastMessageAt: new Date(Date.now() - 600000),
+        messages: {
+          create: [
+            { direction: "INBOUND", content: "Hello, do you do bulk orders for wedding return gifts?", messageType: "text", createdAt: new Date(Date.now() - 600000) },
+          ],
+        },
+      },
+    }),
+    prisma.whatsAppConversation.create({
+      data: {
+        projectId: project.id,
+        customerId: "cust-vikram",
+        waContactId: "916543210987",
+        status: "RESOLVED",
+        unreadCount: 0,
+        lastMessageAt: new Date(Date.now() - 86400000),
+        messages: {
+          create: [
+            { direction: "INBOUND", content: "Has my order BB-0039 been dispatched?", messageType: "text", createdAt: new Date(Date.now() - 86400000) },
+            { direction: "OUTBOUND", content: "Yes Vikram, it's being packed and will be shipped tomorrow. Here's the tracking link: bighibrothers.com/track/BB0039", messageType: "text", createdAt: new Date(Date.now() - 82800000) },
+            { direction: "INBOUND", content: "Thank you! Please share the tracking number once available.", messageType: "text", createdAt: new Date(Date.now() - 79200000) },
+            { direction: "OUTBOUND", content: "Will do! Let me know if you need anything else.", messageType: "text", createdAt: new Date(Date.now() - 75600000) },
+          ],
+        },
+      },
+    }),
+  ]);
+
   const adminUser = await prisma.user.upsert({
     where: { email: "admin@chiti.com" },
     update: {},
@@ -384,6 +437,7 @@ async function main() {
   console.log(`  Orders: ${orders.length}`);
   console.log(`  Leads: ${leads.length}`);
   console.log(`  Content: ${contentEntries.length}`);
+  console.log(`  WhatsApp Conversations: ${whatsappConversations.length}`);
   console.log(`  Users: 1 (admin@chiti.com)`);
 }
 

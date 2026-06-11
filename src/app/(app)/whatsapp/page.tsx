@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db/prisma";
 import { getProjectId } from "@/lib/db/queries";
+import Link from "next/link";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 
 export default async function WhatsappPage() {
@@ -24,7 +25,7 @@ export default async function WhatsappPage() {
             const lastMsg = conv.messages[0]?.content || "No messages";
             const initials = (conv.customer?.name || conv.waContactId).split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
             return (
-              <div key={conv.id} className="flex items-center gap-4 p-4 hover:bg-surface-2 transition-colors cursor-pointer">
+              <Link key={conv.id} href={`/whatsapp/${conv.id}`} className="flex items-center gap-4 p-4 hover:bg-surface-2 transition-colors">
                 <div className="relative">
                   <div className="w-10 h-10 rounded-full bg-brand-primary/20 flex items-center justify-center">
                     <span className="text-sm text-brand-primary font-bold">{initials}</span>
@@ -44,7 +45,7 @@ export default async function WhatsappPage() {
                   </div>
                   <p className="text-xs text-text-muted truncate mt-0.5">{lastMsg}</p>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>
