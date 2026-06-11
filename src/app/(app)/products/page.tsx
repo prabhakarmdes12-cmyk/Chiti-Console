@@ -1,17 +1,53 @@
 import { prisma } from "@/lib/db/prisma";
 import { getProjectId } from "@/lib/db/queries";
+import { Prisma } from "@/generated/prisma/client";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiButton from "@/components/ui/ChitiButton";
+import SearchBar from "@/components/ui/SearchBar";
+import FilterSelect from "@/components/ui/FilterSelect";
+import PaginationBar from "@/components/ui/PaginationBar";
 import { createProduct, deleteProduct } from "@/lib/actions/products";
 import Link from "next/link";
 import { Plus, Trash2, ExternalLink, Download } from "lucide-react";
 
-export default async function ProductsPage() {
+const PAGE_SIZE = 20;
+
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; stock?: string; page?: string }>;
+}) {
   const projectId = await getProjectId();
-  const products = await prisma.product.findMany({
+  const { q, stock, page } = await searchParams;
+  const currentPage = Math.max(1, parseInt(page || "1", 10));
+
+  const where: Prisma.ProductWhereInput = { projectId };
+
+  if (q) {
+    where.OR = [
+      { name: { contains: q, mode: "insensitive" } },
+      { sku: { contains: q, mode: "insensitive" } },
+      { category: { contains: q, mode: "insensitive" } },
+    ];
+  }
+  if (stock === "low") where.stock = { lte: Prisma.DbNull as any, gte: 1 };
+  if (stock === "out") where.stock = 0;
+
+  const categories = await prisma.product.findMany({
     where: { projectId },
-    orderBy: { name: "asc" },
+    select: { category: true },
+    distinct: ["category"],
   });
+
+  const [products, total] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      orderBy: { name: "asc" },
+      skip: (currentPage - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    }),
+    prisma.product.count({ where }),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -24,42 +60,49 @@ export default async function ProductsPage() {
               <ChitiButton variant="secondary" size="sm" icon={<Download className="w-4 h-4" />}>Export CSV</ChitiButton>
             </a>
             <details className="relative">
-            <summary className="list-none">
-              <ChitiButton size="sm" icon={<Plus className="w-4 h-4" />}>New Product</ChitiButton>
-            </summary>
-            <div className="absolute right-0 top-10 w-72 bg-surface-1 border border-white/10 rounded-xl p-4 shadow-2xl z-10">
-              <form action={createProduct} className="space-y-3">
-                <div className="space-y-1">
-                  <label className="block text-xs text-text-muted">Name</label>
-                  <input name="name" required className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm" />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
+              <summary className="list-none">
+                <ChitiButton size="sm" icon={<Plus className="w-4 h-4" />}>New Product</ChitiButton>
+              </summary>
+              <div className="absolute right-0 top-10 w-72 bg-surface-1 border border-white/10 rounded-xl p-4 shadow-2xl z-10">
+                <form action={createProduct} className="space-y-3">
                   <div className="space-y-1">
-                    <label className="block text-xs text-text-muted">SKU</label>
-                    <input name="sku" className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm" />
+                    <label className="block text-xs text-text-muted">Name</label>
+                    <input name="name" required className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm" />
                   </div>
-                  <div className="space-y-1">
-                    <label className="block text-xs text-text-muted">Category</label>
-                    <input name="category" className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm" />
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <label className="block text-xs text-text-muted">SKU</label>
+                      <input name="sku" className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block text-xs text-text-muted">Category</label>
+                      <input name="category" className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm" />
+                    </div>
                   </div>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <label className="block text-xs text-text-muted">Price (₹)</label>
-                    <input name="price" type="number" step="0.01" required className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm" />
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <label className="block text-xs text-text-muted">Price (₹)</label>
+                      <input name="price" type="number" step="0.01" required className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block text-xs text-text-muted">Stock</label>
+                      <input name="stock" type="number" defaultValue="0" className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm" />
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <label className="block text-xs text-text-muted">Stock</label>
-                    <input name="stock" type="number" defaultValue="0" className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm" />
-                  </div>
-                </div>
-                <ChitiButton type="submit" className="w-full">Create Product</ChitiButton>
-              </form>
-            </div>
-          </details>
+                  <ChitiButton type="submit" className="w-full">Create Product</ChitiButton>
+                </form>
+              </div>
+            </details>
           </div>
         }
       />
+
+      <div className="flex items-center gap-3">
+        <div className="flex-1 max-w-sm">
+          <SearchBar placeholder="Search by name, SKU, or category..." />
+        </div>
+        <FilterSelect param="stock" options={[{ value: "low", label: "Low Stock" }, { value: "out", label: "Out of Stock" }]} placeholder="All Stock" />
+      </div>
 
       <div className="bg-surface-1 border border-white/10 rounded-xl overflow-hidden">
         <table className="w-full text-sm">
@@ -92,9 +135,7 @@ export default async function ProductsPage() {
                   <td className="p-4 text-text-muted">{product.category || "—"}</td>
                   <td className="p-4 text-text-main">₹{Number(product.price).toLocaleString("en-IN")}</td>
                   <td className="p-4">
-                    <span className={`text-xs font-medium ${
-                      isOut ? "text-error" : isLow ? "text-warning" : "text-success"
-                    }`}>
+                    <span className={`text-xs font-medium ${isOut ? "text-error" : isLow ? "text-warning" : "text-success"}`}>
                       {isOut ? "Out of Stock" : `${product.stock} units`}
                     </span>
                   </td>
@@ -110,6 +151,7 @@ export default async function ProductsPage() {
             })}
           </tbody>
         </table>
+        <PaginationBar total={total} pageSize={PAGE_SIZE} />
       </div>
     </div>
   );

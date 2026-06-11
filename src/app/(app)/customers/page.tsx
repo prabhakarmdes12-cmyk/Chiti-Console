@@ -1,17 +1,52 @@
 import { prisma } from "@/lib/db/prisma";
 import { getProjectId } from "@/lib/db/queries";
+import { Prisma } from "@/generated/prisma/client";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiButton from "@/components/ui/ChitiButton";
+import SearchBar from "@/components/ui/SearchBar";
+import FilterSelect from "@/components/ui/FilterSelect";
+import PaginationBar from "@/components/ui/PaginationBar";
 import { createCustomer, deleteCustomer } from "@/lib/actions/customers";
 import Link from "next/link";
 import { Plus, Trash2, Download } from "lucide-react";
 
-export default async function CustomersPage() {
+const PAGE_SIZE = 20;
+
+export default async function CustomersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; tier?: string; page?: string }>;
+}) {
   const projectId = await getProjectId();
-  const customers = await prisma.customer.findMany({
-    where: { projectId },
-    orderBy: { totalSpent: "desc" },
-  });
+  const { q, tier, page } = await searchParams;
+  const currentPage = Math.max(1, parseInt(page || "1", 10));
+
+  const where: Prisma.CustomerWhereInput = { projectId };
+
+  if (q) {
+    where.OR = [
+      { name: { contains: q, mode: "insensitive" } },
+      { phone: { contains: q, mode: "insensitive" } },
+      { email: { contains: q, mode: "insensitive" } },
+    ];
+  }
+
+  const tierFilter: Record<string, Prisma.CustomerWhereInput> = {
+    VIP: { totalOrders: { gte: 10 } },
+    Active: { totalOrders: { gte: 5, lt: 10 } },
+    New: { totalOrders: { lt: 5 } },
+  };
+  if (tier && tierFilter[tier]) Object.assign(where, tierFilter[tier]);
+
+  const [customers, total] = await Promise.all([
+    prisma.customer.findMany({
+      where,
+      orderBy: { totalSpent: "desc" },
+      skip: (currentPage - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    }),
+    prisma.customer.count({ where }),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -24,33 +59,40 @@ export default async function CustomersPage() {
               <ChitiButton variant="secondary" size="sm" icon={<Download className="w-4 h-4" />}>Export CSV</ChitiButton>
             </a>
             <details className="relative">
-            <summary className="list-none">
-              <ChitiButton size="sm" icon={<Plus className="w-4 h-4" />}>New Customer</ChitiButton>
-            </summary>
-            <div className="absolute right-0 top-10 w-72 bg-surface-1 border border-white/10 rounded-xl p-4 shadow-2xl z-10">
-              <form action={createCustomer} className="space-y-3">
-                <div className="space-y-1">
-                  <label className="block text-xs text-text-muted">Name</label>
-                  <input name="name" required className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm" />
-                </div>
-                <div className="space-y-1">
-                  <label className="block text-xs text-text-muted">Phone</label>
-                  <input name="phone" className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm" />
-                </div>
-                <div className="space-y-1">
-                  <label className="block text-xs text-text-muted">Email</label>
-                  <input name="email" type="email" className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm" />
-                </div>
-                <ChitiButton type="submit" className="w-full">Create Customer</ChitiButton>
-              </form>
-            </div>
-          </details>
+              <summary className="list-none">
+                <ChitiButton size="sm" icon={<Plus className="w-4 h-4" />}>New Customer</ChitiButton>
+              </summary>
+              <div className="absolute right-0 top-10 w-72 bg-surface-1 border border-white/10 rounded-xl p-4 shadow-2xl z-10">
+                <form action={createCustomer} className="space-y-3">
+                  <div className="space-y-1">
+                    <label className="block text-xs text-text-muted">Name</label>
+                    <input name="name" required className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="block text-xs text-text-muted">Phone</label>
+                    <input name="phone" className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="block text-xs text-text-muted">Email</label>
+                    <input name="email" type="email" className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm" />
+                  </div>
+                  <ChitiButton type="submit" className="w-full">Create Customer</ChitiButton>
+                </form>
+              </div>
+            </details>
           </div>
         }
       />
 
+      <div className="flex items-center gap-3">
+        <div className="flex-1 max-w-sm">
+          <SearchBar placeholder="Search by name, phone, or email..." />
+        </div>
+        <FilterSelect param="tier" options={[{ value: "VIP", label: "VIP" }, { value: "Active", label: "Active" }, { value: "New", label: "New" }]} placeholder="All Tiers" />
+      </div>
+
       {customers.length === 0 && (
-        <div className="bg-surface-1 border border-white/10 rounded-xl p-12 text-center text-text-muted text-sm">No customers yet</div>
+        <div className="bg-surface-1 border border-white/10 rounded-xl p-12 text-center text-text-muted text-sm">No customers found</div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -97,6 +139,8 @@ export default async function CustomersPage() {
           );
         })}
       </div>
+
+      <PaginationBar total={total} pageSize={PAGE_SIZE} />
     </div>
   );
 }

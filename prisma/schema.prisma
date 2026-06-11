@@ -326,6 +326,7 @@ model User {
   emailVerified DateTime?
   image         String?
   role          UserRole  @default(SUPER_ADMIN)
+  preferences   Json?
   createdAt     DateTime  @default(now())
 
   projects UserProject[]

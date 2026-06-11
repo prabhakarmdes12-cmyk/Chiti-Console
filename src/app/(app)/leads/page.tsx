@@ -1,7 +1,10 @@
 import { prisma } from "@/lib/db/prisma";
 import { getProjectId } from "@/lib/db/queries";
+import { Prisma } from "@/generated/prisma/client";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiButton from "@/components/ui/ChitiButton";
+import SearchBar from "@/components/ui/SearchBar";
+import FilterSelect from "@/components/ui/FilterSelect";
 import { createLead, updateLeadStatus, deleteLead } from "@/lib/actions/leads";
 import Link from "next/link";
 import { Plus, Trash2 } from "lucide-react";
@@ -17,10 +20,34 @@ const leadStatusConfig: Record<string, { color: string; bg: string }> = {
 
 const displayOrder = ["NEW", "CONTACTED", "QUALIFIED", "PROPOSAL", "WON", "LOST"];
 
-export default async function LeadsPage() {
+const sourceOptions = [
+  { value: "WEBSITE_FORM", label: "Website Form" },
+  { value: "WHATSAPP", label: "WhatsApp" },
+  { value: "CALENDLY", label: "Calendly" },
+  { value: "MANUAL", label: "Manual" },
+];
+
+export default async function LeadsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; source?: string }>;
+}) {
   const projectId = await getProjectId();
+  const { q, source } = await searchParams;
+
+  const where: Prisma.LeadWhereInput = { projectId };
+
+  if (q) {
+    where.OR = [
+      { name: { contains: q, mode: "insensitive" } },
+      { company: { contains: q, mode: "insensitive" } },
+      { email: { contains: q, mode: "insensitive" } },
+    ];
+  }
+  if (source) (where as any).source = source;
+
   const allLeads = await prisma.lead.findMany({
-    where: { projectId },
+    where,
     orderBy: { createdAt: "desc" },
   });
 
@@ -79,6 +106,16 @@ export default async function LeadsPage() {
           </details>
         }
       />
+
+      <div className="flex items-center gap-3">
+        <div className="flex-1 max-w-sm">
+          <SearchBar placeholder="Search by name, company, or email..." />
+        </div>
+        <FilterSelect param="source" options={sourceOptions} placeholder="All Sources" />
+        {allLeads.length > 0 && (
+          <span className="text-xs text-text-muted">{allLeads.length} leads</span>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
         {columns.map((col) => (
