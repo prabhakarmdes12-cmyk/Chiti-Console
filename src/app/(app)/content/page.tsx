@@ -3,8 +3,9 @@ import { getProjectId } from "@/lib/db/queries";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiButton from "@/components/ui/ChitiButton";
 import ChitiBadge from "@/components/ui/ChitiBadge";
-import { createContent, updateContentStatus, deleteContent } from "@/lib/actions/content";
-import { Plus, Trash2 } from "lucide-react";
+import { createContent, deleteContent } from "@/lib/actions/content";
+import Link from "next/link";
+import { Plus, Trash2, ExternalLink } from "lucide-react";
 
 export default async function ContentPage() {
   const projectId = await getProjectId();
@@ -73,21 +74,19 @@ export default async function ContentPage() {
             {entries.map((entry) => (
               <tr key={entry.id} className="border-b border-white/5 last:border-0 hover:bg-surface-2 transition-colors">
                 <td className="p-4">
-                  <form action={updateContentStatus.bind(null, entry.id, entry.status === "Published" ? "Archived" : "Published")}>
-                    <button type="submit" className="font-medium text-text-main hover:text-brand-primary transition-colors text-left">{entry.title}</button>
-                  </form>
+                  <Link href={`/content/${entry.id}`} className="font-medium text-text-main hover:text-brand-primary transition-colors flex items-center gap-1.5">
+                    {entry.title}
+                    <ExternalLink className="w-3 h-3 text-text-muted" />
+                  </Link>
+                  {entry.body && <p className="text-xs text-text-muted truncate mt-0.5 max-w-md">{entry.body.slice(0, 80)}</p>}
                 </td>
                 <td className="p-4">
                   <span className="text-xs text-text-muted bg-surface-2 px-2 py-0.5 rounded-full">{entry.type}</span>
                 </td>
                 <td className="p-4">
-                  <form action={updateContentStatus.bind(null, entry.id, entry.status === "Published" ? "Draft" : entry.status === "Draft" ? "Published" : "Draft")}>
-                    <button type="submit">
-                      <ChitiBadge variant={entry.status === "Published" ? "success" : entry.status === "Draft" ? "warning" : "info"}>
-                        {entry.status}
-                      </ChitiBadge>
-                    </button>
-                  </form>
+                  <ChitiBadge variant={entry.status === "Published" ? "success" : entry.status === "Draft" ? "warning" : "info"}>
+                    {entry.status}
+                  </ChitiBadge>
                 </td>
                 <td className="p-4 text-text-muted">{entry.createdAt.toLocaleDateString("en-IN")}</td>
                 <td className="p-4 text-right">

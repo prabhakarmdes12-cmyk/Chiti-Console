@@ -9,12 +9,14 @@ const createSchema = z.object({
   title: z.string().min(1),
   type: z.string().optional(),
   status: z.string().optional(),
+  body: z.string().optional(),
 });
 
 const updateSchema = z.object({
   title: z.string().min(1).optional(),
   type: z.string().optional(),
   status: z.string().optional(),
+  body: z.string().optional(),
 });
 
 export async function createContent(formData: FormData) {

@@ -292,6 +292,7 @@ model ContentEntry {
   externalId  String?
   title       String
   slug        String?
+  body        String?
   type        String   @default("page")
   status      String   @default("draft")
   updatedBy   String?
