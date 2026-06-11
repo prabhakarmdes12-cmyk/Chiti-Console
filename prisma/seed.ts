@@ -553,6 +553,140 @@ async function main() {
     },
   });
 
+  const project3 = await prisma.project.upsert({
+    where: { slug: "ts-aromatics" },
+    update: {},
+    create: {
+      name: "Ts Aromatics",
+      slug: "ts-aromatics",
+      type: "ECOMMERCE",
+      domain: "tsaromatics.com",
+      integrationType: "API",
+      isActive: true,
+    },
+  });
+
+  await Promise.all([
+    prisma.product.upsert({
+      where: { id: "ts-oil-001" },
+      update: {},
+      create: {
+        id: "ts-oil-001", projectId: project3.id, name: "Lavender Essential Oil 10ml", sku: "TS-OIL-001", category: "Essential Oils", price: 449, stock: 30, lowStockThreshold: 5, isActive: true,
+      },
+    }),
+    prisma.product.upsert({
+      where: { id: "ts-oil-002" },
+      update: {},
+      create: {
+        id: "ts-oil-002", projectId: project3.id, name: "Tea Tree Essential Oil 10ml", sku: "TS-OIL-002", category: "Essential Oils", price: 399, stock: 0, lowStockThreshold: 5, isActive: true,
+      },
+    }),
+    prisma.product.upsert({
+      where: { id: "ts-diff-003" },
+      update: {},
+      create: {
+        id: "ts-diff-003", projectId: project3.id, name: "Ultrasonic Aroma Diffuser", sku: "TS-DF-003", category: "Diffusers", price: 1299, stock: 8, lowStockThreshold: 3, isActive: true,
+      },
+    }),
+    prisma.customer.upsert({
+      where: { id: "ts-cust-meera" },
+      update: {},
+      create: {
+        id: "ts-cust-meera", projectId: project3.id, name: "Meera Iyer", phone: "+91 99887 00111", email: "meera@example.com", totalOrders: 6, totalSpent: 8920,
+      },
+    }),
+    prisma.customer.upsert({
+      where: { id: "ts-cust-arjun" },
+      update: {},
+      create: {
+        id: "ts-cust-arjun", projectId: project3.id, name: "Arjun Nair", phone: "+91 99887 00222", email: "arjun@example.com", totalOrders: 3, totalSpent: 2397,
+      },
+    }),
+  ]);
+
+  await prisma.order.create({
+    data: {
+      orderNumber: "TS-0001", projectId: project3.id, customerId: "ts-cust-meera", source: "WHATSAPP", status: "DELIVERED", paymentStatus: "PAID", totalAmount: 449,
+      items: { create: [{ productId: "ts-oil-001", productName: "Lavender Essential Oil 10ml", quantity: 1, unitPrice: 449, lineTotal: 449 }] },
+      timeline: { create: [{ status: "PENDING", note: "Order via WhatsApp" }, { status: "DELIVERED", note: "Delivered" }] },
+    },
+  });
+
+  await prisma.contentEntry.create({
+    data: {
+      projectId: project3.id, title: "Aromatherapy Guide", type: "Page", status: "Published",
+      body: "Ts Aromatics offers 100% pure essential oils sourced from sustainable farms across India. Our range includes lavender, tea tree, eucalyptus, and more.",
+    },
+  });
+
+  await prisma.userProject.upsert({
+    where: { userId_projectId: { userId: adminUser.id, projectId: project3.id } },
+    update: {},
+    create: { userId: adminUser.id, projectId: project3.id, role: "ADMIN" },
+  });
+
+  const project4 = await prisma.project.upsert({
+    where: { slug: "bhatia-master-classes" },
+    update: {},
+    create: {
+      name: "Bhatia Master Classes",
+      slug: "bhatia-master-classes",
+      type: "SAAS",
+      domain: "bhatiamasterclasses.com",
+      integrationType: "MANUAL",
+      isActive: true,
+    },
+  });
+
+  await Promise.all([
+    prisma.customer.upsert({
+      where: { id: "bmc-cust-deepak" },
+      update: {},
+      create: {
+        id: "bmc-cust-deepak", projectId: project4.id, name: "Deepak Bhatia", phone: "+91 98765 00333", email: "deepak@bhatiamasterclasses.com", totalOrders: 1, totalSpent: 4999,
+      },
+    }),
+    prisma.customer.upsert({
+      where: { id: "bmc-cust-kavita" },
+      update: {},
+      create: {
+        id: "bmc-cust-kavita", projectId: project4.id, name: "Kavita Sharma", phone: "+91 98765 00444", email: "kavita@example.com", totalOrders: 2, totalSpent: 9998,
+      },
+    }),
+  ]);
+
+  await prisma.lead.create({
+    data: {
+      projectId: project4.id, name: "Ananya Gupta", company: "EduTech Pro", email: "ananya@edutechpro.in", source: "CALENDLY", status: "PROPOSAL", products: ["Bulk corporate access"], quantity: "50 seats",
+    },
+  });
+
+  await prisma.contentEntry.create({
+    data: {
+      projectId: project4.id, title: "Course Catalog — Spring 2026", type: "Collection", status: "Published",
+      body: "Bhatia Master Classes offers premium online courses in finance, investing, and wealth management. Founded by Deepak Bhatia, CFA, with 15+ years of market experience.",
+    },
+  });
+
+  await prisma.whatsAppConversation.create({
+    data: {
+      projectId: project4.id, waContactId: "919876503333", status: "ACTIVE", unreadCount: 0, lastMessageAt: new Date(Date.now() - 172800000),
+      messages: {
+        create: [
+          { direction: "INBOUND", content: "When does the next Options Trading batch start?", messageType: "text", createdAt: new Date(Date.now() - 172800000) },
+          { direction: "OUTBOUND", content: "Hi! Next batch starts on April 15th. Early bird pricing ends March 31st. Want me to send the brochure?", messageType: "text", createdAt: new Date(Date.now() - 169200000) },
+          { direction: "INBOUND", content: "Yes please! Also, do you offer group discounts for corporate teams?", messageType: "text", createdAt: new Date(Date.now() - 165600000) },
+        ],
+      },
+    },
+  });
+
+  await prisma.userProject.upsert({
+    where: { userId_projectId: { userId: adminUser.id, projectId: project4.id } },
+    update: {},
+    create: { userId: adminUser.id, projectId: project4.id, role: "ADMIN" },
+  });
+
   console.log("Seeded Bighi Brothers project with:");
   console.log(`  Project: ${project.name} (${project.id})`);
   console.log(`  Products: ${products.length}`);
@@ -564,6 +698,12 @@ async function main() {
   console.log("");
   console.log("Seeded House of Giriraj project:");
   console.log(`  Products: 2, Customers: 2, Leads: 1, Content: 1, WhatsApp: 1`);
+  console.log("");
+  console.log("Seeded Ts Aromatics project:");
+  console.log(`  Products: 3, Customers: 2, Orders: 1, Content: 1`);
+  console.log("");
+  console.log("Seeded Bhatia Master Classes project:");
+  console.log(`  Customers: 2, Leads: 1, Content: 1, WhatsApp: 1`);
   console.log(`  Users: 1 (admin@chiti.com)`);
 }
 
