@@ -1,6 +1,10 @@
 import { prisma } from "@/lib/db/prisma";
 import { getProjectId } from "@/lib/db/queries";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
+import ChitiButton from "@/components/ui/ChitiButton";
+import { createCustomer, deleteCustomer } from "@/lib/actions/customers";
+import Link from "next/link";
+import { Plus, Trash2 } from "lucide-react";
 
 export default async function CustomersPage() {
   const projectId = await getProjectId();
@@ -11,7 +15,34 @@ export default async function CustomersPage() {
 
   return (
     <div className="space-y-6">
-      <ChitiPageHeader title="Customers" description="View and manage your customer base." />
+      <ChitiPageHeader
+        title="Customers"
+        description="View and manage your customer base."
+        actions={
+          <details className="relative">
+            <summary className="list-none">
+              <ChitiButton size="sm" icon={<Plus className="w-4 h-4" />}>New Customer</ChitiButton>
+            </summary>
+            <div className="absolute right-0 top-10 w-72 bg-surface-1 border border-white/10 rounded-xl p-4 shadow-2xl z-10">
+              <form action={createCustomer} className="space-y-3">
+                <div className="space-y-1">
+                  <label className="block text-xs text-text-muted">Name</label>
+                  <input name="name" required className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm" />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-xs text-text-muted">Phone</label>
+                  <input name="phone" className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm" />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-xs text-text-muted">Email</label>
+                  <input name="email" type="email" className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm" />
+                </div>
+                <ChitiButton type="submit" className="w-full">Create Customer</ChitiButton>
+              </form>
+            </div>
+          </details>
+        }
+      />
 
       {customers.length === 0 && (
         <div className="bg-surface-1 border border-white/10 rounded-xl p-12 text-center text-text-muted text-sm">No customers yet</div>
@@ -22,14 +53,15 @@ export default async function CustomersPage() {
           const initials = customer.name.split(" ").map(n => n[0]).join("");
           const status = customer.totalOrders >= 10 ? "VIP" : customer.totalOrders >= 5 ? "Active" : "New";
           return (
-            <div key={customer.id} className="bg-surface-1 border border-white/10 rounded-xl p-5 space-y-3 hover:border-white/20 transition-colors">
-              <div className="flex items-center justify-between">
+            <div key={customer.id} className="group bg-surface-1 border border-white/10 rounded-xl p-5 space-y-3 hover:border-white/20 transition-colors relative">
+              <Link href={`/customers/${customer.id}`} className="absolute inset-0 z-0" />
+              <div className="flex items-center justify-between relative z-10">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-brand-primary/20 flex items-center justify-center">
                     <span className="text-sm text-brand-primary font-bold">{initials}</span>
                   </div>
                   <div>
-                    <p className="text-sm text-text-main font-medium">{customer.name}</p>
+                    <p className="text-sm text-text-main font-medium group-hover:text-brand-primary transition-colors">{customer.name}</p>
                     <p className="text-xs text-text-muted">{customer.phone || customer.email}</p>
                   </div>
                 </div>
@@ -39,7 +71,7 @@ export default async function CustomersPage() {
                   "bg-success/10 text-success"
                 }`}>{status}</span>
               </div>
-              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/5">
+              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/5 relative z-10">
                 <div>
                   <p className="text-xs text-text-muted">Orders</p>
                   <p className="text-sm text-text-main font-medium">{customer.totalOrders}</p>
@@ -48,6 +80,13 @@ export default async function CustomersPage() {
                   <p className="text-xs text-text-muted">Total Spent</p>
                   <p className="text-sm text-text-main font-medium">₹{Number(customer.totalSpent).toLocaleString("en-IN")}</p>
                 </div>
+              </div>
+              <div className="relative z-10 flex justify-end">
+                <form action={deleteCustomer.bind(null, customer.id)}>
+                  <button type="submit" className="text-text-muted hover:text-error transition-colors p-1">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </form>
               </div>
             </div>
           );

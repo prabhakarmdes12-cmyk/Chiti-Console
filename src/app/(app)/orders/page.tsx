@@ -2,6 +2,10 @@ import { prisma } from "@/lib/db/prisma";
 import { getProjectId } from "@/lib/db/queries";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiStatusBadge from "@/components/ui/ChitiStatusBadge";
+import ChitiButton from "@/components/ui/ChitiButton";
+import { createOrder, updateOrderStatus, deleteOrder } from "@/lib/actions/orders";
+import Link from "next/link";
+import { Plus, Trash2 } from "lucide-react";
 
 export default async function OrdersPage() {
   const projectId = await getProjectId();
@@ -13,7 +17,38 @@ export default async function OrdersPage() {
 
   return (
     <div className="space-y-6">
-      <ChitiPageHeader title="Orders" description="Manage and track all orders." />
+      <ChitiPageHeader
+        title="Orders"
+        description="Manage and track all orders."
+        actions={
+          <details className="relative">
+            <summary className="list-none">
+              <ChitiButton size="sm" icon={<Plus className="w-4 h-4" />}>New Order</ChitiButton>
+            </summary>
+            <div className="absolute right-0 top-10 w-72 bg-surface-1 border border-white/10 rounded-xl p-4 shadow-2xl z-10">
+              <form action={createOrder} className="space-y-3">
+                <div className="space-y-1">
+                  <label className="block text-xs text-text-muted">Customer ID</label>
+                  <input name="customerId" className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm" placeholder="Optional" />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-xs text-text-muted">Source</label>
+                  <select name="source" className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm">
+                    <option value="MANUAL">Manual</option>
+                    <option value="WHATSAPP">WhatsApp</option>
+                    <option value="WEB_CHECKOUT">Web Checkout</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-xs text-text-muted">Amount (₹)</label>
+                  <input name="totalAmount" type="number" step="0.01" required className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm" />
+                </div>
+                <ChitiButton type="submit" className="w-full">Create Order</ChitiButton>
+              </form>
+            </div>
+          </details>
+        }
+      />
 
       <div className="bg-surface-1 border border-white/10 rounded-xl overflow-hidden">
         <table className="w-full text-sm">
@@ -26,21 +61,37 @@ export default async function OrdersPage() {
               <th className="text-left p-4 font-medium">Payment</th>
               <th className="text-left p-4 font-medium">Source</th>
               <th className="text-left p-4 font-medium">Date</th>
+              <th className="text-right p-4 font-medium">Actions</th>
             </tr>
           </thead>
           <tbody>
             {orders.length === 0 && (
-              <tr><td colSpan={7} className="p-8 text-center text-text-muted text-sm">No orders found</td></tr>
+              <tr><td colSpan={8} className="p-8 text-center text-text-muted text-sm">No orders found</td></tr>
             )}
             {orders.map((order) => (
               <tr key={order.id} className="border-b border-white/5 last:border-0 hover:bg-surface-2 transition-colors">
-                <td className="p-4 font-medium text-text-main">{order.orderNumber}</td>
+                <td className="p-4">
+                  <Link href={`/orders/${order.id}`} className="font-medium text-text-main hover:text-brand-primary transition-colors">{order.orderNumber}</Link>
+                </td>
                 <td className="p-4 text-text-main">{order.customer?.name || "—"}</td>
                 <td className="p-4 text-text-main">₹{Number(order.totalAmount).toLocaleString("en-IN")}</td>
-                <td className="p-4"><ChitiStatusBadge status={order.status} type="order" /></td>
+                <td className="p-4">
+                  <form action={updateOrderStatus.bind(null, order.id, order.status === "PENDING" ? "CONFIRMED" : order.status === "CONFIRMED" ? "PROCESSING" : order.status === "PROCESSING" ? "SHIPPED" : order.status === "SHIPPED" ? "DELIVERED" : "PENDING")}>
+                    <button type="submit" className="text-left">
+                      <ChitiStatusBadge status={order.status} type="order" />
+                    </button>
+                  </form>
+                </td>
                 <td className="p-4"><ChitiStatusBadge status={order.paymentStatus} type="payment" /></td>
                 <td className="p-4 text-text-muted text-xs">{order.source}</td>
                 <td className="p-4 text-text-muted">{order.createdAt.toLocaleDateString("en-IN")}</td>
+                <td className="p-4 text-right">
+                  <form action={deleteOrder.bind(null, order.id)}>
+                    <button type="submit" className="text-text-muted hover:text-error transition-colors">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </form>
+                </td>
               </tr>
             ))}
           </tbody>
