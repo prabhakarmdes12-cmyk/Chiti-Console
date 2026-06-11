@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Chiti Console
+
+**Unified operations dashboard for Chiti Technologies projects.**
+
+Single-pane-of-glass for orders, customers, analytics, content, and WhatsApp across all projects — Bighi Brothers, TS Aromatics, House of Giriraj, NetQ Command, AuraPanchang, and more.
+
+---
+
+## Documentation
+
+| Doc | Description |
+|-----|-------------|
+| [01-PRD](./docs/01-PRD.md) | Product Requirements Document — full feature specification |
+| [02-TECHNICAL-ARCHITECTURE](./docs/02-TECHNICAL-ARCHITECTURE.md) | Stack decisions, data flow, topology diagram |
+| [03-UX-FLOW](./docs/03-UX-FLOW.md) | All screens, navigation tree, user journeys |
+| [04-DATA-MODEL](./docs/04-DATA-MODEL.md) | Complete Prisma schema with all entities |
+| [05-INTEGRATION-STRATEGY](./docs/05-INTEGRATION-STRATEGY.md) | How each project connects to Console |
+| [06-SECURITY-AND-AUTH](./docs/06-SECURITY-AND-AUTH.md) | Auth.js config, RBAC, API security |
+| [07-ROADMAP](./docs/07-ROADMAP.md) | Phased build plan with milestones |
+| [08-DESIGN-GUIDE](./docs/08-DESIGN-GUIDE.md) | Chiti UDS v3 tokens, components, layout |
+| [09-API-REFERENCE](./docs/09-API-REFERENCE.md) | All REST API endpoints |
+
+---
+
+## Stack
+
+- **Framework:** Next.js 16 (App Router)
+- **Language:** TypeScript 5
+- **Styling:** Tailwind CSS v4 + Chiti Design System v3 tokens
+- **Database:** PostgreSQL + Prisma ORM
+- **Auth:** Auth.js v5 (Google OAuth + Email)
+- **Analytics:** Self-hosted PostHog
+- **Charts:** Recharts
+- **Animations:** Framer Motion
+- **Icons:** Lucide React
+- **Queue:** Redis + Bull (future)
+
+---
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+# Install dependencies
+npm install
+
+# Set up environment
+cp .env.example .env.local
+
+# Run database migrations
+npx prisma migrate dev
+
+# Start dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project Structure
 
-## Learn More
+```
+src/
+├── app/
+│   ├── layout.tsx          # Root layout (sidebar + topnav + main)
+│   ├── page.tsx            # Dashboard home
+│   ├── login/page.tsx
+│   ├── orders/
+│   ├── customers/
+│   ├── products/
+│   ├── leads/
+│   ├── analytics/
+│   ├── whatsapp/
+│   ├── content/
+│   ├── system/
+│   ├── settings/
+│   └── api/                # API routes
+├── components/
+│   ├── ui/                 # Chiti design system components
+│   ├── dashboard/
+│   ├── orders/
+│   ├── analytics/
+│   └── shared/
+├── lib/
+│   ├── db/                 # Prisma client
+│   ├── auth/               # Auth.js config
+│   └── integrations/       # WhatsApp, GitHub, Stripe
+├── styles/
+│   └── globals.css         # Chiti tokens as CSS variables
+├── docs/                   # Documentation
+└── prisma/
+    └── schema.prisma
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Deployed on Vercel. Each push to `main` triggers automatic deployment.
 
-## Deploy on Vercel
+**Production:** https://console.chiti.tech
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Built by **Chiti Technologies** © 2026
