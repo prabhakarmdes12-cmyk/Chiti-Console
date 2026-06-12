@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
 import { getProjectId, projectFilter } from "@/lib/db/queries";
-import { Prisma } from "@/generated/prisma/client";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiStatusBadge from "@/components/ui/ChitiStatusBadge";
 import ChitiButton from "@/components/ui/ChitiButton";
@@ -38,7 +37,7 @@ export default async function OrdersPage({
   const { q, status, source, page } = await searchParams;
   const currentPage = Math.max(1, parseInt(page || "1", 10));
 
-  const where: Prisma.OrderWhereInput = { ...projectFilter(projectId) };
+  const where: Record<string, unknown> = { ...projectFilter(projectId) };
 
   if (q) {
     where.OR = [
@@ -46,8 +45,8 @@ export default async function OrdersPage({
       { customer: { name: { contains: q, mode: "insensitive" } } },
     ];
   }
-  if (status) (where as any).status = status;
-  if (source) (where as any).source = source;
+  if (status) where.status = status;
+  if (source) where.source = source;
 
   const [orders, total] = await Promise.all([
     prisma.order.findMany({

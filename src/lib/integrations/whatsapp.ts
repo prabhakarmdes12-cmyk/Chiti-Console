@@ -39,22 +39,22 @@ export function verifyWebhook(mode: string | null, verifyToken: string | null, c
   return { verified: false, challenge: null };
 }
 
-export function extractIncomingMessage(payload: any) {
-  const entry = payload?.entry?.[0];
-  const change = entry?.changes?.[0];
-  const value = change?.value;
+export function extractIncomingMessage(payload: Record<string, unknown>) {
+  const entry = (payload?.entry as Record<string, unknown>[])?.[0];
+  const change = (entry?.changes as Record<string, unknown>[])?.[0];
+  const value = change?.value as Record<string, unknown>;
   if (!value) return null;
 
-  const messages = value.messages?.[0];
-  const contacts = value.contacts?.[0];
+  const messages = (value.messages as Record<string, unknown>[])?.[0];
+  const contacts = (value.contacts as Record<string, unknown>[])?.[0];
   if (!messages) return null;
 
   return {
-    waMessageId: messages.id,
-    from: messages.from,
-    fromName: contacts?.profile?.name || "Unknown",
-    content: messages.text?.body || "",
-    timestamp: messages.timestamp,
-    type: messages.type || "text",
+    waMessageId: messages.id as string,
+    from: messages.from as string,
+    fromName: ((contacts?.profile as Record<string, string>)?.name) || "Unknown",
+    content: ((messages.text as Record<string, string>)?.body) || "",
+    timestamp: messages.timestamp as string,
+    type: (messages.type as string) || "text",
   };
 }

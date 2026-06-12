@@ -14,8 +14,13 @@ export default function SearchBar({ placeholder = "Search...", param = "q" }: Se
   const searchParams = useSearchParams();
   const [value, setValue] = useState(searchParams.get(param) || "");
   const timer = useRef(0);
+  const initialRef = useRef(false);
 
   useEffect(() => {
+    if (!initialRef.current) {
+      initialRef.current = true;
+      return;
+    }
     setValue(searchParams.get(param) || "");
   }, [searchParams, param]);
 

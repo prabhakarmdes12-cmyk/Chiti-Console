@@ -23,6 +23,19 @@
   --font-mono: "JetBrains Mono", monospace;
 }
 
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-surface-1: hsl(0, 0%, 100%);
+    --color-surface-2: hsl(220, 15%, 95%);
+    --color-surface-3: hsl(220, 15%, 90%);
+    --color-bg-dark: hsl(0, 0%, 98%);
+    --color-text-main: hsl(220, 10%, 15%);
+    --color-text-muted: hsl(220, 10%, 50%);
+    --color-success: hsl(150, 60%, 35%);
+    --color-error: hsl(350, 70%, 50%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     transition-duration: 0ms !important;

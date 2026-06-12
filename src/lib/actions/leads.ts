@@ -12,11 +12,11 @@ export async function createLead(formData: FormData) {
     data: {
       projectId,
       name: formData.get("name") as string,
-      email: formData.get("email") as string || undefined,
-      phone: formData.get("phone") as string || undefined,
-      company: formData.get("company") as string || undefined,
-      source: (formData.get("source") as string || "MANUAL") as any,
-      message: formData.get("message") as string || undefined,
+      email: (formData.get("email") as string) || undefined,
+      phone: (formData.get("phone") as string) || undefined,
+      company: (formData.get("company") as string) || undefined,
+      source: (formData.get("source") as string || "MANUAL") as "MANUAL" | "WEBSITE_FORM" | "WHATSAPP" | "CALENDLY",
+      message: (formData.get("message") as string) || undefined,
     },
   });
 
@@ -24,7 +24,10 @@ export async function createLead(formData: FormData) {
 }
 
 export async function updateLeadStatus(leadId: string, status: string) {
-  await prisma.lead.update({ where: { id: leadId }, data: { status: status as any } });
+  await prisma.lead.update({
+    where: { id: leadId },
+    data: { status: status as "NEW" | "CONTACTED" | "QUALIFIED" | "PROPOSAL" | "WON" | "LOST" },
+  });
 
   revalidatePath("/leads");
   revalidatePath(`/leads/${leadId}`);

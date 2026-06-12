@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
-import { verifyWebhook, extractIncomingMessage, sendTextMessage } from "@/lib/integrations/whatsapp";
+import { verifyWebhook, extractIncomingMessage } from "@/lib/integrations/whatsapp";
 import { getProjectId } from "@/lib/db/queries";
 
 export async function GET(request: Request) {

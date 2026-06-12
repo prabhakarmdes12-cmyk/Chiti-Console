@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 200);
   const offset = parseInt(searchParams.get("offset") || "0");
 
-  const where: any = { projectId: project!.id };
+  const where: Record<string, unknown> = { projectId: project!.id };
   if (status) where.status = status;
 
   const [orders, total] = await Promise.all([
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
       status: body.status || "PENDING",
       paymentStatus: body.paymentStatus || "UNPAID",
       totalAmount: parseFloat(body.totalAmount),
-      items: body.items ? { create: body.items.map((i: any) => ({ productName: i.productName, quantity: i.quantity, unitPrice: i.unitPrice, lineTotal: i.quantity * i.unitPrice })) } : undefined,
+      items: body.items ? { create: body.items.map((i: { productName: string; quantity: number; unitPrice: number }) => ({ productName: i.productName, quantity: i.quantity, unitPrice: i.unitPrice, lineTotal: i.quantity * i.unitPrice })) } : undefined,
     },
     include: { items: true },
   });

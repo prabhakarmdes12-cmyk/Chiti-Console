@@ -14,8 +14,8 @@ const styleMap = {
 };
 
 const sizes = {
-  sm: "text-[10px] px-1.5 py-0.5",
-  md: "text-xs px-2 py-0.5",
+  sm: "text-xs px-2 py-1",
+  md: "text-xs px-2 py-1",
 };
 
 export default function ChitiBadge({ children, variant = "default", size = "md", className = "" }: ChitiBadgeProps) {

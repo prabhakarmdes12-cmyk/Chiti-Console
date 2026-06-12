@@ -12,8 +12,8 @@ export async function createProduct(formData: FormData) {
     data: {
       projectId,
       name: formData.get("name") as string,
-      sku: formData.get("sku") as string || undefined,
-      category: formData.get("category") as string || undefined,
+      sku: (formData.get("sku") as string) || undefined,
+      category: (formData.get("category") as string) || undefined,
       price: parseFloat(formData.get("price") as string),
       stock: parseInt(formData.get("stock") as string) || 0,
       lowStockThreshold: parseInt(formData.get("lowStockThreshold") as string) || 5,
@@ -24,20 +24,22 @@ export async function createProduct(formData: FormData) {
 }
 
 export async function updateProduct(productId: string, formData: FormData) {
-  const data: any = {};
   const name = formData.get("name") as string;
   const sku = formData.get("sku") as string;
   const category = formData.get("category") as string;
   const price = formData.get("price") as string;
   const lowStockThreshold = formData.get("lowStockThreshold") as string;
 
-  if (name) data.name = name;
-  if (sku) data.sku = sku;
-  if (category) data.category = category;
-  if (price) data.price = parseFloat(price);
-  if (lowStockThreshold) data.lowStockThreshold = parseInt(lowStockThreshold);
-
-  await prisma.product.update({ where: { id: productId }, data });
+  await prisma.product.update({
+    where: { id: productId },
+    data: {
+      ...(name ? { name } : {}),
+      ...(sku ? { sku } : {}),
+      ...(category ? { category } : {}),
+      ...(price ? { price: parseFloat(price) } : {}),
+      ...(lowStockThreshold ? { lowStockThreshold: parseInt(lowStockThreshold) } : {}),
+    },
+  });
 
   revalidatePath("/products");
   revalidatePath(`/products/${productId}`);
@@ -60,7 +62,7 @@ export async function adjustStock(productId: string, quantity: number, type: "IN
   await prisma.product.update({ where: { id: productId }, data: { stock: newStock } });
 
   await prisma.stockMovement.create({
-    data: { productId, type: type as any, quantity, reason: "Manual adjustment via Console" },
+    data: { productId, type: type as "IN" | "OUT" | "ADJUSTMENT", quantity, reason: "Manual adjustment via Console" },
   });
 
   revalidatePath("/products");

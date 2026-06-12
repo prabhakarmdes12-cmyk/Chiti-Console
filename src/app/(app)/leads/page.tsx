@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
 import { getProjectId, projectFilter } from "@/lib/db/queries";
-import { Prisma } from "@/generated/prisma/client";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiButton from "@/components/ui/ChitiButton";
 import SearchBar from "@/components/ui/SearchBar";
@@ -35,7 +34,7 @@ export default async function LeadsPage({
   const projectId = await getProjectId();
   const { q, source } = await searchParams;
 
-  const where: Prisma.LeadWhereInput = { ...projectFilter(projectId) };
+  const where: Record<string, unknown> = { ...projectFilter(projectId) };
 
   if (q) {
     where.OR = [
@@ -44,7 +43,7 @@ export default async function LeadsPage({
       { email: { contains: q, mode: "insensitive" } },
     ];
   }
-  if (source) (where as any).source = source;
+  if (source) where.source = source;
 
   const allLeads = await prisma.lead.findMany({
     where,

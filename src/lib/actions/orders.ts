@@ -12,12 +12,14 @@ export async function createOrder(formData: FormData) {
   const source = formData.get("source") as string;
   const totalAmount = parseFloat(formData.get("totalAmount") as string);
 
+  if (isNaN(totalAmount)) throw new Error("Invalid amount");
+
   await prisma.order.create({
     data: {
       orderNumber: `BB-${String(Date.now()).slice(-4)}`,
       projectId,
       customerId: customerId || undefined,
-      source: (source || "MANUAL") as any,
+      source: (source || "MANUAL") as "API" | "MANUAL" | "WHATSAPP" | "WEB_CHECKOUT",
       status: "PENDING",
       paymentStatus: "UNPAID",
       totalAmount,
@@ -31,7 +33,10 @@ export async function createOrder(formData: FormData) {
 export async function updateOrderStatus(orderId: string, status: string) {
   await prisma.order.update({
     where: { id: orderId },
-    data: { status: status as any, timeline: { create: { status: status as any } } },
+    data: {
+      status: status as "PENDING" | "CONFIRMED" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED",
+      timeline: { create: { status: status as "PENDING" | "CONFIRMED" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED" } },
+    },
   });
 
   revalidatePath("/orders");

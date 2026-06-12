@@ -18,7 +18,7 @@ export default function ChitiStatCard({
   color = "text-brand-primary",
 }: ChitiStatCardProps) {
   return (
-    <div className="bg-surface-1 border border-white/10 rounded-xl p-5 space-y-3">
+    <div className="bg-surface-1 border border-white/10 rounded-xl p-6 space-y-4">
       <div className="flex items-center justify-between">
         <span className="text-sm text-text-muted">{label}</span>
         <Icon className={`w-4 h-4 ${color}`} />

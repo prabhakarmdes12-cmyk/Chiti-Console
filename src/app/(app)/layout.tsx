@@ -1,5 +1,4 @@
 import { cookies } from "next/headers";
-import { auth } from "@/lib/auth/auth";
 import { prisma } from "@/lib/db/prisma";
 import Sidebar from "@/components/ui/Sidebar";
 import TopNav from "@/components/ui/TopNav";
@@ -9,7 +8,6 @@ import { ToastProvider } from "@/components/ui/ChitiToast";
 export const dynamic = "force-dynamic";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const session = await auth();
   const cookieStore = await cookies();
   const currentId = cookieStore.get("chiti_project")?.value || null;
 
@@ -21,7 +19,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <ToastProvider>
       <div className="flex min-h-screen">
-        <Sidebar />
+        <Sidebar projects={projects} />
         <div className="flex-1 flex flex-col">
           <TopNav>
             <ProjectSelector projects={projects} currentId={currentId && currentId !== "all" ? currentId : null} />

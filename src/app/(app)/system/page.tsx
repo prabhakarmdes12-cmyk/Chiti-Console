@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
-import { getProjectId, projectFilter } from "@/lib/db/queries";
+import { getProjectId } from "@/lib/db/queries";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 
 export default async function SystemPage() {

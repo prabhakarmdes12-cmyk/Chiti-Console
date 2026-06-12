@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart,
 } from "recharts";
 
 interface MonthlyData {
@@ -30,7 +30,7 @@ export default function MonthlyRevenueChart({ data }: { data: MonthlyData[] }) {
         <Tooltip
           contentStyle={{ background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", fontSize: "13px" }}
           labelStyle={{ color: "#e2e8f0" }}
-          formatter={(value: any) => [typeof value === "number" ? `₹${value.toLocaleString("en-IN")}` : value, "Revenue"]}
+          formatter={(value: unknown) => [`₹${Number(value ?? 0).toLocaleString("en-IN")}`, "Revenue"]}
         />
         <Area type="monotone" dataKey="revenue" stroke="#3b82f6" fill="url(#revenueGrad)" strokeWidth={2} />
       </AreaChart>

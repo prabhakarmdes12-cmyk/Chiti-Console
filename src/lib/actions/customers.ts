@@ -12,8 +12,8 @@ export async function createCustomer(formData: FormData) {
     data: {
       projectId,
       name: formData.get("name") as string,
-      phone: formData.get("phone") as string || undefined,
-      email: formData.get("email") as string || undefined,
+      phone: (formData.get("phone") as string) || undefined,
+      email: (formData.get("email") as string) || undefined,
     },
   });
 
@@ -21,16 +21,14 @@ export async function createCustomer(formData: FormData) {
 }
 
 export async function updateCustomer(customerId: string, formData: FormData) {
-  const data: any = {};
   const name = formData.get("name") as string;
   const phone = formData.get("phone") as string;
   const email = formData.get("email") as string;
 
-  if (name) data.name = name;
-  if (phone) data.phone = phone;
-  if (email) data.email = email;
-
-  await prisma.customer.update({ where: { id: customerId }, data });
+  await prisma.customer.update({
+    where: { id: customerId },
+    data: { ...(name ? { name } : {}), ...(phone ? { phone } : {}), ...(email ? { email } : {}) },
+  });
 
   revalidatePath("/customers");
   revalidatePath(`/customers/${customerId}`);

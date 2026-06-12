@@ -8,10 +8,11 @@ function toCSV(headers: string[], rows: string[][]): string {
   return [headers.join(","), ...rows.map((r) => r.map(escape).join(","))].join("\n");
 }
 
-export const GET = auth(async (req) => {
-  if (!req.auth?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export async function GET(request: Request) {
+  const session = await auth();
+  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { searchParams } = new URL(req.url);
+  const { searchParams } = new URL(request.url);
   const entity = searchParams.get("entity") || "orders";
   const projectId = await getProjectId();
 
@@ -74,4 +75,4 @@ export const GET = auth(async (req) => {
       "Content-Disposition": `attachment; filename="${filename}"`,
     },
   });
-}) as any;
+}

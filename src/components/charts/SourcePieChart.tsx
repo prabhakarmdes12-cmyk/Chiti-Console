@@ -29,7 +29,7 @@ export default function SourcePieChart({ data }: { data: SourceData[] }) {
         </Pie>
         <Tooltip
           contentStyle={{ background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", fontSize: "13px" }}
-          formatter={(value: any) => [`${value} (${((value / total) * 100).toFixed(1)}%)`, ""]}
+          formatter={(value: unknown) => [`${value ?? 0} (${(Number(value ?? 0) / total * 100).toFixed(1)}%)`, ""]}
         />
         <Legend
           formatter={(value: string) => <span style={{ color: "#888", fontSize: "12px" }}>{value.replace(/_/g, " ")}</span>}

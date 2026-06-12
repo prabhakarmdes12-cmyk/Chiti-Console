@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       paymentStatus: body.paymentStatus || "UNPAID",
       totalAmount: parseFloat(body.totalAmount || "0"),
       items: body.items
-        ? { create: body.items.map((i: any) => ({
+        ? { create: body.items.map((i: { productName: string; quantity: number; unitPrice: number }) => ({
             productId: existingProduct?.id,
             productName: i.productName,
             quantity: i.quantity,

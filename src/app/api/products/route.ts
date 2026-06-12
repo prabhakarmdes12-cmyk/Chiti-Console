@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 200);
   const offset = parseInt(searchParams.get("offset") || "0");
 
-  const where: any = { projectId: project!.id };
+  const where: Record<string, unknown> = { projectId: project!.id };
   if (category) where.category = category;
 
   const [products, total] = await Promise.all([

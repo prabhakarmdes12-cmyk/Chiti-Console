@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -13,6 +14,9 @@ import {
   FileText,
   ShieldCheck,
   Settings,
+  ChevronDown,
+  ChevronRight,
+  Building2,
 } from "lucide-react";
 
 const navItems = [
@@ -28,8 +32,9 @@ const navItems = [
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ projects }: { projects: { id: string; name: string }[] }) {
   const pathname = usePathname();
+  const [expanded, setExpanded] = useState(pathname.startsWith("/projects"));
 
   return (
     <aside className="w-60 min-h-screen bg-surface-1 border-r border-white/10 flex flex-col">
@@ -40,6 +45,54 @@ export default function Sidebar() {
         </Link>
       </div>
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+        {/* Projects expandable */}
+        <div>
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150 ${
+              pathname.startsWith("/projects")
+                ? "bg-brand-primary/10 text-brand-primary font-medium"
+                : "text-text-muted hover:text-text-main hover:bg-surface-2"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <Building2 className="w-4 h-4" />
+              Projects
+            </div>
+            {expanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+          </button>
+          {expanded && (
+            <div className="ml-2 mt-0.5 space-y-0.5 border-l border-white/10">
+              <Link
+                href="/projects"
+                className={`flex items-center gap-3 pl-9 pr-3 py-1.5 rounded-lg text-xs transition-all duration-150 ${
+                  pathname === "/projects"
+                    ? "text-brand-primary font-medium"
+                    : "text-text-muted hover:text-text-main"
+                }`}
+              >
+                All Projects
+              </Link>
+              {projects.map((p) => {
+                const isActive = pathname === `/projects/${p.id}` || pathname.startsWith(`/projects/${p.id}/`);
+                return (
+                  <Link
+                    key={p.id}
+                    href={`/projects/${p.id}`}
+                    className={`flex items-center gap-3 pl-9 pr-3 py-1.5 rounded-lg text-xs transition-all duration-150 ${
+                      isActive
+                        ? "text-brand-primary font-medium"
+                        : "text-text-muted hover:text-text-main"
+                    }`}
+                  >
+                    {p.name}
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname.startsWith(item.href);

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { authenticateApiKey } from "@/lib/api/auth";
 
@@ -27,7 +28,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const existing = await prisma.order.findFirst({ where: { id, projectId: project!.id } });
   if (!existing) return NextResponse.json({ error: "Order not found" }, { status: 404 });
 
-  const data: any = {};
+  const data: Prisma.OrderUpdateInput = {};
   if (body.status) data.status = body.status;
   if (body.paymentStatus) data.paymentStatus = body.paymentStatus;
 

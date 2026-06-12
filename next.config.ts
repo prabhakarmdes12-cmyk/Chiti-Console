@@ -16,11 +16,7 @@ const csp = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
-  output: "standalone",
   serverExternalPackages: ["@prisma/adapter-pg", "pg"],
-  turbopack: {
-    root: process.cwd(),
-  },
   async headers() {
     return [
       {

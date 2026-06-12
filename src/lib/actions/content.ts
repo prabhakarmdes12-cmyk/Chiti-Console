@@ -6,14 +6,14 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 const createSchema = z.object({
-  title: z.string().min(1),
+  title: z.string().min(1, "Title is required"),
   type: z.string().optional(),
   status: z.string().optional(),
   body: z.string().optional(),
 });
 
 const updateSchema = z.object({
-  title: z.string().min(1).optional(),
+  title: z.string().min(1, "Title is required").optional(),
   type: z.string().optional(),
   status: z.string().optional(),
   body: z.string().optional(),
@@ -25,12 +25,7 @@ export async function createContent(formData: FormData) {
 
   const parsed = createSchema.parse(Object.fromEntries(formData));
   await prisma.contentEntry.create({
-    data: {
-      projectId,
-      title: parsed.title,
-      type: parsed.type || "page",
-      status: parsed.status || "draft",
-    },
+    data: { projectId, title: parsed.title, type: parsed.type || "page", status: parsed.status || "draft", body: parsed.body },
   });
   revalidatePath("/content");
 }
@@ -40,10 +35,7 @@ export async function updateContent(id: string, formData: FormData) {
   if (!projectId) throw new Error("No project found");
 
   const parsed = updateSchema.parse(Object.fromEntries(formData));
-  await prisma.contentEntry.updateMany({
-    where: { id, projectId },
-    data: parsed,
-  });
+  await prisma.contentEntry.updateMany({ where: { id, projectId }, data: parsed });
   revalidatePath("/content");
 }
 
@@ -51,10 +43,7 @@ export async function updateContentStatus(id: string, status: string) {
   const projectId = await getProjectId();
   if (!projectId) throw new Error("No project found");
 
-  await prisma.contentEntry.updateMany({
-    where: { id, projectId },
-    data: { status },
-  });
+  await prisma.contentEntry.updateMany({ where: { id, projectId }, data: { status } });
   revalidatePath("/content");
 }
 
