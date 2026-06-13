@@ -1,16 +1,12 @@
 const BASE = "https://graph.facebook.com/v22.0";
 
-function getConfig() {
+export async function sendTextMessage(to: string, body: string) {
   const token = process.env.WHATSAPP_ACCESS_TOKEN;
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
   if (!token || !phoneNumberId) {
-    throw new Error("WHATSAPP_ACCESS_TOKEN and WHATSAPP_PHONE_NUMBER_ID must be set");
+    console.warn("WHATSAPP_ACCESS_TOKEN or WHATSAPP_PHONE_NUMBER_ID not set — message saved locally only");
+    return null;
   }
-  return { token, phoneNumberId };
-}
-
-export async function sendTextMessage(to: string, body: string) {
-  const { token, phoneNumberId } = getConfig();
   const res = await fetch(`${BASE}/${phoneNumberId}/messages`, {
     method: "POST",
     headers: {
@@ -47,6 +43,7 @@ export function extractIncomingMessage(payload: Record<string, unknown>) {
 
   const messages = (value.messages as Record<string, unknown>[])?.[0];
   const contacts = (value.contacts as Record<string, unknown>[])?.[0];
+  const metadata = value.metadata as Record<string, unknown> | undefined;
   if (!messages) return null;
 
   return {
@@ -56,5 +53,6 @@ export function extractIncomingMessage(payload: Record<string, unknown>) {
     content: ((messages.text as Record<string, string>)?.body) || "",
     timestamp: messages.timestamp as string,
     type: (messages.type as string) || "text",
+    phoneNumberId: (metadata?.phone_number_id as string) || null,
   };
 }

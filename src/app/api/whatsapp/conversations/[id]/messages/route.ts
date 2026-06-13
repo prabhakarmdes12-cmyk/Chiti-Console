@@ -24,7 +24,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "Conversation not found" }, { status: 404 });
   }
 
-  await sendTextMessage(conversation.waContactId, content);
+  try {
+    await sendTextMessage(conversation.waContactId, content);
+  } catch (e) {
+    console.warn("WhatsApp API unavailable, saving locally:", e instanceof Error ? e.message : e);
+  }
 
   const message = await prisma.whatsAppMessage.create({
     data: {

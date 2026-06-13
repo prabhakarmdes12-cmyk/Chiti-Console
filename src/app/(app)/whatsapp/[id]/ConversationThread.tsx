@@ -1,10 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ShoppingCart, CheckCheck } from "lucide-react";
 import ChatBubble from "@/components/ui/ChatBubble";
 import ChatInput from "@/components/ui/ChatInput";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
 interface Message {
   id: string;
@@ -40,6 +40,7 @@ export default function ConversationThread({
   const router = useRouter();
   const [messages, setMessages] = useState(initial.messages);
   const [sending, setSending] = useState(false);
+  const [, startTransition] = useTransition();
 
   const handleSend = async (content: string) => {
     setSending(true);
@@ -65,15 +66,53 @@ export default function ConversationThread({
     }
   };
 
+  const handleCreateOrder = () => {
+    const params = new URLSearchParams();
+    if (initial.customer) {
+      params.set("customerId", initial.customer.id);
+      params.set("customerName", initial.customer.name || "");
+      params.set("source", "WHATSAPP");
+    }
+    router.push(`/orders/new?${params.toString()}`);
+  };
+
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
       <div className="flex items-center gap-3 p-4 border-b border-white/10 bg-surface-1">
         <button onClick={() => router.push("/whatsapp")} className="text-text-muted hover:text-text-main transition-colors">
           <ArrowLeft size={20} />
         </button>
-        <div>
+        <div className="flex-1">
           <p className="text-sm font-medium text-text-main">{name}</p>
           <p className="text-xs text-text-muted">{phone}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          {initial.customer && (
+            <button
+              onClick={handleCreateOrder}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-primary/10 hover:bg-brand-primary/20 text-brand-primary text-xs font-medium transition-colors"
+            >
+              <ShoppingCart size={14} />
+              Order
+            </button>
+          )}
+          {initial.unreadCount > 0 && (
+            <form action={() => {
+              startTransition(async () => {
+                const { markConversationRead } = await import("@/lib/actions/whatsapp");
+                await markConversationRead(initial.id);
+                router.refresh();
+              });
+            }}>
+              <button
+                type="submit"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 text-text-muted text-xs font-medium transition-colors"
+              >
+                <CheckCheck size={14} />
+                Mark Read
+              </button>
+            </form>
+          )}
         </div>
       </div>
 

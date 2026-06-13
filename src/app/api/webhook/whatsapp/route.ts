@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
 import { verifyWebhook, extractIncomingMessage } from "@/lib/integrations/whatsapp";
-import { getProjectId } from "@/lib/db/queries";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -23,23 +22,24 @@ export async function POST(request: Request) {
     return new Response("OK", { status: 200 });
   }
 
-  const projectId = await getProjectId();
-  if (!projectId) {
-    return new Response("No project found", { status: 500 });
-  }
+  const projectId = msg.phoneNumberId
+    ? await findProjectByPhoneNumberId(msg.phoneNumberId)
+    : null;
 
   let conversation = await prisma.whatsAppConversation.findFirst({
-    where: { projectId, waContactId: msg.from },
+    where: { waContactId: msg.from, ...(projectId ? { projectId } : {}) },
   });
 
   if (!conversation) {
-    const existingCustomer = await prisma.customer.findFirst({
-      where: { projectId, phone: msg.from },
-    });
+    const existingCustomer = projectId
+      ? await prisma.customer.findFirst({ where: { projectId, phone: { contains: msg.from.slice(-10) } } })
+      : null;
+
+    const targetProjectId = projectId || existingCustomer?.projectId || null;
 
     conversation = await prisma.whatsAppConversation.create({
       data: {
-        projectId,
+        projectId: targetProjectId || "unknown",
         waContactId: msg.from,
         customerId: existingCustomer?.id || null,
         status: "ACTIVE",
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
       data: {
         lastMessageAt: new Date(Number(msg.timestamp) * 1000),
         unreadCount: { increment: 1 },
-        status: "ACTIVE",
+        status: "ACTIVE" as const,
       },
     });
   }
@@ -68,4 +68,19 @@ export async function POST(request: Request) {
   });
 
   return new Response("OK", { status: 200 });
+}
+
+async function findProjectByPhoneNumberId(phoneNumberId: string): Promise<string | null> {
+  const projects = await prisma.project.findMany({
+    where: { isActive: true },
+    select: { id: true, config: true },
+  });
+
+  for (const project of projects) {
+    const config = project.config as Record<string, unknown> | null;
+    if (config?.whatsappPhoneNumberId === phoneNumberId) {
+      return project.id;
+    }
+  }
+  return null;
 }
