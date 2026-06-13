@@ -2,6 +2,8 @@ import { prisma } from "@/lib/db/prisma";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import HealthScore from "@/components/ui/HealthScore";
 import { getProjectHealth } from "@/lib/db/queries";
+import Link from "next/link";
+import { Plus } from "lucide-react";
 
 type HealthCache = Record<string, Awaited<ReturnType<typeof getProjectHealth>>>;
 
@@ -37,7 +39,19 @@ export default async function ProjectsPage() {
 
   return (
     <div className="space-y-6">
-      <ChitiPageHeader title="Projects" description="Project overview and system status." />
+      <ChitiPageHeader
+        title="Projects"
+        description="Project overview and system status."
+        actions={
+          <Link
+            href="/projects/new"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-primary hover:bg-brand-primary/90 text-white text-sm font-medium transition-all"
+          >
+            <Plus className="w-4 h-4" />
+            New Project
+          </Link>
+        }
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {projectData.map((p) => {

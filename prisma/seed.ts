@@ -3,7 +3,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 
 // Use DIRECT_URL or fallback (prisma+postgres:// proxy URL won't work with PrismaPg adapter)
 const raw = process.env.DIRECT_URL || process.env.DATABASE_URL || "";
-const connectionString = raw.startsWith("postgres://") ? raw : "postgres://postgres:postgres@localhost:51214/postgres";
+const connectionString = raw.startsWith("postgres") ? raw : "postgres://postgres:postgres@localhost:51214/postgres";
 const adapter = new PrismaPg(connectionString);
 const prisma = new PrismaClient({ adapter });
 
