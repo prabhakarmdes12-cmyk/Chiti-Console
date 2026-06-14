@@ -1,6 +1,6 @@
 # Chiti Console — System Journal & Decision Log
 
-> **Version:** 1.1.0  
+> **Version:** 1.2.0  
 > **Codename:** V1 AI  
 > **Last Updated:** 14 June 2026  
 > **Maintainer:** Prabhakar Kumar  
@@ -111,11 +111,21 @@ UI components live in `src/components/ui/` and follow a consistent pattern: serv
 | `HealthScore` | `HealthScore.tsx` | Server | Circular SVG gauge (0-100) |
 | `ProjectSelector` | `ProjectSelector.tsx` | Client | Dropdown to filter dashboard by project |
 | `ProjectTabs` | `ProjectTabs.tsx` | Client | Sub-navigation (Overview, Orders, Products, Customers) |
-| `Sidebar` | `Sidebar.tsx` | Client | Expandable navigation with project list |
-| `TopNav` | `TopNav.tsx` | Client | Header bar with project selector + user menu |
-| `MonthlyRevenueChart` | `charts/MonthlyRevenueChart.tsx` | Client | Recharts area chart (6-month) |
+| `Sidebar` | `Sidebar.tsx` | Client | Expandable navigation with project list + brand glow |
+| `TopNav` | `TopNav.tsx` | Client | Header bar with project selector + user menu + glass |
+| `MonthlyRevenueChart` | `charts/MonthlyRevenueChart.tsx` | Client | Recharts area chart (6-month) with brand gradient |
 | `DeleteButton` | (form-level) | Client | Confirmation dialog for destructive actions |
 | `ActionForm` | (form-level) | Server | Reusable form action wrapper |
+| `FadeIn` | `motion/FadeIn.tsx` | Client | Fade + slide-up entry animation (direction, delay, duration) |
+| `SlideUp` | `motion/SlideUp.tsx` | Client | Vertical slide with spring physics |
+| `Stagger` | `motion/Stagger.tsx` | Client | Staggered children with configurable delay |
+| `NumberTicker` | `motion/NumberTicker.tsx` | Client | Animated counter (SSR-disabled) |
+| `GlowCard` | `motion/GlowCard.tsx` | Client | Card with animated brand glow border |
+| `EmptyState` | `ui/EmptyState.tsx` | Server | Reusable empty state with icon + message + CTA |
+| `ErrorBoundary` | `ui/ErrorBoundary.tsx` | Client | Class component error boundary with retry |
+| `ProfitLossChart` | `charts/ProfitLossChart.tsx` | Client | Recharts area chart for revenue vs expenses |
+| `AddExpenseForm` | `finance/AddExpenseForm.tsx` | Client | Modal form with category/tags/date |
+| `LeadFollowUp` | `ui/LeadFollowUp.tsx` | Client | Email modal for lead follow-ups |
 
 No external UI library is used. All components are custom-built to match Chiti UDS v3 specifications exactly, avoiding the overhead and styling conflicts of shadcn/ui, Material UI, or Chakra.
 
@@ -248,7 +258,7 @@ Client submits <form action={serverAction}>
 
 Each feature entry below documents what was built, the key technical pattern, and implementation status.
 
-> **Session 10 update (14 June 2026):** 44 routes, 0 TS errors. New modules: Financial Dashboard, Client Portal, Pricing/Billing, AI NL Query. New models: Invoice, InvoiceItem, Expense, ClientAccess.
+> **Session 11 update (14 June 2026):** 44+ routes, 0 TS errors. Visual refresh: glassmorphism + Framer Motion on all pages. Security hardening: signed portal JWT, CSP + HSTS + Permissions-Policy, timing-safe webhooks, `verifyProjectAccess()` authz on all server actions, Zod v4 input validation on API routes.
 
 ### 4.1 Project Registry
 
@@ -429,16 +439,6 @@ Clients log in with email + PIN. The JWT encodes `clientAccessId` for permission
 
 The `QueryBar` component floats above the dashboard. Users type natural language questions ("show revenue from last month", "which orders are pending?", "top customers"). The `performNLQuery` action uses intent classification to route to orders, financial, or customers data, returning structured results rendered inline.
 
-### 4.16 New UI Components (Session 10)
-
-| Component | File | Description |
-|-----------|------|-------------|
-| `QueryBar` | `src/components/ai/QueryBar.tsx` | Floating NL query input with intent parsing |
-| `ProfitLossChart` | `src/components/charts/ProfitLossChart.tsx` | Recharts area chart for revenue vs expenses |
-| `AddExpenseForm` | `src/components/finance/AddExpenseForm.tsx` | Modal form with category/tags/date |
-| `LeadFollowUp` | `src/components/ui/LeadFollowUp.tsx` | Email modal for lead follow-ups |
-| `EmptyState` | `src/components/ui/EmptyState.tsx` | Reusable empty state with icon + message + CTA |
-
 ---
 
 ## 5. Data Architecture
@@ -520,11 +520,27 @@ The JWT callback enriches the token with the user's `role` (from the database re
 /* → protected (redirects to /login if unauthenticated)
 ```
 
-All API routes require `auth()` verification. Server actions throw if `session.user` is null. The `UserProject` junction table enables per-project role enforcement (not yet fully implemented in queries — all queries currently operate at the Super Admin level).
+All API routes require `auth()` verification. Server actions throw if `session.user` is null. The `UserProject` junction table enables per-project role enforcement via `verifyProjectAccess()` in `src/lib/db/queries.ts`, which checks `SUPER_ADMIN` bypass or `UserProject` membership for the resource's project. This is applied to all mutation server actions (orders, customers, products, leads, finance).
 
 ### 6.4 API Security
 
-API endpoints use the same JWT session for browser-based requests. Programmatic access (planned) will use project-level API keys validated via `Bearer` token header.
+API endpoints use the same JWT session for browser-based requests. Programmatic access uses project-level API keys validated via `Bearer` token header.
+
+### 6.5 Input Validation
+
+All POST/PUT/PATCH API routes use Zod v4 schemas from `src/lib/api/validation.ts`:
+
+| Schema | Validates |
+|--------|-----------|
+| `paginationSchema` | `limit` (1–200), `offset` (0+) |
+| `productCreateSchema` | `name` (required), `price` (positive number), `stock`, `category`, etc. |
+| `orderCreateSchema` | `totalAmount` (positive), `status`/`paymentStatus` (enums), `items` array |
+| `orderUpdateSchema` | `status`, `paymentStatus` (optional enums) |
+| `leadCreateSchema` | `name` (required), `email` (valid format), `source`/`status` (enums) |
+| `customerCreateSchema` | `name` (required), `email` (valid format) |
+| `preferencesUpdateSchema` | Key-value boolean pairs |
+
+The `validate()` helper returns a discriminated union — after checking `if (validated.error) return`, TypeScript narrows `validated.data` as fully typed.
 
 ---
 
@@ -589,6 +605,11 @@ API endpoints use the same JWT session for browser-based requests. Programmatic 
 | 2026-06 | NL Query uses intent classification over LLM | Lighter, faster, no API dependency; rule-based intent parser routes to existing Prisma queries rather than generating SQL |
 | 2026-06 | `QueryBar` as a floating client component | Avoids full-page navigation for NL queries; renders inline results below input without losing dashboard context |
 | 2026-06 | Razorpay + Stripe webhook handlers scaffolded upfront | Both payment gateways seeded early for future client onboarding; webhooks most reliable way to sync payment status |
+| 2026-06 | Portal cookie replaced base64 with signed JWT (jose HS256) | Plain base64 was tamperable; jose already a transitive dependency via next-auth |
+| 2026-06 | CSP includes `object-src 'none'`, HSTS, Permissions-Policy | Blocks plugin-based XSS; enforces HTTPS; disables camera/mic/geo |
+| 2026-06 | Webhook validation uses `crypto.timingSafeEqual` | Prevents timing attacks on webhook signature comparison |
+| 2026-06 | `verifyProjectAccess` called per-mutation (not middleware) | Explicit per-route authorization; simpler to audit than middleware-based checks |
+| 2026-06 | Zod v4 with discriminated union `validate()` helper | After `if (validated.error) return`, TypeScript narrows `validated.data` as defined |
 
 ### 8.3 Product Decisions
 
@@ -654,15 +675,17 @@ API endpoints use the same JWT session for browser-based requests. Programmatic 
 | **13** | **AI NL Query** | ✅ Complete | `QueryBar` on dashboard; intent classification routes questions to orders/finance/customers data |
 | **14** | **Auth & Cleanup** | ✅ Complete | Login/Register pages, `redirectIfAuthenticated`, removed mock APIs, consolidated server action pattern |
 | **15** | Full AI Assistant | 🔴 Future | LLM-powered chat, context-aware suggestions, multi-step workflows |
+| **16** | **Visual Refresh** | ✅ Complete | Glassmorphism cards, Framer Motion primitives, brand glow effects |
+| **17** | **Security Hardening** | ✅ Complete | Signed portal JWT, CSP + HSTS, timing-safe webhook, authz checks, Zod validation |
 
 ### Next Up
 
-1. Fix Google OAuth (add authorized JavaScript origins in Google Cloud Console)
-2. Enable WhatsApp integration (register Meta developer account, configure webhook, add 3 env vars to Vercel)
-3. Implement content dashboard UI
-4. Set up PostHog for product analytics (key and host env vars ready)
-5. Add more NL Query intents (content, system health, WhatsApp data)
-6. Seed financial data (invoices, expenses, budgets) for all 4 projects
+1. Set `DIRECT_URL` env var on Vercel for database pages to work
+2. Fix Google OAuth (add authorized JavaScript origins in Google Cloud Console)
+3. Enable WhatsApp integration (register Meta developer account, configure webhook, add 3 env vars to Vercel)
+4. Implement content dashboard UI
+5. Set up PostHog for product analytics
+6. Add more NL Query intents (content, system health, WhatsApp data)
 
 ---
 
@@ -680,7 +703,10 @@ API endpoints use the same JWT session for browser-based requests. Programmatic 
 | `AUTH_DEV_EMAIL` | No | Dev login email (default: `admin@chiti.com`) |
 | `AUTH_DEV_PASSWORD` | No | Dev login password (default: `dev123`) |
 | `NEXT_PUBLIC_CONSOLE_URL` | Yes | Deployment URL for callbacks |
+| `OPENAI_API_KEY` | For AI | GPT-based NL query on dashboard |
 | `WHATSAPP_*` | No | WhatsApp Cloud API credentials (optional; not configured) |
+| `RAZORPAY_*` | No | Razorpay webhook secret (optional) |
+| `STRIPE_*` | No | Stripe webhook secret (optional) |
 
 ### B. Ethical Protocol
 
@@ -702,16 +728,22 @@ In alignment with Chiti Technologies standards:
 | **Seed Data** | `prisma/seed.ts` |
 | **Auth Config** | `src/lib/auth/auth.ts` |
 | **Portal Auth** | `src/lib/auth/portal.ts` |
+| **API Validation** | `src/lib/api/validation.ts` |
 | **Prisma Client** | `src/lib/db/prisma.ts` |
 | **DB Queries** | `src/lib/db/queries.ts` |
 | **UI Components** | `src/components/ui/` |
+| **Motion Primitives** | `src/components/motion/` |
+| **Chart Components** | `src/components/charts/` |
 | **Finance Components** | `src/components/finance/` |
 | **AI Components** | `src/components/ai/` |
 | **Server Actions** | `src/lib/actions/` |
 | **AI Actions** | `src/lib/ai/` |
+| **Webhook Handlers** | `src/lib/integrations/` |
 | **Styles** | `src/app/globals.css` |
 | **Portal Pages** | `src/app/portal/` |
 | **Pricing Pages** | `src/app/pricing/` |
+| **Security Headers** | `next.config.ts` |
+| **Env Validation** | `src/lib/env.ts` |
 
 ---
 

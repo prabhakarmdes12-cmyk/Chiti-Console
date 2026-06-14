@@ -185,3 +185,64 @@
 - Export: CSV download for orders, products, customers
 - Infra: Docker, docker-compose, GitHub Actions CI, CSP, env validation
 - History: 4 commits on master, pushed to GitHub
+
+---
+
+### Session: Visual Refresh — Glassmorphism + Motion
+
+**Goal:** Upgrade the UI with glassmorphism cards, Framer Motion animations, and brand glow effects.
+
+**Done:**
+- Installed `framer-motion` and `@tabler/icons-react`
+- Enhanced `globals.css` with aurora background, glass card solid, brand glow, and float/pulse animations
+- Created 5 motion primitives:
+  - `FadeIn` — fade + slide-up entry animation (direction, delay, duration props)
+  - `SlideUp` — vertical slide with spring physics
+  - `Stagger` — staggered children with configurable delay
+  - `NumberTicker` — animated counter (SSR-disabled)
+  - `GlowCard` — card with animated brand glow border
+- Updated `ChitiCard` with `glass` and `hover` props
+- Updated `ChitiButton` with `motion.button` + `whileTap` scale
+- Updated `Sidebar` nav items with brand glow on active
+- Updated `TopNav` with glass background
+- Polished 3 chart components (MonthlyRevenueChart, ProfitLossChart, SourcePieChart) with brand gradients + glass tooltips
+- Applied FadeIn + glass cards to: dashboard, login, analytics, orders, customers, leads, products, settings, system, finance, whatsapp, content pages
+- Created `EmptyState` component for no-data views
+- Applied FadeIn to remaining pages: order detail, customer detail, new order, portal dashboard/orders/invoices/login, pricing tier cards
+- Fixed TS errors: Decimal→number mapping in dashboard, Stagger ease type (`as const`), NumberTicker animation (useMotionValue→useState+requestAnimationFrame)
+
+**Key decisions:**
+- Framer Motion `motion.button` type conflicts with `ButtonHTMLAttributes` — cast via `as React.ComponentProps<typeof motion.button>`
+- NumberTicker SSR-disabled via `dynamic(() => import(...), { ssr: false })`
+- All glass effects use `backdrop-blur-xl` + `border-white/[opacity]` pattern
+
+**Git commit:** `2fcb9e1` — "ui: FadeIn motion on remaining pages (detail views, portal, pricing)" (8 files)
+
+---
+
+### Session: Security Hardening & Deployment Fixes
+
+**Goal:** Fix runtime errors on Vercel, harden security (CSP, auth, webhooks, authz).
+
+**Done:**
+- **Root cause analysis** — `src/lib/db/prisma.ts` falls back to `localhost:51214` when `DIRECT_URL` is not a valid `postgres://` URL. On Vercel `DATABASE_URL` is `prisma+postgres://`, triggering the fallback → connection refused → "Server Components render error"
+- **Error boundaries** — Created `ErrorBoundary` component, root `error.tsx`, `global-error.tsx`, `loading.tsx`
+- **Dashboard resilience** — Wrapped data fetch in try/catch with fallback card explaining DIRECT_URL issue
+- **CSP hardening** — Added `object-src 'none'`, `media-src 'self' data:`, `Strict-Transport-Security` (2 years), `Permissions-Policy` (no camera/mic/geo)
+- **Portal cookie** — Replaced base64 with signed JWT via `jose` (HS256, 24h expiry)
+- **Webhook validation** — `crypto.timingSafeEqual` for signature comparison; replaced `require()` with `import`
+- **Authorization** — Created `verifyProjectAccess()` in `src/lib/db/queries.ts` that checks `SUPER_ADMIN` bypass or `UserProject` membership
+- **Authz on server actions** — Applied to: `updateOrderStatus`, `markOrderPaid`, `deleteOrder` (orders); `updateLeadStatus`, `deleteLead` (leads); `updateCustomer`, `deleteCustomer` (customers); `deleteProduct`, `adjustStock` (products); `deleteExpense`, `updateInvoiceStatus` (finance)
+- **Zod input validation** — Created `src/lib/api/validation.ts` with schemas for products, orders, leads, customers, preferences; applied to `POST /api/products`, `POST /api/orders`, `PATCH /api/orders/[id]`, `POST /api/leads`, `POST /api/customers`, `PUT /api/settings/preferences`
+
+**Build verified:** 0 TS errors.
+**Git commits:** `b628c7a` — security fixes (12 files), `dfa13ac` — Zod validation (7 files)
+
+**Key decisions:**
+- Zod v4 requires `z.record(z.string(), z.boolean())` (2 args) instead of v3's `z.record(z.boolean())`
+- `validate()` function uses discriminated union return type for proper TypeScript narrowing
+- `verifyProjectAccess()` is called per-mutation (not middleware) — explicit per-route authorization
+
+**Blocked:**
+- `DIRECT_URL` not set on Vercel env vars — database pages crash with "Server Components render error"
+- Manifest route (`/manifest.webmanifest`) returns login HTML instead of JSON — pre-existing Vercel config issue
