@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Check, ArrowRight, Sparkles } from "lucide-react";
 import { TIERS } from "@/lib/billing/stripe";
+import FadeIn from "@/components/motion/FadeIn";
 
 export default function PricingPage() {
   return (
@@ -40,8 +41,8 @@ export default function PricingPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {TIERS.map((tier, i) => (
+            <FadeIn key={tier.id} direction="up" delay={0.1 + i * 0.15}>
             <div
-              key={tier.id}
               className={`relative rounded-2xl p-[1px] transition-all duration-300 hover:scale-[1.02] ${
                 tier.highlighted
                   ? "bg-gradient-to-b from-brand-primary to-brand-secondary"
@@ -93,6 +94,7 @@ export default function PricingPage() {
                 </Link>
               </div>
             </div>
+            </FadeIn>
           ))}
         </div>
 

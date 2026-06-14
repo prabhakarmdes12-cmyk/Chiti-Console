@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import { createOrder } from "@/lib/actions/orders";
 import { prisma } from "@/lib/db/prisma";
 import { getProjectId } from "@/lib/db/queries";
+import FadeIn from "@/components/motion/FadeIn";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
@@ -26,18 +27,21 @@ export default async function NewOrderPage({
 
   return (
     <div className="space-y-6 max-w-2xl">
-      <ChitiPageHeader
-        title="New Order"
-        description={project?.name ? `Create an order for ${project.name}` : "Create a new order"}
-        actions={
-          <Link href="/orders" className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-2 hover:bg-surface-3 border border-white/10 text-text-main text-sm transition-all">
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </Link>
-        }
-      />
+      <FadeIn>
+        <ChitiPageHeader
+          title="New Order"
+          description={project?.name ? `Create an order for ${project.name}` : "Create a new order"}
+          actions={
+            <Link href="/orders" className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-2 hover:bg-surface-3 border border-white/10 text-text-main text-sm transition-all">
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </Link>
+          }
+        />
+      </FadeIn>
 
-      <form action={createOrder} className="bg-surface-1 border border-white/10 rounded-xl p-6 space-y-5">
+      <FadeIn direction="up" delay={0.1}>
+        <form action={createOrder} className="bg-surface-1 border border-white/10 rounded-xl p-6 space-y-5">
         <div>
           <label htmlFor="customerId" className="block text-sm text-text-muted mb-1">Customer</label>
           <select
@@ -89,6 +93,7 @@ export default async function NewOrderPage({
           Create Order
         </button>
       </form>
+      </FadeIn>
     </div>
   );
 }

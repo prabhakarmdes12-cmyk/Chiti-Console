@@ -1,6 +1,7 @@
 import { getPortalSession } from "@/lib/auth/portal";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
+import FadeIn from "@/components/motion/FadeIn";
 
 export const dynamic = "force-dynamic";
 
@@ -26,11 +27,14 @@ export default async function PortalOrdersPage() {
 
   return (
     <div className="space-y-4">
+      <FadeIn>
       <div>
         <h1 className="text-xl font-display font-bold text-text-main">Orders</h1>
         <p className="text-sm text-text-muted mt-1">All your orders</p>
       </div>
+      </FadeIn>
 
+      <FadeIn direction="up" delay={0.1}>
       <div className="bg-surface-1 border border-white/10 rounded-xl overflow-hidden">
         <table className="w-full text-sm">
           <thead>
@@ -66,6 +70,7 @@ export default async function PortalOrdersPage() {
           </tbody>
         </table>
       </div>
+      </FadeIn>
     </div>
   );
 }

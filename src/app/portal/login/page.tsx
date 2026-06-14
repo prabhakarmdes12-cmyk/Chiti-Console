@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getPortalSession, verifyPortalAccess, setPortalSession } from "@/lib/auth/portal";
+import FadeIn from "@/components/motion/FadeIn";
 
 export default async function PortalLoginPage() {
   const session = await getPortalSession();
@@ -7,6 +8,7 @@ export default async function PortalLoginPage() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
+      <FadeIn>
       <div className="w-full max-w-sm mx-4">
         <div className="bg-surface-1 border border-white/10 rounded-xl p-8">
           <div className="flex items-center gap-2 mb-6">
@@ -57,6 +59,7 @@ export default async function PortalLoginPage() {
           </form>
         </div>
       </div>
+      </FadeIn>
     </div>
   );
 }

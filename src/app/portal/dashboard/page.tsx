@@ -1,6 +1,7 @@
 import { getPortalSession } from "@/lib/auth/portal";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
+import FadeIn from "@/components/motion/FadeIn";
 import Link from "next/link";
 import { ShoppingCart, Receipt, ArrowRight, Sparkles, Package } from "lucide-react";
 
@@ -22,8 +23,9 @@ export default async function PortalDashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Hero Welcome */}
-      <div className="bg-gradient-to-br from-brand-primary/10 via-surface-1 to-surface-1 border border-white/10 rounded-2xl p-6">
+      <FadeIn>
+        {/* Hero Welcome */}
+        <div className="bg-gradient-to-br from-brand-primary/10 via-surface-1 to-surface-1 border border-white/10 rounded-2xl p-6">
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -35,8 +37,10 @@ export default async function PortalDashboardPage() {
           </div>
         </div>
       </div>
+      </FadeIn>
 
       {/* Stats */}
+      <FadeIn direction="up" delay={0.15}>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           { label: "Total Orders", value: String(orderCount), icon: ShoppingCart, href: "/portal/orders", gradient: "from-sky-500 to-cyan-500" },
@@ -54,8 +58,10 @@ export default async function PortalDashboardPage() {
           </Link>
         ))}
       </div>
+      </FadeIn>
 
       {/* Recent Orders */}
+      <FadeIn direction="up" delay={0.3}>
       <div className="bg-surface-1 border border-white/10 rounded-xl p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -100,6 +106,7 @@ export default async function PortalDashboardPage() {
           </div>
         )}
       </div>
+      </FadeIn>
     </div>
   );
 }
