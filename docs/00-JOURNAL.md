@@ -1,8 +1,8 @@
 # Chiti Console — System Journal & Decision Log
 
-> **Version:** 1.0.0  
-> **Codename:** Founder OS  
-> **Last Updated:** June 2026  
+> **Version:** 1.1.0  
+> **Codename:** V1 AI  
+> **Last Updated:** 14 June 2026  
 > **Maintainer:** Prabhakar Kumar  
 > **Audience:** Developers | Designers | Stakeholders
 
@@ -248,6 +248,8 @@ Client submits <form action={serverAction}>
 
 Each feature entry below documents what was built, the key technical pattern, and implementation status.
 
+> **Session 10 update (14 June 2026):** 44 routes, 0 TS errors. New modules: Financial Dashboard, Client Portal, Pricing/Billing, AI NL Query. New models: Invoice, InvoiceItem, Expense, ClientAccess.
+
 ### 4.1 Project Registry
 
 | Aspect | Detail |
@@ -386,6 +388,57 @@ System health monitoring (uptime, SSL, deployment log) is documented in the PRD 
 
 Settings currently supports user preference toggles (persisted as JSON on the User model).
 
+### 4.12 Financial Module
+
+| Aspect | Detail |
+|--------|--------|
+| **Location** | `/finance` (dashboard, expenses, budgets, invoices tabs) |
+| **Server actions** | `src/lib/actions/finance.ts` — `getFinancialDashboardData`, `createExpense`, `deleteExpense`, `getBudgets`, `getInvoices`, `getInvoiceLineItems` |
+| **Status** | ✅ Complete |
+
+The financial dashboard shows real-time KPIs (revenue, expenses, profit, pending invoices) and a ProfitLossChart (Recharts area chart). The Expenses tab includes `AddExpenseForm` modal with category/tags/date filtering. Budgets tab shows progress bars against monthly limits. Invoices tab has status badges, totals, client info, and due dates.
+
+**New DB models:** `Invoice`, `InvoiceItem`, `Expense`, `Budget` (project-scoped, all follow `BaseEntity` pattern with `createdAt`/`updatedAt`).
+
+### 4.13 Client Portal
+
+| Aspect | Detail |
+|--------|--------|
+| **Location** | `/portal/login`, `/portal/dashboard`, `/portal/orders/[id]`, `/portal/invoices` |
+| **Auth** | JWT-based (separate from admin Auth.js); `src/lib/auth/portal.ts` — `generatePortalToken`, `verifyPortalToken` |
+| **Status** | ✅ Complete |
+
+Clients log in with email + PIN. The JWT encodes `clientAccessId` for permission scoping. Dashboard shows order status, invoice list, and receipt download. Order detail page has timeline, line items, and tracking. Permission model uses `ClientAccess` model (ties users to companies with optional `order:read`, `invoice:read`, `analytics:read` scopes).
+
+### 4.14 Pricing & Billing
+
+| Aspect | Detail |
+|--------|--------|
+| **Location** | `/pricing` (plan cards), `/billing` (current plan, payment method, invoice history, usage) |
+| **Status** | ✅ Complete |
+
+`/pricing` shows Starter / Growth / Enterprise plan cards with monthly/annual toggle. `/billing` reads plan from `User.plan` field, displays usage metrics (projects, team members, storage), and lists payment methods and billing history. Stripe/Razorpay webhook handlers are scaffolded at `src/app/api/webhook/stripe/` and `src/app/api/webhook/razorpay/`.
+
+### 4.15 AI Chat / NL Query
+
+| Aspect | Detail |
+|--------|--------|
+| **Location** | `QueryBar` component on `/dashboard` |
+| **Server action** | `src/lib/ai/nl-query.ts` — `performNLQuery` |
+| **Status** | ✅ Complete (basic) |
+
+The `QueryBar` component floats above the dashboard. Users type natural language questions ("show revenue from last month", "which orders are pending?", "top customers"). The `performNLQuery` action uses intent classification to route to orders, financial, or customers data, returning structured results rendered inline.
+
+### 4.16 New UI Components (Session 10)
+
+| Component | File | Description |
+|-----------|------|-------------|
+| `QueryBar` | `src/components/ai/QueryBar.tsx` | Floating NL query input with intent parsing |
+| `ProfitLossChart` | `src/components/charts/ProfitLossChart.tsx` | Recharts area chart for revenue vs expenses |
+| `AddExpenseForm` | `src/components/finance/AddExpenseForm.tsx` | Modal form with category/tags/date |
+| `LeadFollowUp` | `src/components/ui/LeadFollowUp.tsx` | Email modal for lead follow-ups |
+| `EmptyState` | `src/components/ui/EmptyState.tsx` | Reusable empty state with icon + message + CTA |
+
 ---
 
 ## 5. Data Architecture
@@ -401,16 +454,23 @@ Project ──1:N── ContentEntry
 Project ──1:N── AnalyticsEvent
 Project ──1:N── WhatsAppConversation
 Project ──N:N── User (via UserProject)
+Project ──1:N── Invoice
+Project ──1:N── Expense
+Project ──1:N── Budget
+Project ──1:N── ClientAccess
 
 Customer ──1:N── Order
 Customer ──1:N── Lead
 Customer ──1:N── WhatsAppConversation
+Customer ──1:N── Invoice
 
 Order ──1:N── OrderItem
 Order ──1:N── OrderTimeline
 
 Product ──1:N── OrderItem
 Product ──1:N── StockMovement
+
+Invoice ──1:N── InvoiceItem
 
 User ──1:N── Account (Auth.js)
 User ──1:N── Session (Auth.js)
@@ -518,6 +578,17 @@ API endpoints use the same JWT session for browser-based requests. Programmatic 
 | 2026-06 | Cookie-based project context (`chiti_project`) | Stateless — no server-side session needed for project scope; readable in RSCs without API calls |
 | 2026-06 | UUID primary keys | Prevents ID enumeration attacks; safe for multi-tenant API exposure; no coordination needed between projects |
 | 2026-06 | Removed `output: "standalone"` from Next.js config | Conflicted with Vercel's default build output; standalone mode is designed for Docker deployments, not Vercel |
+| 2026-06 | WhatsApp message saved locally even if Meta API fails | Ensures outbound messages are never lost due to transient API errors or missing credentials |
+| 2026-06 | Webhook uses `phone_number_id` from Meta payload, not cookies | Webhook requests from Meta have no browser cookies; project identified via phone number ID stored in project config |
+| 2026-06 | Order-from-Chat navigates to new order form with pre-filled params | Keeps the create flow consistent rather than creating orders inline within the chat UI |
+| 2026-06 | All server actions wrapped in try/catch with `console.error` | Prevents raw Prisma errors from reaching the client; provides server-side error logging for debugging |
+| 2026-06 | Segment-level loading.tsx added for detail pages | Prevents layout flash on dynamic routes (`projects/[id]`, `orders/[id]`, `customers/[id]`) while data fetches |
+| 2026-06 | Client Portal uses separate JWT auth (not Auth.js) | Avoids coupling client-facing auth with internal admin Auth.js; lighter token payload (no DB lookup on every request) |
+| 2026-06 | `BaseEntity` pattern for all DB models | `createdAt`/`updatedAt` fields extracted to a shared mixin; every operational entity gets timestamps without repetition |
+| 2026-06 | Auth.js `signIn` callback auto-syncs user to Prisma | New users created via OAuth or credentials immediately added to the `User` table with a `USER` role |
+| 2026-06 | NL Query uses intent classification over LLM | Lighter, faster, no API dependency; rule-based intent parser routes to existing Prisma queries rather than generating SQL |
+| 2026-06 | `QueryBar` as a floating client component | Avoids full-page navigation for NL queries; renders inline results below input without losing dashboard context |
+| 2026-06 | Razorpay + Stripe webhook handlers scaffolded upfront | Both payment gateways seeded early for future client onboarding; webhooks most reliable way to sync payment status |
 
 ### 8.3 Product Decisions
 
@@ -570,19 +641,28 @@ API endpoints use the same JWT session for browser-based requests. Programmatic 
 | **0** | Foundation | ✅ Complete | Next.js scaffold, Prisma, Auth.js, base layout, Vercel deployment |
 | **1** | Core | ✅ Complete | Project CRUD, orders, customers, products, leads, dashboard |
 | **2** | New Project Flow | ✅ Complete | `/projects/new` form, `createProject` action, project list with "New Project" button |
-| **3** | WhatsApp | 🔴 Not started | Unified inbox, auto-create order from message, templates |
-| **4** | Full Analytics | 🟡 Partial | Monthly revenue chart exists; no dedicated analytics page |
+| **3** | WhatsApp | ✅ Complete | Conversation list, thread UI, order-from-chat flow, webhook handler, send-message resilience — blocked on Meta credentials |
+| **4** | Full Analytics | ✅ Complete | Dedicated analytics page with KPI row, monthly revenue chart, source pie chart; empty-data handling |
 | **5** | Content Dashboard | 🔴 Not started | Content list view, GitHub sync |
 | **6** | System Health | 🔴 Not started | Uptime monitoring, SSL checks, deployment log |
 | **7** | Google OAuth Fix | 🟡 In progress | Configured but non-functional; JavaScript origins may need updating |
-| **8** | Productization | 🔴 Future | Multi-tenant, white-label, billing, client onboarding |
+| **8** | Error Resilience & UX | ✅ Complete | All 8 server actions wrapped in try/catch; empty states on every page; 3 segment-level loading.tsx files; initials null-safety; global error.tsx and not-found.tsx |
+| **9** | Productization | 🔴 Future | Multi-tenant, white-label, billing, client onboarding |
+| **10** | **Financial Module** | ✅ Complete | `/finance` with dashboard KPIs, expenses, budgets, invoices; ProfitLossChart |
+| **11** | **Client Portal** | ✅ Complete | JWT-based portal login, order/invoice viewing, permission scopes via ClientAccess |
+| **12** | **Pricing & Billing** | ✅ Complete | `/pricing` plan cards, `/billing` with usage metrics, Stripe/Razorpay webhook scaffold |
+| **13** | **AI NL Query** | ✅ Complete | `QueryBar` on dashboard; intent classification routes questions to orders/finance/customers data |
+| **14** | **Auth & Cleanup** | ✅ Complete | Login/Register pages, `redirectIfAuthenticated`, removed mock APIs, consolidated server action pattern |
+| **15** | Full AI Assistant | 🔴 Future | LLM-powered chat, context-aware suggestions, multi-step workflows |
 
 ### Next Up
 
 1. Fix Google OAuth (add authorized JavaScript origins in Google Cloud Console)
-2. Enable WhatsApp integration (register Meta developer account, configure webhook)
-3. Build dedicated analytics page with cross-project drilldown and date range filtering
-4. Implement content dashboard UI
+2. Enable WhatsApp integration (register Meta developer account, configure webhook, add 3 env vars to Vercel)
+3. Implement content dashboard UI
+4. Set up PostHog for product analytics (key and host env vars ready)
+5. Add more NL Query intents (content, system health, WhatsApp data)
+6. Seed financial data (invoices, expenses, budgets) for all 4 projects
 
 ---
 
@@ -621,11 +701,17 @@ In alignment with Chiti Technologies standards:
 | **Schema** | `prisma/schema.prisma` |
 | **Seed Data** | `prisma/seed.ts` |
 | **Auth Config** | `src/lib/auth/auth.ts` |
+| **Portal Auth** | `src/lib/auth/portal.ts` |
 | **Prisma Client** | `src/lib/db/prisma.ts` |
 | **DB Queries** | `src/lib/db/queries.ts` |
 | **UI Components** | `src/components/ui/` |
+| **Finance Components** | `src/components/finance/` |
+| **AI Components** | `src/components/ai/` |
 | **Server Actions** | `src/lib/actions/` |
+| **AI Actions** | `src/lib/ai/` |
 | **Styles** | `src/app/globals.css` |
+| **Portal Pages** | `src/app/portal/` |
+| **Pricing Pages** | `src/app/pricing/` |
 
 ---
 

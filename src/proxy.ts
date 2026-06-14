@@ -6,6 +6,11 @@ export const proxy = auth((req) => {
   const { pathname } = req.nextUrl;
 
   const isPublic = pathname === "/login" || pathname.startsWith("/api/auth");
+  const isPortal = pathname.startsWith("/portal");
+
+  if (isPortal) {
+    return NextResponse.next();
+  }
 
   if (!isLoggedIn && !isPublic) {
     return NextResponse.redirect(new URL("/login", req.nextUrl));

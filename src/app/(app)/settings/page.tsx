@@ -14,7 +14,7 @@ export default async function SettingsPage() {
   const name = user?.name || session?.user?.name || "User";
   const email = user?.email || session?.user?.email || "";
   const role = user?.role || "USER";
-  const initials = name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase();
+  const initials = (name || "?").split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase();
   const prefs = (user?.preferences as Record<string, boolean>) || {
     emailNotifications: true,
     whatsappAlerts: true,

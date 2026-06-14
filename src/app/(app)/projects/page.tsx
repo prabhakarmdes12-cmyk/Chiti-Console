@@ -53,9 +53,19 @@ export default async function ProjectsPage() {
         }
       />
 
+      {projectData.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="w-12 h-12 rounded-full bg-surface-2 flex items-center justify-center mb-3">
+            <span className="text-xl text-text-muted">+</span>
+          </div>
+          <p className="text-sm text-text-muted mb-1">No projects yet</p>
+          <p className="text-xs text-text-muted/60">Create your first project to get started.</p>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {projectData.map((p) => {
-          const initials = p.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase();
+          const initials = (p.name || "?").split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase();
           return (
             <a key={p.id} href={`/projects/${p.id}`} className="bg-surface-1 border border-white/10 rounded-xl p-5 space-y-4 hover:border-white/20 transition-colors group">
               <div className="flex items-center justify-between">

@@ -24,9 +24,16 @@ export async function createContent(formData: FormData) {
   if (!projectId) throw new Error("No project found");
 
   const parsed = createSchema.parse(Object.fromEntries(formData));
-  await prisma.contentEntry.create({
-    data: { projectId, title: parsed.title, type: parsed.type || "page", status: parsed.status || "draft", body: parsed.body },
-  });
+
+  try {
+    await prisma.contentEntry.create({
+      data: { projectId, title: parsed.title, type: parsed.type || "page", status: parsed.status || "draft", body: parsed.body },
+    });
+  } catch (e) {
+    console.error("createContent failed:", e);
+    throw new Error("Failed to create content");
+  }
+
   revalidatePath("/content");
 }
 
@@ -35,7 +42,14 @@ export async function updateContent(id: string, formData: FormData) {
   if (!projectId) throw new Error("No project found");
 
   const parsed = updateSchema.parse(Object.fromEntries(formData));
-  await prisma.contentEntry.updateMany({ where: { id, projectId }, data: parsed });
+
+  try {
+    await prisma.contentEntry.updateMany({ where: { id, projectId }, data: parsed });
+  } catch (e) {
+    console.error("updateContent failed:", e);
+    throw new Error("Failed to update content");
+  }
+
   revalidatePath("/content");
 }
 
@@ -43,7 +57,13 @@ export async function updateContentStatus(id: string, status: string) {
   const projectId = await getProjectId();
   if (!projectId) throw new Error("No project found");
 
-  await prisma.contentEntry.updateMany({ where: { id, projectId }, data: { status } });
+  try {
+    await prisma.contentEntry.updateMany({ where: { id, projectId }, data: { status } });
+  } catch (e) {
+    console.error("updateContentStatus failed:", e);
+    throw new Error("Failed to update content status");
+  }
+
   revalidatePath("/content");
 }
 
@@ -51,6 +71,12 @@ export async function deleteContent(id: string) {
   const projectId = await getProjectId();
   if (!projectId) throw new Error("No project found");
 
-  await prisma.contentEntry.deleteMany({ where: { id, projectId } });
+  try {
+    await prisma.contentEntry.deleteMany({ where: { id, projectId } });
+  } catch (e) {
+    console.error("deleteContent failed:", e);
+    throw new Error("Failed to delete content");
+  }
+
   revalidatePath("/content");
 }

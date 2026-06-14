@@ -5,9 +5,10 @@ import ChitiCard from "@/components/ui/ChitiCard";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiStatusBadge from "@/components/ui/ChitiStatusBadge";
 import ChitiButton from "@/components/ui/ChitiButton";
-import { updateOrderStatus, deleteOrder } from "@/lib/actions/orders";
+import { updateOrderStatus, deleteOrder, markOrderPaid } from "@/lib/actions/orders";
+import { createInvoice } from "@/lib/actions/finance";
 import Link from "next/link";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2, Receipt } from "lucide-react";
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -19,6 +20,8 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
   if (!order) notFound();
 
+  const existingInvoice = await prisma.invoice.findFirst({ where: { orderId: id } });
+
   return (
     <div className="space-y-6">
       <ChitiPageHeader
@@ -29,6 +32,11 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             <Link href="/orders">
               <ChitiButton variant="ghost" size="sm" icon={<ArrowLeft className="w-4 h-4" />}>Back</ChitiButton>
             </Link>
+            {!existingInvoice && (
+              <form action={createInvoice.bind(null, order.id)}>
+                <ChitiButton type="submit" variant="secondary" size="sm" icon={<Receipt className="w-4 h-4" />}>Generate Invoice</ChitiButton>
+              </form>
+            )}
           </div>
         }
       />
@@ -68,6 +76,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           <ChitiCard>
             <h3 className="text-sm font-medium text-text-muted mb-3">Timeline</h3>
             <div className="space-y-3">
+              {order.timeline.length === 0 && <p className="text-xs text-text-muted text-center py-4">No timeline entries yet</p>}
               {order.timeline.map((entry) => (
                 <div key={entry.id} className="flex items-start gap-3">
                   <div className="w-2 h-2 rounded-full bg-brand-primary mt-1.5 shrink-0" />
@@ -96,6 +105,12 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                 <span className="text-text-muted">Payment</span>
                 <ChitiStatusBadge status={order.paymentStatus} type="payment" />
               </div>
+              {order.paymentProvider && (
+                <div className="flex justify-between">
+                  <span className="text-text-muted">Provider</span>
+                  <span className="text-text-main text-xs">{order.paymentProvider}{order.paymentProviderId ? ` · ${order.paymentProviderId.slice(0, 12)}...` : ""}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-text-muted">Source</span>
                 <span className="text-text-main">{order.source}</span>
@@ -121,6 +136,24 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           <ChitiCard>
             <h3 className="text-sm font-medium text-text-muted mb-3">Actions</h3>
             <div className="space-y-2">
+              {order.paymentStatus === "UNPAID" && (
+                <form action={async (formData: FormData) => {
+                  "use server";
+                  await markOrderPaid(
+                    order.id,
+                    formData.get("paymentMethod") as string || "UPI",
+                    formData.get("paymentProvider") as string || "MANUAL",
+                    formData.get("paymentProviderId") as string || ""
+                  );
+                }}>
+                  <div className="space-y-2 mb-3 p-3 bg-surface-2 rounded-lg">
+                    <input name="paymentMethod" placeholder="Method (UPI, COD, etc.)" defaultValue="UPI" className="w-full px-2 py-1.5 rounded bg-surface-1 border border-white/10 text-text-main text-xs" />
+                    <input name="paymentProvider" placeholder="Provider (RAZORPAY, STRIPE, etc.)" defaultValue="MANUAL" className="w-full px-2 py-1.5 rounded bg-surface-1 border border-white/10 text-text-main text-xs" />
+                    <input name="paymentProviderId" placeholder="Transaction ID" className="w-full px-2 py-1.5 rounded bg-surface-1 border border-white/10 text-text-main text-xs" />
+                    <ChitiButton type="submit" variant="secondary" size="sm" className="w-full">Mark Paid</ChitiButton>
+                  </div>
+                </form>
+              )}
               <form action={updateOrderStatus.bind(null, order.id, "CONFIRMED")}>
                 <ChitiButton type="submit" variant="secondary" size="sm" className="w-full">Mark Confirmed</ChitiButton>
               </form>

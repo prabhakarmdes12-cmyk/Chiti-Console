@@ -1,9 +1,10 @@
 import { prisma } from "@/lib/db/prisma";
-import { getProjectId, projectFilter } from "@/lib/db/queries";
+import { getProjectId, projectFilter, getProject } from "@/lib/db/queries";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiCard from "@/components/ui/ChitiCard";
 import MonthlyRevenueChart from "@/components/charts/MonthlyRevenueChart";
 import SourcePieChart from "@/components/charts/SourcePieChart";
+import { fetchGAPageViews } from "@/lib/integrations/analytics";
 
 export default async function AnalyticsPage() {
   const projectId = await getProjectId();
@@ -47,6 +48,12 @@ export default async function AnalyticsPage() {
     color: sourceColors[name] || "#888",
   }));
 
+  const project = await getProject();
+  const hasGA4 = !!process.env.GA4_CLIENT_EMAIL;
+  const gaData = hasGA4 && project?.domain
+    ? await fetchGAPageViews(project.domain, "30daysAgo", "today").catch(() => null)
+    : null;
+
   return (
     <div className="space-y-6">
       <ChitiPageHeader title="Analytics" description="Performance metrics." />
@@ -79,6 +86,21 @@ export default async function AnalyticsPage() {
           <SourcePieChart data={sourceData} />
         </ChitiCard>
       </div>
+
+      {gaData && gaData.sources.length > 0 && (
+        <ChitiCard>
+          <h2 className="text-sm font-medium text-text-muted mb-4">Traffic Sources (GA4)</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {gaData.sources.slice(0, 6).map((src) => (
+              <div key={src.source} className="bg-surface-2 rounded-lg p-3">
+                <p className="text-xs text-text-muted mb-1">{src.source}</p>
+                <p className="text-lg font-display font-bold text-text-main">{src.sessions}</p>
+                <p className="text-xs text-text-muted">{src.pageViews} page views</p>
+              </div>
+            ))}
+          </div>
+        </ChitiCard>
+      )}
     </div>
   );
 }

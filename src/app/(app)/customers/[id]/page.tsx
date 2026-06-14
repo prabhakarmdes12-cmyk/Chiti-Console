@@ -19,7 +19,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
 
   if (!customer) notFound();
 
-  const initials = customer.name.split(" ").map((n) => n[0]).join("");
+  const initials = (customer.name || "?").split(" ").map((n) => n[0]).join("");
 
   return (
     <div className="space-y-6">

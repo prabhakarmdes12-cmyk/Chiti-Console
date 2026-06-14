@@ -11,6 +11,10 @@ interface SourceData {
 export default function SourcePieChart({ data }: { data: SourceData[] }) {
   const total = data.reduce((sum, d) => sum + d.value, 0);
 
+  if (total === 0) {
+    return <p className="text-text-muted text-sm text-center py-8">No data yet</p>;
+  }
+
   return (
     <ResponsiveContainer width="100%" height={280}>
       <PieChart>

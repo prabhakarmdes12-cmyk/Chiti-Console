@@ -118,6 +118,9 @@ model Project {
   customers           Customer[]
   products            Product[]
   leads               Lead[]
+  invoices            Invoice[]
+  expenses            Expense[]
+  clientAccess        ClientAccess[]
   contentEntries      ContentEntry[]
   analyticsEvents     AnalyticsEvent[]
   whatsappConversations WhatsAppConversation[]
@@ -149,25 +152,28 @@ model Customer {
 }
 
 model Order {
-  id            String        @id @default(uuid())
-  orderNumber   String
-  projectId     String
-  customerId    String?
-  source        OrderSource   @default(MANUAL)
-  status        OrderStatus   @default(PENDING)
-  paymentStatus PaymentStatus @default(UNPAID)
-  paymentMethod PaymentMethod?
-  totalAmount   Decimal       @db.Decimal(10, 2)
-  discount      Decimal       @default(0) @db.Decimal(10, 2)
-  notes         String?
-  assignedTo    String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id                 String        @id @default(uuid())
+  orderNumber        String
+  projectId          String
+  customerId         String?
+  source             OrderSource   @default(MANUAL)
+  status             OrderStatus   @default(PENDING)
+  paymentStatus      PaymentStatus @default(UNPAID)
+  paymentMethod      PaymentMethod?
+  paymentProvider    String?
+  paymentProviderId  String?
+  totalAmount        Decimal       @db.Decimal(10, 2)
+  discount           Decimal       @default(0) @db.Decimal(10, 2)
+  notes              String?
+  assignedTo         String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
 
   project  Project        @relation(fields: [projectId], references: [id])
   customer Customer?      @relation(fields: [customerId], references: [id])
   items    OrderItem[]
   timeline OrderTimeline[]
+  invoices Invoice[]
 
   @@index([projectId, createdAt])
   @@index([customerId])
@@ -241,6 +247,8 @@ model Lead {
   phone        String?
   source       LeadSource @default(WEBSITE_FORM)
   status       LeadStatus @default(NEW)
+  score        Int?
+  scoreReason  String?
   products     String[]   @default([])
   quantity     String?
   message      String?
@@ -284,6 +292,70 @@ model WhatsAppMessage {
   createdAt      DateTime         @default(now())
 
   conversation WhatsAppConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+model Invoice {
+  id            String        @id @default(uuid())
+  orderId       String?
+  order         Order?        @relation(fields: [orderId], references: [id])
+  projectId     String
+  project       Project       @relation(fields: [projectId], references: [id])
+  invoiceNumber String        @unique
+  amount        Decimal       @db.Decimal(10, 2)
+  taxAmount     Decimal       @default(0) @db.Decimal(10, 2)
+  totalAmount   Decimal       @db.Decimal(10, 2)
+  status        String        @default("DRAFT")
+  dueDate       DateTime?
+  paidAt        DateTime?
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  items InvoiceItem[]
+
+  @@index([projectId])
+}
+
+model InvoiceItem {
+  id          String   @id @default(uuid())
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description String
+  quantity    Int
+  unitPrice   Decimal  @db.Decimal(10, 2)
+  total       Decimal  @db.Decimal(10, 2)
+}
+
+model Expense {
+  id          String   @id @default(uuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  description String
+  amount      Decimal  @db.Decimal(10, 2)
+  category    String
+  date        DateTime
+  receipt     String?
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  @@index([projectId, date])
+}
+
+model ClientAccess {
+  id           String    @id @default(uuid())
+  projectId    String
+  name         String
+  email        String
+  phone        String?
+  sharedSecret String
+  active       Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@unique([projectId, email])
+  @@index([projectId])
 }
 
 model ContentEntry {

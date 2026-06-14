@@ -52,7 +52,7 @@ export default async function ProjectOverviewPage({ params }: { params: Promise<
               { label: "Revenue", value: `₹${totalRevenue.toLocaleString("en-IN")}` },
               { label: "Customers", value: String(customerCount) },
               { label: "Orders (30d)", value: String(health.orderCount) },
-              { label: "Open Leads", value: String(health.staleLeads + 2) },
+              { label: "Open Leads", value: String(health.staleLeads) },
             ].map((m) => (
               <div key={m.label}>
                 <p className="text-xs text-text-muted">{m.label}</p>
@@ -78,6 +78,7 @@ export default async function ProjectOverviewPage({ params }: { params: Promise<
                 <span className="text-text-muted">₹{Number(o.totalAmount).toLocaleString("en-IN")}</span>
               </div>
             ))}
+            {recentLeads.length === 0 && recentOrders.length === 0 && <p className="text-text-muted text-center py-4">No activity yet</p>}
             {recentLeads.slice(0, 2).map((l) => (
               <div key={l.id} className="flex items-center justify-between py-1.5 border-b border-white/5 last:border-0">
                 <span className="text-text-main">{l.name}</span>

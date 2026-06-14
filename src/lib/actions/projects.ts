@@ -9,7 +9,13 @@ export async function createProject(formData: FormData) {
   const session = await auth();
   if (!session?.user?.email) throw new Error("Not authenticated");
 
-  const user = await prisma.user.findUnique({ where: { email: session.user.email } });
+  let user;
+  try {
+    user = await prisma.user.findUnique({ where: { email: session.user.email } });
+  } catch (e) {
+    console.error("createProject find user failed:", e);
+    throw new Error("Failed to find user");
+  }
   if (!user) throw new Error("User not found");
 
   const name = formData.get("name") as string;
@@ -21,13 +27,24 @@ export async function createProject(formData: FormData) {
   const integrationType = formData.get("integrationType") as string || "MANUAL";
   const logoUrl = formData.get("logoUrl") as string || undefined;
 
-  const project = await prisma.project.create({
-    data: { name, slug, type: type as any, domain, integrationType: integrationType as any, logoUrl },
-  });
+  let project;
+  try {
+    project = await prisma.project.create({
+      data: { name, slug, type: type as any, domain, integrationType: integrationType as any, logoUrl },
+    });
+  } catch (e) {
+    console.error("createProject create failed:", e);
+    throw new Error("Failed to create project");
+  }
 
-  await prisma.userProject.create({
-    data: { userId: user.id, projectId: project.id, role: "ADMIN" },
-  });
+  try {
+    await prisma.userProject.create({
+      data: { userId: user.id, projectId: project.id, role: "ADMIN" },
+    });
+  } catch (e) {
+    console.error("createProject userProject failed:", e);
+    throw new Error("Failed to assign user to project");
+  }
 
   revalidatePath("/projects");
   redirect(`/projects/${project.id}`);

@@ -40,7 +40,7 @@ export default async function SystemPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-brand-primary/10 flex items-center justify-center">
-                  <span className="text-sm text-brand-primary font-bold">{p.name.split(" ").map(n => n[0]).join("")}</span>
+                  <span className="text-sm text-brand-primary font-bold">{(p.name || "?").split(" ").map(n => n[0]).join("")}</span>
                 </div>
                 <div>
                   <h3 className="text-sm text-text-main font-medium">{p.name}</h3>

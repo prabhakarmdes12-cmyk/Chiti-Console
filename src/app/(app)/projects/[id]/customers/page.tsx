@@ -56,7 +56,7 @@ export default async function ProjectCustomersPage({ params }: { params: Promise
       )}
       {customers.length > 0 && <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {customers.map((customer) => {
-          const initials = customer.name.split(" ").map(n => n[0]).join("");
+          const initials = (customer.name || "?").split(" ").map(n => n[0]).join("");
           const status = customer.totalOrders >= 10 ? "VIP" : customer.totalOrders >= 5 ? "Active" : "New";
           return (
             <div key={customer.id} className="group bg-surface-1 border border-white/10 rounded-xl p-4 space-y-2 hover:border-white/20 transition-colors relative">

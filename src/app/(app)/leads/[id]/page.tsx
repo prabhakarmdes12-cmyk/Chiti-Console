@@ -4,6 +4,7 @@ import { getProjectId, projectFilter } from "@/lib/db/queries";
 import ChitiCard from "@/components/ui/ChitiCard";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiButton from "@/components/ui/ChitiButton";
+import LeadFollowUp from "@/components/ui/LeadFollowUp";
 import { updateLeadStatus, deleteLead } from "@/lib/actions/leads";
 import Link from "next/link";
 import { ArrowLeft, Trash2 } from "lucide-react";
@@ -38,6 +39,21 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
                 <span className="text-text-muted">Status</span>
                 <span className="font-medium">{lead.status}</span>
               </div>
+              {lead.score != null && (
+                <div className="flex justify-between">
+                  <span className="text-text-muted">Score</span>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                    lead.score >= 70 ? "bg-success/10 text-success"
+                    : lead.score >= 40 ? "bg-warning/10 text-warning"
+                    : "bg-error/10 text-error"
+                  }`}>{lead.score} — {lead.score >= 70 ? "HOT" : lead.score >= 40 ? "WARM" : "COLD"}</span>
+                </div>
+              )}
+              {lead.scoreReason && (
+                <div className="pt-1">
+                  <p className="text-xs text-text-muted italic">{lead.scoreReason}</p>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-text-muted">Source</span>
                 <span className="text-text-main">{lead.source}</span>
@@ -107,6 +123,11 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
                 </form>
               ))}
             </div>
+          </ChitiCard>
+
+          <ChitiCard>
+            <h3 className="text-sm font-medium text-text-muted mb-3">AI Assistant</h3>
+            <LeadFollowUp leadId={lead.id} />
           </ChitiCard>
 
           <div className="pt-2">

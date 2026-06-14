@@ -135,7 +135,16 @@ export default async function LeadsPage({
                     {lead.company && <p className="text-xs text-text-muted">{lead.company}</p>}
                     <div className="flex items-center justify-between text-xs mt-1">
                       <span className="text-text-muted">{lead.source}</span>
-                      <span className="text-text-muted">{new Date(lead.createdAt).toLocaleDateString("en-IN")}</span>
+                      <span className="flex items-center gap-1.5">
+                        {lead.score != null && (
+                          <span className={`text-xs font-medium px-1.5 py-0.5 rounded-full ${
+                            lead.score >= 70 ? "bg-success/10 text-success"
+                            : lead.score >= 40 ? "bg-warning/10 text-warning"
+                            : "bg-error/10 text-error"
+                          }`}>{lead.score}</span>
+                        )}
+                        <span className="text-text-muted">{new Date(lead.createdAt).toLocaleDateString("en-IN")}</span>
+                      </span>
                     </div>
                     {lead.products.length > 0 && (
                       <p className="text-xs text-brand-primary truncate mt-1">{lead.products.join(", ")}</p>

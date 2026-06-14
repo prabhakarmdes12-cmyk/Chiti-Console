@@ -23,6 +23,93 @@
   --font-mono: "JetBrains Mono", monospace;
 }
 
+@layer utilities {
+  .gradient-brand {
+    background: linear-gradient(135deg, hsl(260, 100%, 65%), hsl(190, 100%, 50%));
+  }
+  .gradient-brand-text {
+    background: linear-gradient(135deg, hsl(260, 100%, 65%), hsl(190, 100%, 50%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .gradient-success {
+    background: linear-gradient(135deg, hsl(150, 80%, 40%), hsl(175, 80%, 45%));
+  }
+  .gradient-warm {
+    background: linear-gradient(135deg, hsl(35, 90%, 50%), hsl(340, 80%, 65%));
+  }
+  .glow-brand {
+    box-shadow: 0 0 24px -4px hsla(260, 100%, 65%, 0.3);
+  }
+  .glow-success {
+    box-shadow: 0 0 20px -4px hsla(150, 80%, 40%, 0.25);
+  }
+  .glass-card {
+    background: hsla(220, 10%, 8%, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsla(0, 0%, 100%, 0.08);
+  }
+  .glass-card:hover {
+    background: hsla(220, 10%, 8%, 0.75);
+    border-color: hsla(260, 100%, 65%, 0.2);
+  }
+  .text-gradient {
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out both;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out both;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out both;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, hsla(0, 0%, 100%, 0.04), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+.skeleton {
+  background: hsla(220, 10%, 15%, 0.6);
+  border-radius: 8px;
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     --color-surface-1: hsl(0, 0%, 100%);
@@ -33,6 +120,14 @@
     --color-text-muted: hsl(220, 10%, 50%);
     --color-success: hsl(150, 60%, 35%);
     --color-error: hsl(350, 70%, 50%);
+  }
+  .glass-card {
+    background: hsla(0, 0%, 100%, 0.7);
+    border-color: hsla(220, 10%, 50%, 0.15);
+  }
+  .glass-card:hover {
+    background: hsla(0, 0%, 100%, 0.85);
+    border-color: hsla(260, 100%, 65%, 0.3);
   }
 }
 

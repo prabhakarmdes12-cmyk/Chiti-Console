@@ -97,7 +97,7 @@ export default async function CustomersPage({
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {customers.map((customer) => {
-          const initials = customer.name.split(" ").map(n => n[0]).join("");
+          const initials = (customer.name || "?").split(" ").map(n => n[0]).join("");
           const status = customer.totalOrders >= 10 ? "VIP" : customer.totalOrders >= 5 ? "Active" : "New";
           return (
             <div key={customer.id} className="group bg-surface-1 border border-white/10 rounded-xl p-5 space-y-3 hover:border-white/20 transition-colors relative">

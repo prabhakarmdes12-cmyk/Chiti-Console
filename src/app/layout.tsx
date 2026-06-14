@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Outfit, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -20,6 +20,12 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Chiti Console — Operations Dashboard",
   description: "Unified operations dashboard for Chiti Technologies projects.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0f0f1a",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
