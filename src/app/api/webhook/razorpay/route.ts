@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
+import { createHmac, timingSafeEqual } from "crypto";
 
 export async function POST(req: NextRequest) {
   const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
@@ -10,9 +11,8 @@ export async function POST(req: NextRequest) {
   const body = await req.text();
   const signature = req.headers.get("x-razorpay-signature") || "";
 
-  const crypto = require("crypto");
-  const expected = crypto.createHmac("sha256", secret).update(body).digest("hex");
-  if (expected !== signature) {
+  const expected = createHmac("sha256", secret).update(body).digest("hex");
+  if (expected.length !== signature.length || !timingSafeEqual(Buffer.from(expected), Buffer.from(signature))) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 

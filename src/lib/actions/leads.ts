@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db/prisma";
-import { getProjectId } from "@/lib/db/queries";
+import { getProjectId, verifyProjectAccess } from "@/lib/db/queries";
 import { scoreLead } from "@/lib/ai/score-lead";
 
 export async function createLead(formData: FormData) {
@@ -48,6 +48,9 @@ export async function createLead(formData: FormData) {
 }
 
 export async function updateLeadStatus(leadId: string, status: string) {
+  const lead = await prisma.lead.findUnique({ where: { id: leadId }, select: { projectId: true } });
+  if (!lead || !await verifyProjectAccess(lead.projectId)) throw new Error("Access denied");
+
   try {
     await prisma.lead.update({
       where: { id: leadId },
@@ -82,6 +85,9 @@ export async function generateFollowUp(leadId: string) {
 }
 
 export async function deleteLead(leadId: string) {
+  const lead = await prisma.lead.findUnique({ where: { id: leadId }, select: { projectId: true } });
+  if (!lead || !await verifyProjectAccess(lead.projectId)) throw new Error("Access denied");
+
   try {
     await prisma.lead.delete({ where: { id: leadId } });
   } catch (e) {

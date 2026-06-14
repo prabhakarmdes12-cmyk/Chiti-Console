@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db/prisma";
-import { getProjectId } from "@/lib/db/queries";
+import { getProjectId, verifyProjectAccess } from "@/lib/db/queries";
 
 export async function createInvoice(orderId: string) {
   const projectId = await getProjectId();
@@ -80,6 +80,9 @@ export async function createExpense(formData: FormData) {
 }
 
 export async function deleteExpense(expenseId: string) {
+  const expense = await prisma.expense.findUnique({ where: { id: expenseId }, select: { projectId: true } });
+  if (!expense || !await verifyProjectAccess(expense.projectId)) throw new Error("Access denied");
+
   try {
     await prisma.expense.delete({ where: { id: expenseId } });
   } catch (e) {
@@ -91,6 +94,9 @@ export async function deleteExpense(expenseId: string) {
 }
 
 export async function updateInvoiceStatus(invoiceId: string, status: string) {
+  const invoice = await prisma.invoice.findUnique({ where: { id: invoiceId }, select: { projectId: true } });
+  if (!invoice || !await verifyProjectAccess(invoice.projectId)) throw new Error("Access denied");
+
   try {
     await prisma.invoice.update({
       where: { id: invoiceId },

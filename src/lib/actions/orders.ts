@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db/prisma";
-import { getProjectId } from "@/lib/db/queries";
+import { getProjectId, verifyProjectAccess } from "@/lib/db/queries";
 
 export async function createOrder(formData: FormData) {
   const projectId = await getProjectId();
@@ -35,7 +35,15 @@ export async function createOrder(formData: FormData) {
   revalidatePath("/orders");
 }
 
+async function verifyOrderAccess(orderId: string): Promise<boolean> {
+  const order = await prisma.order.findUnique({ where: { id: orderId }, select: { projectId: true } });
+  if (!order) return false;
+  return verifyProjectAccess(order.projectId);
+}
+
 export async function updateOrderStatus(orderId: string, status: string) {
+  if (!await verifyOrderAccess(orderId)) throw new Error("Access denied");
+
   try {
     await prisma.order.update({
     where: { id: orderId },
@@ -60,6 +68,8 @@ export async function markOrderPaid(
   paymentProvider: string,
   paymentProviderId: string
 ) {
+  if (!await verifyOrderAccess(orderId)) throw new Error("Access denied");
+
   try {
     await prisma.order.update({
       where: { id: orderId },
@@ -81,6 +91,8 @@ export async function markOrderPaid(
 }
 
 export async function deleteOrder(orderId: string) {
+  if (!await verifyOrderAccess(orderId)) throw new Error("Access denied");
+
   try {
     await prisma.order.delete({ where: { id: orderId } });
   } catch (e) {

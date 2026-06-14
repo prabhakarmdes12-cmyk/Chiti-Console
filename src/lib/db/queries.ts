@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { prisma } from "./prisma";
+import { auth } from "@/lib/auth/auth";
 
 export async function getProject() {
   const cookieStore = await cookies();
@@ -15,6 +16,24 @@ export async function getProjectId() {
 
 export function projectFilter(projectId: string | null) {
   return projectId ? { projectId } : {};
+}
+
+export async function verifyProjectAccess(projectId: string): Promise<boolean> {
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) return false;
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true },
+  });
+  if (!user) return false;
+  if (user.role === "SUPER_ADMIN") return true;
+
+  const membership = await prisma.userProject.findUnique({
+    where: { userId_projectId: { userId, projectId } },
+  });
+  return membership !== null;
 }
 
 export async function getProjectHealth(projectId: string) {

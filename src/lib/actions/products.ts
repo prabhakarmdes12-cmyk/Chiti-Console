@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db/prisma";
-import { getProjectId } from "@/lib/db/queries";
+import { getProjectId, verifyProjectAccess } from "@/lib/db/queries";
 
 export async function createProduct(formData: FormData) {
   const projectId = await getProjectId();
@@ -55,7 +55,15 @@ export async function updateProduct(productId: string, formData: FormData) {
   revalidatePath(`/products/${productId}`);
 }
 
+async function verifyProductAccess(productId: string): Promise<boolean> {
+  const product = await prisma.product.findUnique({ where: { id: productId }, select: { projectId: true } });
+  if (!product) return false;
+  return verifyProjectAccess(product.projectId);
+}
+
 export async function deleteProduct(productId: string) {
+  if (!await verifyProductAccess(productId)) throw new Error("Access denied");
+
   try {
     await prisma.product.delete({ where: { id: productId } });
   } catch (e) {
@@ -74,6 +82,7 @@ export async function adjustStock(productId: string, quantity: number, type: "IN
     throw new Error("Failed to find product");
   }
   if (!product) throw new Error("Product not found");
+  if (!await verifyProjectAccess(product.projectId)) throw new Error("Access denied");
 
   const newStock =
     type === "IN" ? (product.stock ?? 0) + quantity

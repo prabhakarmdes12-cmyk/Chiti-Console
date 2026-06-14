@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db/prisma";
-import { getProjectId } from "@/lib/db/queries";
+import { getProjectId, verifyProjectAccess } from "@/lib/db/queries";
 
 export async function createCustomer(formData: FormData) {
   const projectId = await getProjectId();
@@ -25,7 +25,15 @@ export async function createCustomer(formData: FormData) {
   revalidatePath("/customers");
 }
 
+async function verifyCustomerAccess(customerId: string): Promise<boolean> {
+  const customer = await prisma.customer.findUnique({ where: { id: customerId }, select: { projectId: true } });
+  if (!customer) return false;
+  return verifyProjectAccess(customer.projectId);
+}
+
 export async function updateCustomer(customerId: string, formData: FormData) {
+  if (!await verifyCustomerAccess(customerId)) throw new Error("Access denied");
+
   const name = formData.get("name") as string;
   const phone = formData.get("phone") as string;
   const email = formData.get("email") as string;
@@ -45,6 +53,8 @@ export async function updateCustomer(customerId: string, formData: FormData) {
 }
 
 export async function deleteCustomer(customerId: string) {
+  if (!await verifyCustomerAccess(customerId)) throw new Error("Access denied");
+
   try {
     await prisma.customer.delete({ where: { id: customerId } });
   } catch (e) {
