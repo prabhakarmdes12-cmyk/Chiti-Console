@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
 import { auth } from "@/lib/auth/auth";
 import { NextResponse } from "next/server";
+import { preferencesUpdateSchema, validate } from "@/lib/api/validation";
 
 export async function PUT(request: Request) {
   const session = await auth();
@@ -9,15 +10,17 @@ export async function PUT(request: Request) {
   }
 
   const body = await request.json();
+  const validated = validate(preferencesUpdateSchema, body);
+  if (validated.error) return validated.error;
   const user = await prisma.user.findUnique({ where: { email: session.user.email } });
   if (!user) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
-  const merged = { ...((user.preferences as Record<string, boolean>) || {}), ...body };
+  const merged = { ...((user.preferences as Record<string, boolean>) || {}), ...validated.data };
   await prisma.user.update({
     where: { email: session.user.email },
-    data: { preferences: merged },
+    data: { preferences: merged as Record<string, boolean> },
   });
 
   return NextResponse.json({ success: true, preferences: merged });

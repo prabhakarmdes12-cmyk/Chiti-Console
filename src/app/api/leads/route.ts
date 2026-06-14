@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
+import type { LeadSource, LeadStatus } from "@/generated/prisma/client";
 import { authenticateApiKey } from "@/lib/api/auth";
+import { leadCreateSchema, paginationSchema, validate } from "@/lib/api/validation";
 
 export async function GET(request: Request) {
   const { error, project } = await authenticateApiKey(request);
@@ -8,8 +10,9 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const status = searchParams.get("status");
-  const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 200);
-  const offset = parseInt(searchParams.get("offset") || "0");
+  const pagination = validate(paginationSchema, Object.fromEntries(searchParams));
+  const limit = pagination.data?.limit ?? 50;
+  const offset = pagination.data?.offset ?? 0;
 
   const where: Record<string, unknown> = { projectId: project!.id };
   if (status) where.status = status;
@@ -27,18 +30,20 @@ export async function POST(request: Request) {
   if (error) return error;
 
   const body = await request.json();
+  const validated = validate(leadCreateSchema, body);
+  if (validated.error) return validated.error;
 
   const lead = await prisma.lead.create({
     data: {
       projectId: project!.id,
-      name: body.name,
-      email: body.email,
-      phone: body.phone,
-      company: body.company,
-      source: body.source || "API",
-      status: body.status || "NEW",
-      message: body.message,
-      products: body.products || [],
+      name: validated.data.name,
+      email: validated.data.email || undefined,
+      phone: validated.data.phone,
+      company: validated.data.company,
+      source: (validated.data.source || "API") as LeadSource,
+      status: (validated.data.status || "NEW") as LeadStatus,
+      message: validated.data.message,
+      products: validated.data.products || [],
     },
   });
 

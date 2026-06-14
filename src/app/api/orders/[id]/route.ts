@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { authenticateApiKey } from "@/lib/api/auth";
+import { orderUpdateSchema, validate } from "@/lib/api/validation";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const request = new Request(_request);
@@ -24,13 +25,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   const { id } = await params;
   const body = await request.json();
+  const validated = validate(orderUpdateSchema, body);
+  if (validated.error) return validated.error;
 
   const existing = await prisma.order.findFirst({ where: { id, projectId: project!.id } });
   if (!existing) return NextResponse.json({ error: "Order not found" }, { status: 404 });
 
   const data: Prisma.OrderUpdateInput = {};
-  if (body.status) data.status = body.status;
-  if (body.paymentStatus) data.paymentStatus = body.paymentStatus;
+  if (validated.data.status) data.status = validated.data.status;
+  if (validated.data.paymentStatus) data.paymentStatus = validated.data.paymentStatus;
 
   const order = await prisma.order.update({ where: { id }, data, include: { items: true } });
 

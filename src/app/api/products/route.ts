@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { authenticateApiKey } from "@/lib/api/auth";
+import { productCreateSchema, paginationSchema, validate } from "@/lib/api/validation";
 
 export async function GET(request: Request) {
   const { error, project } = await authenticateApiKey(request);
@@ -8,8 +9,9 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const category = searchParams.get("category");
-  const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 200);
-  const offset = parseInt(searchParams.get("offset") || "0");
+  const pagination = validate(paginationSchema, Object.fromEntries(searchParams));
+  const limit = pagination.data?.limit ?? 50;
+  const offset = pagination.data?.offset ?? 0;
 
   const where: Record<string, unknown> = { projectId: project!.id };
   if (category) where.category = category;
@@ -27,17 +29,19 @@ export async function POST(request: Request) {
   if (error) return error;
 
   const body = await request.json();
+  const validated = validate(productCreateSchema, body);
+  if (validated.error) return validated.error;
 
   const product = await prisma.product.create({
     data: {
       projectId: project!.id,
-      name: body.name,
-      sku: body.sku,
-      category: body.category,
-      price: parseFloat(body.price),
-      stock: body.stock ? parseInt(body.stock) : 0,
-      lowStockThreshold: body.lowStockThreshold ? parseInt(body.lowStockThreshold) : 5,
-      externalId: body.externalId,
+      name: validated.data.name,
+      sku: validated.data.sku,
+      category: validated.data.category,
+      price: validated.data.price,
+      stock: validated.data.stock ?? 0,
+      lowStockThreshold: validated.data.lowStockThreshold ?? 5,
+      externalId: validated.data.externalId,
     },
   });
 
