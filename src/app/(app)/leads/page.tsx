@@ -6,7 +6,9 @@ import SearchBar from "@/components/ui/SearchBar";
 import FilterSelect from "@/components/ui/FilterSelect";
 import { createLead, updateLeadStatus, deleteLead } from "@/lib/actions/leads";
 import Link from "next/link";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, UserPlus } from "lucide-react";
+import FadeIn from "@/components/motion/FadeIn";
+import EmptyState from "@/components/ui/EmptyState";
 
 const leadStatusConfig: Record<string, { color: string; bg: string }> = {
   NEW: { color: "text-dataviz-sapphire", bg: "bg-dataviz-sapphire/10" },
@@ -57,7 +59,8 @@ export default async function LeadsPage({
   }));
 
   return (
-    <div className="space-y-6">
+    <FadeIn direction="up" delay={0.1}>
+      <div className="space-y-6">
       <ChitiPageHeader
         title="Leads"
         description="Track and manage sales leads through the pipeline."
@@ -125,7 +128,7 @@ export default async function LeadsPage({
             </div>
             <div className="space-y-2">
               {col.leads.length === 0 && (
-                <p className="text-xs text-text-muted text-center py-4">No leads</p>
+                <EmptyState icon={UserPlus} title="No leads" />
               )}
               {col.leads.map((lead) => (
                 <div key={lead.id} className="group bg-surface-2 rounded-lg p-3 space-y-1.5 border border-white/5 relative">
@@ -173,5 +176,6 @@ export default async function LeadsPage({
         ))}
       </div>
     </div>
+    </FadeIn>
   );
 }

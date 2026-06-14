@@ -20,19 +20,20 @@ export default function MonthlyRevenueChart({ data }: { data: MonthlyData[] }) {
       <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
         <defs>
           <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+            <stop offset="0%" stopColor="hsl(260, 100%, 65%)" stopOpacity={0.35} />
+            <stop offset="60%" stopColor="hsl(260, 100%, 65%)" stopOpacity={0.08} />
+            <stop offset="100%" stopColor="hsl(260, 100%, 65%)" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-        <XAxis dataKey="month" tick={{ fontSize: 12, fill: "#888" }} axisLine={false} tickLine={false} />
-        <YAxis tick={{ fontSize: 12, fill: "#888" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `₹${(v / 1000).toFixed(0)}k`} />
+        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+        <XAxis dataKey="month" tick={{ fontSize: 12, fill: "hsl(220,10%,65%)" }} axisLine={false} tickLine={false} dy={8} />
+        <YAxis tick={{ fontSize: 12, fill: "hsl(220,10%,65%)" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `₹${(v / 1000).toFixed(0)}k`} />
         <Tooltip
-          contentStyle={{ background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", fontSize: "13px" }}
-          labelStyle={{ color: "#e2e8f0" }}
+          contentStyle={{ background: "hsla(220,10%,8%,0.85)", backdropFilter: "blur(12px)", border: "1px solid hsla(260,100%,65%,0.2)", borderRadius: "8px", fontSize: "13px" }}
+          labelStyle={{ color: "hsl(0,0%,98%)" }}
           formatter={(value: unknown) => [`₹${Number(value ?? 0).toLocaleString("en-IN")}`, "Revenue"]}
         />
-        <Area type="monotone" dataKey="revenue" stroke="#3b82f6" fill="url(#revenueGrad)" strokeWidth={2} />
+        <Area type="monotone" dataKey="revenue" stroke="hsl(260, 100%, 65%)" strokeWidth={2} fill="url(#revenueGrad)" />
       </AreaChart>
     </ResponsiveContainer>
   );

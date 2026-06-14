@@ -3,9 +3,10 @@ import { getProjectId, projectFilter } from "@/lib/db/queries";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiButton from "@/components/ui/ChitiButton";
 import ChitiBadge from "@/components/ui/ChitiBadge";
+import EmptyState from "@/components/ui/EmptyState";
 import { createContent, deleteContent } from "@/lib/actions/content";
 import Link from "next/link";
-import { Plus, Trash2, ExternalLink } from "lucide-react";
+import { Plus, Trash2, ExternalLink, FileText } from "lucide-react";
 
 export default async function ContentPage() {
   const projectId = await getProjectId();
@@ -24,16 +25,16 @@ export default async function ContentPage() {
             <summary className="list-none">
               <ChitiButton size="sm" icon={<Plus className="w-4 h-4" />}>New Entry</ChitiButton>
             </summary>
-            <div className="absolute right-0 top-10 w-72 bg-surface-1 border border-white/10 rounded-xl p-4 shadow-2xl z-10">
+            <div className="absolute right-0 top-10 w-72 glass-card rounded-xl p-4 shadow-2xl z-10">
               <form action={createContent} className="space-y-3">
                 <div className="space-y-1">
                   <label className="block text-xs text-text-muted">Title</label>
-                  <input name="title" required className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm" />
+                  <input name="title" required className="w-full px-3 py-2 rounded-lg bg-surface-2/50 border border-white/10 text-text-main text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/50" />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
                     <label className="block text-xs text-text-muted">Type</label>
-                    <select name="type" className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm">
+                    <select name="type" className="w-full px-3 py-2 rounded-lg bg-surface-2/50 border border-white/10 text-text-main text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/50">
                       <option value="Page">Page</option>
                       <option value="Collection">Collection</option>
                       <option value="Banner">Banner</option>
@@ -42,7 +43,7 @@ export default async function ContentPage() {
                   </div>
                   <div className="space-y-1">
                     <label className="block text-xs text-text-muted">Status</label>
-                    <select name="status" className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm">
+                    <select name="status" className="w-full px-3 py-2 rounded-lg bg-surface-2/50 border border-white/10 text-text-main text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/50">
                       <option value="Draft">Draft</option>
                       <option value="Published">Published</option>
                       <option value="Archived">Archived</option>
@@ -56,7 +57,7 @@ export default async function ContentPage() {
         }
       />
 
-      <div className="bg-surface-1 border border-white/10 rounded-xl overflow-hidden">
+      <div className="glass-card rounded-xl overflow-hidden">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-white/10 text-text-muted">
@@ -69,10 +70,10 @@ export default async function ContentPage() {
           </thead>
           <tbody>
             {entries.length === 0 && (
-              <tr><td colSpan={5} className="p-8 text-center text-text-muted text-sm">No content entries</td></tr>
+              <tr><td colSpan={5}><EmptyState icon={FileText} title="No content entries" description="Create your first content entry using the button above." /></td></tr>
             )}
             {entries.map((entry) => (
-              <tr key={entry.id} className="border-b border-white/5 last:border-0 hover:bg-surface-2 transition-colors">
+              <tr key={entry.id} className="border-b border-white/5 last:border-0 hover:bg-surface-2/40 transition-colors">
                 <td className="p-4">
                   <Link href={`/content/${entry.id}`} className="font-medium text-text-main hover:text-brand-primary transition-colors flex items-center gap-1.5">
                     {entry.title}

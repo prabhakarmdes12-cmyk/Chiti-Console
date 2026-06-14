@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
 import { auth } from "@/lib/auth/auth";
 import SettingsForm from "./SettingsForm";
+import FadeIn from "@/components/motion/FadeIn";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -22,5 +23,9 @@ export default async function SettingsPage() {
     soundEffects: false,
   };
 
-  return <SettingsForm name={name} email={email} role={role} initials={initials} initialPrefs={prefs} />;
+  return (
+    <FadeIn direction="up" delay={0.1}>
+      <SettingsForm name={name} email={email} role={role} initials={initials} initialPrefs={prefs} />
+    </FadeIn>
+  );
 }

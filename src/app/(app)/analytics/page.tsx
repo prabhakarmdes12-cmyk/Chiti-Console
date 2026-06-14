@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db/prisma";
 import { getProjectId, projectFilter, getProject } from "@/lib/db/queries";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiCard from "@/components/ui/ChitiCard";
+import FadeIn from "@/components/motion/FadeIn";
 import MonthlyRevenueChart from "@/components/charts/MonthlyRevenueChart";
 import SourcePieChart from "@/components/charts/SourcePieChart";
 import { fetchGAPageViews } from "@/lib/integrations/analytics";
@@ -58,37 +59,42 @@ export default async function AnalyticsPage() {
     <div className="space-y-6">
       <ChitiPageHeader title="Analytics" description="Performance metrics." />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <FadeIn delay={0.1}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: "Total Revenue", value: `₹${revenue.toLocaleString("en-IN")}`, change: "+18.2%" },
           { label: "Orders", value: orderCount.toLocaleString(), change: "+12.5%" },
           { label: "Customers", value: customerCount.toLocaleString(), change: "+8.3%" },
           { label: "Avg. Order Value", value: `₹${avgOrder.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`, change: "+5.2%" },
         ].map((metric) => (
-          <div key={metric.label} className="bg-surface-1 border border-white/10 rounded-xl p-4">
+          <ChitiCard key={metric.label} glass hover>
             <p className="text-xs text-text-muted mb-1">{metric.label}</p>
             <p className="text-xl font-display font-bold text-text-main">{metric.value}</p>
             <div className="flex items-center gap-1 mt-1">
               <span className="text-xs text-success">{metric.change}</span>
               <span className="text-xs text-text-muted">vs last month</span>
             </div>
-          </div>
+          </ChitiCard>
         ))}
       </div>
+      </FadeIn>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <ChitiCard>
+      <FadeIn delay={0.2}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <ChitiCard glass hover>
           <h2 className="text-sm font-medium text-text-muted mb-4">Monthly Revenue</h2>
           <MonthlyRevenueChart data={monthlyData} />
         </ChitiCard>
-        <ChitiCard>
+        <ChitiCard glass hover>
           <h2 className="text-sm font-medium text-text-muted mb-4">Order Sources</h2>
           <SourcePieChart data={sourceData} />
         </ChitiCard>
       </div>
+      </FadeIn>
 
       {gaData && gaData.sources.length > 0 && (
-        <ChitiCard>
+        <FadeIn delay={0.3}>
+        <ChitiCard glass hover>
           <h2 className="text-sm font-medium text-text-muted mb-4">Traffic Sources (GA4)</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {gaData.sources.slice(0, 6).map((src) => (
@@ -100,6 +106,7 @@ export default async function AnalyticsPage() {
             ))}
           </div>
         </ChitiCard>
+        </FadeIn>
       )}
     </div>
   );

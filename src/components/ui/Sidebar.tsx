@@ -113,7 +113,7 @@ export default function Sidebar({ projects }: { projects: { id: string; name: st
               href={item.href}
               className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150 group ${
                 isActive
-                  ? "text-brand-primary font-medium bg-brand-primary/10"
+                  ? "text-brand-primary font-medium bg-brand-primary/10 glow-brand-sm"
                   : "text-text-muted hover:text-text-main hover:bg-surface-2"
               }`}
             >

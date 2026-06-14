@@ -7,7 +7,9 @@ import FilterSelect from "@/components/ui/FilterSelect";
 import PaginationBar from "@/components/ui/PaginationBar";
 import { createProduct, deleteProduct } from "@/lib/actions/products";
 import Link from "next/link";
-import { Plus, Trash2, ExternalLink, Download } from "lucide-react";
+import { Plus, Trash2, ExternalLink, Download, Package } from "lucide-react";
+import FadeIn from "@/components/motion/FadeIn";
+import EmptyState from "@/components/ui/EmptyState";
 
 const PAGE_SIZE = 20;
 
@@ -43,7 +45,8 @@ export default async function ProductsPage({
   ]);
 
   return (
-    <div className="space-y-6">
+    <FadeIn direction="up" delay={0.1}>
+      <div className="space-y-6">
       <ChitiPageHeader
         title="Products"
         description="Inventory and product catalog."
@@ -111,7 +114,9 @@ export default async function ProductsPage({
           </thead>
           <tbody>
             {products.length === 0 && (
-              <tr><td colSpan={6} className="p-8 text-center text-text-muted text-sm">No products found</td></tr>
+              <tr><td colSpan={6} className="p-8 text-center">
+                <EmptyState icon={Package} title="No products found" description="Try adjusting your search or filter criteria." />
+              </td></tr>
             )}
             {products.map((product) => {
               const isLow = (product.stock ?? 0) <= (product.lowStockThreshold ?? 5) && (product.stock ?? 0) > 0;
@@ -147,5 +152,6 @@ export default async function ProductsPage({
         <PaginationBar total={total} pageSize={PAGE_SIZE} />
       </div>
     </div>
+    </FadeIn>
   );
 }

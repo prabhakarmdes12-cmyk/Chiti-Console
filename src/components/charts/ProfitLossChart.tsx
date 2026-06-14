@@ -18,19 +18,17 @@ export default function ProfitLossChart({ data }: { data: PLData[] }) {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-        <XAxis dataKey="month" tick={{ fontSize: 12, fill: "#888" }} axisLine={false} tickLine={false} />
-        <YAxis tick={{ fontSize: 12, fill: "#888" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `₹${(v / 1000).toFixed(0)}k`} />
+        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+        <XAxis dataKey="month" tick={{ fontSize: 12, fill: "hsl(220,10%,65%)" }} axisLine={false} tickLine={false} dy={8} />
+        <YAxis tick={{ fontSize: 12, fill: "hsl(220,10%,65%)" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `₹${(v / 1000).toFixed(0)}k`} />
         <Tooltip
-          contentStyle={{ background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", fontSize: "13px" }}
-          labelStyle={{ color: "#e2e8f0" }}
-          formatter={(value: any) => [
-            `₹${Number(value ?? 0).toLocaleString("en-IN")}`,
-          ]}
+          contentStyle={{ background: "hsla(220,10%,8%,0.85)", backdropFilter: "blur(12px)", border: "1px solid hsla(260,100%,65%,0.2)", borderRadius: "8px", fontSize: "13px" }}
+          labelStyle={{ color: "hsl(0,0%,98%)" }}
+          formatter={(value: any) => [`₹${Number(value ?? 0).toLocaleString("en-IN")}`]}
         />
-        <Legend wrapperStyle={{ fontSize: "12px", color: "#888" }} />
-        <Bar dataKey="revenue" fill="#22c55e" radius={[4, 4, 0, 0]} name="Revenue" />
-        <Bar dataKey="expenses" fill="#ef4444" radius={[4, 4, 0, 0]} name="Expenses" />
+        <Legend wrapperStyle={{ fontSize: "12px", color: "hsl(220,10%,65%)" }} />
+        <Bar dataKey="revenue" fill="hsl(150, 80%, 40%)" radius={[4, 4, 0, 0]} name="Revenue" />
+        <Bar dataKey="expenses" fill="hsl(350, 80%, 55%)" radius={[4, 4, 0, 0]} name="Expenses" />
       </BarChart>
     </ResponsiveContainer>
   );

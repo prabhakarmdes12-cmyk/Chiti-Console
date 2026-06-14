@@ -8,7 +8,9 @@ import FilterSelect from "@/components/ui/FilterSelect";
 import PaginationBar from "@/components/ui/PaginationBar";
 import { createCustomer, deleteCustomer } from "@/lib/actions/customers";
 import Link from "next/link";
-import { Plus, Trash2, Download } from "lucide-react";
+import { Plus, Trash2, Download, Users } from "lucide-react";
+import FadeIn from "@/components/motion/FadeIn";
+import EmptyState from "@/components/ui/EmptyState";
 
 const PAGE_SIZE = 20;
 
@@ -49,7 +51,8 @@ export default async function CustomersPage({
   ]);
 
   return (
-    <div className="space-y-6">
+    <FadeIn direction="up" delay={0.1}>
+      <div className="space-y-6">
       <ChitiPageHeader
         title="Customers"
         description="View and manage your customer base."
@@ -92,7 +95,7 @@ export default async function CustomersPage({
       </div>
 
       {customers.length === 0 && (
-        <div className="bg-surface-1 border border-white/10 rounded-xl p-12 text-center text-text-muted text-sm">No customers found</div>
+        <EmptyState icon={Users} title="No customers found" description="Try adjusting your search or filter criteria." />
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -142,5 +145,6 @@ export default async function CustomersPage({
 
       <PaginationBar total={total} pageSize={PAGE_SIZE} />
     </div>
+    </FadeIn>
   );
 }

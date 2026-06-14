@@ -8,7 +8,9 @@ import FilterSelect from "@/components/ui/FilterSelect";
 import PaginationBar from "@/components/ui/PaginationBar";
 import { createOrder, updateOrderStatus, deleteOrder } from "@/lib/actions/orders";
 import Link from "next/link";
-import { Plus, Trash2, Download } from "lucide-react";
+import { Plus, Trash2, Download, ShoppingCart } from "lucide-react";
+import FadeIn from "@/components/motion/FadeIn";
+import EmptyState from "@/components/ui/EmptyState";
 
 const PAGE_SIZE = 20;
 
@@ -60,7 +62,8 @@ export default async function OrdersPage({
   ]);
 
   return (
-    <div className="space-y-6">
+    <FadeIn direction="up" delay={0.1}>
+      <div className="space-y-6">
       <ChitiPageHeader
         title="Orders"
         description="Manage and track all orders."
@@ -123,7 +126,9 @@ export default async function OrdersPage({
           </thead>
           <tbody>
             {orders.length === 0 && (
-              <tr><td colSpan={8} className="p-8 text-center text-text-muted text-sm">No orders found</td></tr>
+              <tr><td colSpan={8} className="p-8 text-center">
+                <EmptyState icon={ShoppingCart} title="No orders found" description="Try adjusting your search or filter criteria." />
+              </td></tr>
             )}
             {orders.map((order) => (
               <tr key={order.id} className="border-b border-white/5 last:border-0 hover:bg-surface-2 transition-colors">
@@ -156,5 +161,6 @@ export default async function OrdersPage({
         <PaginationBar total={total} pageSize={PAGE_SIZE} />
       </div>
     </div>
+    </FadeIn>
   );
 }

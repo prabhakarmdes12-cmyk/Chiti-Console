@@ -2,6 +2,8 @@ import { prisma } from "@/lib/db/prisma";
 import { getProjectId, projectFilter } from "@/lib/db/queries";
 import Link from "next/link";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
+import EmptyState from "@/components/ui/EmptyState";
+import { MessageCircle } from "lucide-react";
 
 export default async function WhatsappPage() {
   const projectId = await getProjectId();
@@ -15,9 +17,9 @@ export default async function WhatsappPage() {
     <div className="space-y-6">
       <ChitiPageHeader title="WhatsApp" description="Customer conversations." />
 
-      <div className="bg-surface-1 border border-white/10 rounded-xl overflow-hidden">
+      <div className="glass-card rounded-xl overflow-hidden">
         {conversations.length === 0 && (
-          <div className="p-12 text-center text-text-muted text-sm">No conversations yet</div>
+          <EmptyState icon={MessageCircle} title="No conversations yet" description="Incoming WhatsApp messages will appear here." />
         )}
         <div className="divide-y divide-white/5">
           {conversations.map((conv) => {

@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/db/prisma";
 import { getProjectId } from "@/lib/db/queries";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
+import ChitiCard from "@/components/ui/ChitiCard";
+import FadeIn from "@/components/motion/FadeIn";
 
 export default async function SystemPage() {
   const projectId = await getProjectId();
@@ -31,12 +33,13 @@ export default async function SystemPage() {
     <div className="space-y-6">
       <ChitiPageHeader title="System" description="Project overview and system status." />
 
+      <FadeIn direction="up" delay={0.1}>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {projectData.length === 0 && (
           <div className="col-span-full p-12 text-center text-text-muted text-sm">No projects found</div>
         )}
         {projectData.map((p) => (
-          <div key={p.name} className="bg-surface-1 border border-white/10 rounded-xl p-5 space-y-4">
+          <ChitiCard key={p.name} glass hover padding="sm" className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-brand-primary/10 flex items-center justify-center">
@@ -70,9 +73,10 @@ export default async function SystemPage() {
                 <p className="text-text-main font-medium mt-0.5">{p.customers.toLocaleString()}</p>
               </div>
             </div>
-          </div>
+          </ChitiCard>
         ))}
       </div>
+      </FadeIn>
     </div>
   );
 }

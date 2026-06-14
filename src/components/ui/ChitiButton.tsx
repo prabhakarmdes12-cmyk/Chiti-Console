@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 
 interface ChitiButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -33,15 +34,17 @@ export default function ChitiButton({
   ...props
 }: ChitiButtonProps) {
   return (
-    <button
-      className={`inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-150 ${
+    <motion.button
+      className={`inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors duration-150 ${
         variants[variant]
       } ${sizes[size]} ${disabled || loading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"} ${className}`}
       disabled={disabled || loading}
-      {...props}
+      whileTap={disabled || loading ? undefined : { scale: 0.97 }}
+      transition={{ duration: 0.1 }}
+      {...(props as React.ComponentProps<typeof motion.button>)}
     >
       {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : icon}
       {children}
-    </button>
+    </motion.button>
   );
 }

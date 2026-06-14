@@ -6,6 +6,7 @@ import ProfitLossChart from "@/components/charts/ProfitLossChart";
 import AddExpenseForm from "@/components/finance/AddExpenseForm";
 import { deleteExpense, updateInvoiceStatus } from "@/lib/actions/finance";
 import { Trash2, ArrowRight, Receipt, CreditCard, TrendingUp, Wallet } from "lucide-react";
+import FadeIn from "@/components/motion/FadeIn";
 import Link from "next/link";
 
 const tabs = [
@@ -76,7 +77,8 @@ async function InvoicesTab({ projectId }: { projectId: string | null }) {
   };
 
   return (
-    <ChitiCard padding="sm">
+    <FadeIn direction="up" delay={0.1}>
+      <ChitiCard padding="sm" glass hover>
       {invoices.length === 0 ? (
         <div className="py-12 text-center">
           <div className="w-12 h-12 rounded-xl bg-surface-2 flex items-center justify-center mx-auto mb-3">
@@ -129,7 +131,8 @@ async function InvoicesTab({ projectId }: { projectId: string | null }) {
           </table>
         </div>
       )}
-    </ChitiCard>
+      </ChitiCard>
+    </FadeIn>
   );
 }
 
@@ -143,12 +146,13 @@ async function ExpensesTab({ projectId }: { projectId: string | null }) {
   const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
 
   return (
-    <div className="space-y-4">
-      <ChitiCard padding="sm">
+    <FadeIn direction="up" delay={0.1}>
+      <div className="space-y-4">
+      <ChitiCard padding="sm" glass hover>
         <AddExpenseForm />
       </ChitiCard>
 
-      <ChitiCard padding="sm">
+      <ChitiCard padding="sm" glass hover>
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
           <h3 className="text-sm font-medium text-text-main">All Expenses</h3>
           <div className="flex items-center gap-2">
@@ -199,6 +203,7 @@ async function ExpensesTab({ projectId }: { projectId: string | null }) {
         )}
       </ChitiCard>
     </div>
+      </FadeIn>
   );
 }
 
@@ -248,8 +253,8 @@ async function PnLTab({ projectId }: { projectId: string | null }) {
           { label: "Total Revenue", value: `₹${totalRevenue.toLocaleString("en-IN")}`, gradient: "from-emerald-500 to-teal-500", icon: TrendingUp },
           { label: "Total Expenses", value: `₹${totalExpenses.toLocaleString("en-IN")}`, gradient: "from-rose-500 to-pink-500", icon: CreditCard },
           { label: `Profit (${margin}% margin)`, value: `₹${profit.toLocaleString("en-IN")}`, gradient: isProfitable ? "from-emerald-500 to-teal-500" : "from-rose-500 to-pink-500", icon: Wallet },
-        ].map((metric) => (
-          <div key={metric.label} className="group relative bg-surface-1 border border-white/10 rounded-xl p-5 hover:border-white/20 transition-all duration-300">
+        ].map((metric, i) => (
+          <FadeIn key={metric.label} direction="up" delay={0.1 + i * 0.05} className="group relative bg-surface-1 border border-white/10 rounded-xl p-5 hover:border-white/20 transition-all duration-300">
             <div className="flex items-start justify-between mb-3">
               <p className="text-xs text-text-muted font-medium">{metric.label}</p>
               <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${metric.gradient} flex items-center justify-center shadow-lg opacity-80 group-hover:opacity-100 transition-opacity`}>
@@ -257,11 +262,12 @@ async function PnLTab({ projectId }: { projectId: string | null }) {
               </div>
             </div>
             <p className={`text-xl font-display font-bold ${isProfitable ? "text-success" : "text-error"}`}>{metric.value}</p>
-          </div>
+          </FadeIn>
         ))}
       </div>
 
-      <ChitiCard padding="md">
+      <FadeIn direction="up" delay={0.3}>
+        <ChitiCard padding="md" glass hover>
         <div className="flex items-center gap-2 mb-4">
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
             <TrendingUp className="w-3.5 h-3.5 text-white" />
@@ -270,6 +276,7 @@ async function PnLTab({ projectId }: { projectId: string | null }) {
         </div>
         <ProfitLossChart data={chartData} />
       </ChitiCard>
+      </FadeIn>
     </div>
   );
 }

@@ -18,7 +18,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <ToastProvider>
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen aurora-bg">
         <Sidebar projects={projects} />
         <div className="flex-1 flex flex-col">
           <TopNav>

@@ -20,14 +20,20 @@ export default async function LoginPage() {
   if (session?.user) redirect("/dashboard");
 
   return (
-    <div className="min-h-screen bg-bg-dark flex items-center justify-center p-8">
-      <div className="w-full max-w-sm">
-        <div className="bg-surface-1 border border-white/10 rounded-xl p-8 space-y-6">
+    <div className="min-h-screen bg-bg-dark flex items-center justify-center p-8 relative overflow-hidden">
+      {/* Aurora background */}
+      <div className="absolute inset-0 aurora-bg" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_40%_30%_at_50%_0%,hsla(260,100%,65%,0.06)_0%,transparent_60%)]" />
+
+      <div className="w-full max-w-sm relative z-10">
+        <div className="glass-card rounded-xl p-8 space-y-6">
           <div className="text-center space-y-2">
             <div className="flex justify-center">
-              <div className="w-3 h-3 rounded-full bg-brand-primary" />
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center shadow-lg shadow-brand-primary/20">
+                <span className="text-white font-display font-bold text-lg">C</span>
+              </div>
             </div>
-            <h1 className="text-2xl font-display font-bold text-text-main">
+            <h1 className="text-2xl font-display font-bold gradient-brand-text">
               Chiti Console
             </h1>
             <p className="text-sm text-text-muted">Sign in to your account</p>
@@ -36,7 +42,7 @@ export default async function LoginPage() {
           <form action={signInWithGoogle}>
             <button
               type="submit"
-              className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-lg bg-surface-2 hover:bg-surface-3 border border-white/10 text-text-main text-sm font-medium transition-all duration-150"
+              className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-lg bg-surface-2/50 hover:bg-surface-2/80 border border-white/10 text-text-main text-sm font-medium transition-all duration-150 hover:border-brand-primary/20"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
@@ -53,7 +59,7 @@ export default async function LoginPage() {
               <div className="w-full border-t border-white/10" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-surface-1 px-2 text-text-muted">or continue with</span>
+              <span className="bg-surface-1/50 px-2 text-text-muted backdrop-blur-sm">or continue with</span>
             </div>
           </div>
 
@@ -65,7 +71,7 @@ export default async function LoginPage() {
                 name="email"
                 type="email"
                 required
-                className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-brand-primary/50"
+                className="w-full px-3 py-2 rounded-lg bg-surface-2/50 border border-white/10 text-text-main text-sm placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-brand-primary/50 transition-all duration-150"
                 placeholder="admin@chiti.com"
               />
             </div>
@@ -76,18 +82,22 @@ export default async function LoginPage() {
                 name="password"
                 type="password"
                 required
-                className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-white/10 text-text-main text-sm placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-brand-primary/50"
+                className="w-full px-3 py-2 rounded-lg bg-surface-2/50 border border-white/10 text-text-main text-sm placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-brand-primary/50 transition-all duration-150"
                 placeholder="••••••••"
               />
             </div>
             <button
               type="submit"
-              className="w-full px-4 py-3 rounded-lg bg-brand-primary hover:bg-brand-primary/90 text-white text-sm font-medium transition-all duration-150"
+              className="w-full px-4 py-3 rounded-lg bg-gradient-to-r from-brand-primary to-brand-secondary/80 hover:from-brand-primary/90 hover:to-brand-secondary/70 text-white text-sm font-medium transition-all duration-150 shadow-lg shadow-brand-primary/20"
             >
               Sign in
             </button>
           </form>
         </div>
+
+        <p className="text-xs text-text-muted/50 text-center mt-6">
+          Chiti Technologies © 2026
+        </p>
       </div>
     </div>
   );
