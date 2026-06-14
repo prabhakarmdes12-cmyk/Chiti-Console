@@ -1,6 +1,6 @@
 "use client";
 
-import { ShoppingCart, TrendingUp, Users, DollarSign, AlertTriangle, MessageCircle, Package, ArrowRight, Sparkles, Building2 } from "lucide-react";
+import { ShoppingCart, TrendingUp, Users, DollarSign, AlertTriangle, MessageCircle, Package, ArrowRight, Sparkles, Building2, type LucideIcon } from "lucide-react";
 import ChitiCard from "@/components/ui/ChitiCard";
 import ChitiStatusBadge from "@/components/ui/ChitiStatusBadge";
 import MonthlyRevenueChart from "@/components/charts/MonthlyRevenueChart";
@@ -16,7 +16,7 @@ interface Stat {
   value: number;
   display: string;
   change: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: LucideIcon;
   gradient: string;
 }
 
