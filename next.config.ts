@@ -8,6 +8,7 @@ const csp = [
   "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://*.googleusercontent.com https://avatars.githubusercontent.com",
+  "media-src 'self' data:",
   "font-src 'self'",
   "connect-src 'self' https://*.posthog.com",
   "frame-ancestors 'none'",

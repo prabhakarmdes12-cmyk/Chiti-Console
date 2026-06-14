@@ -101,8 +101,11 @@ export default async function DashboardPage() {
             <span className="text-error text-2xl font-bold">!</span>
           </div>
           <h2 className="text-lg font-display font-semibold text-text-main mb-2">Could not load dashboard</h2>
-          <p className="text-sm text-text-muted max-w-md mx-auto mb-6">
-            Unable to fetch data from the database. The server may be starting up or experiencing a temporary issue.
+          <p className="text-sm text-text-muted max-w-md mx-auto mb-2">
+            Unable to connect to the database. This is usually a configuration issue.
+          </p>
+          <p className="text-xs text-text-muted/60 max-w-md mx-auto mb-6">
+            Make sure <code className="text-brand-primary">DIRECT_URL</code> is set in your Vercel environment variables to a valid PostgreSQL connection string.
           </p>
           <a
             href="/dashboard"
