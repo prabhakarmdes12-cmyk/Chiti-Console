@@ -9,6 +9,7 @@ import ChitiStatusBadge from "@/components/ui/ChitiStatusBadge";
 import MonthlyRevenueChart from "@/components/charts/MonthlyRevenueChart";
 import QueryBar from "@/components/ai/QueryBar";
 import DashboardClient from "./DashboardClient";
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import Link from "next/link";
 
 function getGreeting(name: string) {
@@ -90,7 +91,9 @@ export default async function DashboardPage() {
 
       <QueryBar />
 
-      <DashboardClient stats={stats} attentionItems={attentionItems} expectedRevenue={expectedRevenue} monthlyData={monthlyData} recentOrders={recentOrders.map((o) => ({ id: o.id, orderNumber: o.orderNumber, totalAmount: Number(o.totalAmount), status: o.status, customer: o.customer ? { name: o.customer.name } : null }))} projects={projects} />
+      <ErrorBoundary>
+        <DashboardClient stats={stats} attentionItems={attentionItems} expectedRevenue={expectedRevenue} monthlyData={monthlyData} recentOrders={recentOrders.map((o) => ({ id: o.id, orderNumber: o.orderNumber, totalAmount: Number(o.totalAmount), status: o.status, customer: o.customer ? { name: o.customer.name } : null }))} projects={projects} />
+      </ErrorBoundary>
     </div>
   );
 }

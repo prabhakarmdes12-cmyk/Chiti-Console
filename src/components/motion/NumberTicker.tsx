@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, useInView, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { motion, useInView } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 
 interface NumberTickerProps {
   value: number;
@@ -24,29 +24,36 @@ export default function NumberTicker({ value, suffix = "", prefix = "", decimals
       animate={isInView ? { opacity: 1 } : {}}
     >
       {prefix}
-      <motion.span
-        initial={{ opacity: 0 }}
-        animate={isInView ? { opacity: 1 } : {}}
-      >
-        <CountUp target={value} isActive={isInView} decimals={decimals} duration={duration} />
-      </motion.span>
+      <CountUp target={value} isActive={isInView} decimals={decimals} duration={duration} />
       {suffix}
     </motion.span>
   );
 }
 
 function CountUp({ target, isActive, decimals, duration }: { target: number; isActive: boolean; decimals: number; duration: number }) {
-  const motionValue = useMotionValue(0);
-  const springValue = useSpring(motionValue, { stiffness: 50, damping: 20, duration });
-  const rounded = useTransform(springValue, (v) => v.toFixed(decimals));
+  const [display, setDisplay] = useState("0");
+  const frameRef = useRef(0);
 
   useEffect(() => {
-    if (isActive) motionValue.set(target);
-  }, [isActive, target, motionValue]);
+    if (!isActive) return;
+    const startTime = performance.now();
+
+    function animate(now: number) {
+      const elapsed = (now - startTime) / 1000;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = 0 + (target - 0) * eased;
+      setDisplay(current.toFixed(decimals));
+      if (progress < 1) frameRef.current = requestAnimationFrame(animate);
+    }
+
+    frameRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameRef.current);
+  }, [isActive, target, decimals, duration]);
 
   return (
     <motion.span initial={{ opacity: 0 }} animate={isActive ? { opacity: 1 } : {}}>
-      <motion.span>{rounded}</motion.span>
+      {display}
     </motion.span>
   );
 }
