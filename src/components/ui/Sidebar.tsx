@@ -38,7 +38,7 @@ const navItems = [
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
-export default function Sidebar({ projects }: { projects: { id: string; name: string }[] }) {
+export default function Sidebar({ projects, onClose }: { projects: { id: string; name: string }[]; onClose?: () => void }) {
   const pathname = usePathname();
   const [expanded, setExpanded] = useState(pathname.startsWith("/projects"));
 
@@ -80,6 +80,7 @@ export default function Sidebar({ projects }: { projects: { id: string; name: st
             <div className="ml-3 mt-0.5 space-y-0.5 border-l border-white/5">
               <Link
                 href="/projects"
+                onClick={onClose}
                 className={`flex items-center gap-3 pl-10 pr-3 py-1.5 rounded-lg text-xs transition-all duration-150 ${
                   pathname === "/projects"
                     ? "text-brand-primary font-medium"
@@ -94,6 +95,7 @@ export default function Sidebar({ projects }: { projects: { id: string; name: st
                   <Link
                     key={p.id}
                     href={`/projects/${p.id}`}
+                    onClick={onClose}
                     className={`flex items-center gap-3 pl-10 pr-3 py-1.5 rounded-lg text-xs transition-all duration-150 ${
                       active
                         ? "text-brand-primary font-medium"
@@ -116,6 +118,7 @@ export default function Sidebar({ projects }: { projects: { id: string; name: st
             <Link
               key={item.href}
               href={item.href}
+              onClick={onClose}
               className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150 group ${
                 active
                   ? "text-brand-primary font-medium bg-brand-primary/10 active-glow"
@@ -136,17 +139,18 @@ export default function Sidebar({ projects }: { projects: { id: string; name: st
       <div className="p-3 border-t border-white/10 space-y-1">
         <Link
           href="/projects/new"
+          onClick={onClose}
           className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-primary-container text-on-primary-container text-sm font-semibold hover:opacity-90 active:scale-95 transition-all"
         >
           <Plus className="w-4 h-4" />
           Add Project
         </Link>
         <div className="pt-2 space-y-1">
-          <Link href="/help" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-text-muted hover:text-text-main hover:bg-surface-2 transition-all">
+          <Link href="/help" onClick={onClose} className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-text-muted hover:text-text-main hover:bg-surface-2 transition-all">
             <HelpCircle className="w-4 h-4" />
             Help
           </Link>
-          <Link href="/login" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-text-muted hover:text-text-main hover:bg-surface-2 transition-all">
+          <Link href="/login" onClick={onClose} className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-text-muted hover:text-text-main hover:bg-surface-2 transition-all">
             <LogOut className="w-4 h-4" />
             Logout
           </Link>

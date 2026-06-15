@@ -213,16 +213,17 @@ export default function ConversationThread({
                 </div>
               )}
 
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-white/10 text-text-muted">
-                    <th className="text-left pb-2 font-medium">Item</th>
-                    <th className="text-right pb-2 font-medium">Qty</th>
-                    <th className="text-right pb-2 font-medium">Price</th>
-                    <th className="text-right pb-2 font-medium">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-white/10 text-text-muted">
+                      <th className="text-left pb-2 font-medium">Item</th>
+                      <th className="text-right pb-2 font-medium">Qty</th>
+                      <th className="text-right pb-2 font-medium">Price</th>
+                      <th className="text-right pb-2 font-medium">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
                   {extraction.items.map((item, i) => (
                     <tr key={i} className="border-b border-white/5">
                       <td className="py-2 text-text-main">{item.productName}</td>
@@ -245,6 +246,7 @@ export default function ConversationThread({
                   </tr>
                 </tfoot>
               </table>
+              </div>
 
               {extraction.customerName && (
                 <p className="text-xs text-text-muted">Customer: {extraction.customerName}</p>

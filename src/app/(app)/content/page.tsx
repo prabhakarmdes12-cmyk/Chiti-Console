@@ -57,7 +57,7 @@ export default async function ContentPage() {
         }
       />
 
-      <div className="glass-card rounded-xl overflow-hidden">
+      <div className="glass-card rounded-xl overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-white/10 text-text-muted">

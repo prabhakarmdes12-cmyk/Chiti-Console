@@ -61,7 +61,7 @@ export default async function ProjectOrdersPage({ params }: { params: Promise<{ 
           <p className="text-text-muted/60 text-xs">Create your first order using the &quot;New&quot; button above.</p>
         </div>
       )}
-      {orders.length > 0 && <div className="bg-surface-1 border border-white/10 rounded-xl overflow-hidden">
+      {orders.length > 0 && <div className="bg-surface-1 border border-white/10 rounded-xl overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-white/10 text-text-muted">

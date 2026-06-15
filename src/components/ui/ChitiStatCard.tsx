@@ -23,7 +23,7 @@ export default function ChitiStatCard({
   const changeColor = change ? (isPositive ? "text-success" : "text-error") : "";
 
   return (
-    <div className="relative overflow-hidden glass-card p-6 rounded-2xl">
+    <div className="relative overflow-hidden glass-card p-4 sm:p-6 rounded-2xl">
       {glow && <div className="chiti-glow -top-20 -right-20" />}
       <div className="relative z-10 space-y-4">
         <div className="flex items-center justify-between">

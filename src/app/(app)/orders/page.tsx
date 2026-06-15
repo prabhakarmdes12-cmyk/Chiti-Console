@@ -110,7 +110,7 @@ export default async function OrdersPage({
         <FilterSelect param="source" options={sourceOptions} placeholder="All Sources" />
       </div>
 
-      <div className="bg-surface-1 border border-white/10 rounded-xl overflow-hidden">
+      <div className="bg-surface-1 border border-white/10 rounded-xl overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-white/10 text-text-muted">

@@ -1,7 +1,6 @@
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/db/prisma";
-import Sidebar from "@/components/ui/Sidebar";
-import TopNav from "@/components/ui/TopNav";
+import AppShell from "@/components/layout/AppShell";
 import ProjectSelector from "@/components/ui/ProjectSelector";
 import { ToastProvider } from "@/components/ui/ChitiToast";
 
@@ -18,15 +17,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <ToastProvider>
-      <div className="flex min-h-screen aurora-bg">
-        <Sidebar projects={projects} />
-        <div className="flex-1 flex flex-col">
-          <TopNav>
-            <ProjectSelector projects={projects} currentId={currentId && currentId !== "all" ? currentId : null} />
-          </TopNav>
-          <main className="flex-1 overflow-y-auto p-6">{children}</main>
-        </div>
-      </div>
+      <AppShell
+        projects={projects}
+        currentProjectId={currentId && currentId !== "all" ? currentId : null}
+        sidebarChildren={<ProjectSelector projects={projects} currentId={currentId && currentId !== "all" ? currentId : null} />}
+      >
+        {children}
+      </AppShell>
     </ToastProvider>
   );
 }

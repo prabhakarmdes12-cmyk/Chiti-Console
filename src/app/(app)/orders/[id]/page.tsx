@@ -49,32 +49,34 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           <FadeIn direction="up" delay={0.1}>
             <ChitiCard>
               <h3 className="text-sm font-medium text-text-muted mb-3">Order Items</h3>
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-white/10 text-text-muted">
-                    <th className="text-left pb-2 font-medium">Item</th>
-                    <th className="text-right pb-2 font-medium">Qty</th>
-                    <th className="text-right pb-2 font-medium">Price</th>
-                    <th className="text-right pb-2 font-medium">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {order.items.map((item) => (
-                    <tr key={item.id} className="border-b border-white/5 last:border-0">
-                      <td className="py-2 text-text-main">{item.productName}</td>
-                      <td className="py-2 text-right text-text-muted">{item.quantity}</td>
-                      <td className="py-2 text-right text-text-muted">₹{Number(item.unitPrice).toLocaleString("en-IN")}</td>
-                      <td className="py-2 text-right text-text-main font-medium">₹{Number(item.lineTotal).toLocaleString("en-IN")}</td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-white/10 text-text-muted">
+                      <th className="text-left pb-2 font-medium">Item</th>
+                      <th className="text-right pb-2 font-medium">Qty</th>
+                      <th className="text-right pb-2 font-medium">Price</th>
+                      <th className="text-right pb-2 font-medium">Total</th>
                     </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr className="border-t border-white/10">
-                    <td colSpan={3} className="pt-2 text-right text-sm text-text-muted font-medium">Total</td>
-                    <td className="pt-2 text-right text-sm text-text-main font-bold">₹{Number(order.totalAmount).toLocaleString("en-IN")}</td>
-                  </tr>
-                </tfoot>
-              </table>
+                  </thead>
+                  <tbody>
+                    {order.items.map((item) => (
+                      <tr key={item.id} className="border-b border-white/5 last:border-0">
+                        <td className="py-2 text-text-main">{item.productName}</td>
+                        <td className="py-2 text-right text-text-muted">{item.quantity}</td>
+                        <td className="py-2 text-right text-text-muted">₹{Number(item.unitPrice).toLocaleString("en-IN")}</td>
+                        <td className="py-2 text-right text-text-main font-medium">₹{Number(item.lineTotal).toLocaleString("en-IN")}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="border-t border-white/10">
+                      <td colSpan={3} className="pt-2 text-right text-sm text-text-muted font-medium">Total</td>
+                      <td className="pt-2 text-right text-sm text-text-main font-bold">₹{Number(order.totalAmount).toLocaleString("en-IN")}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
             </ChitiCard>
           </FadeIn>
 

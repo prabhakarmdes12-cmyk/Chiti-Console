@@ -10,7 +10,7 @@ interface ChitiFABProps {
 }
 
 export default function ChitiFAB({ href = "/orders/new", label = "Quick Order", onClick }: ChitiFABProps) {
-  const base = "fixed bottom-8 right-8 w-14 h-14 bg-brand-primary text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50 group";
+  const base = "fixed bottom-20 sm:bottom-8 right-4 sm:right-8 w-12 h-12 sm:w-14 sm:h-14 bg-brand-primary text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50 group";
 
   if (onClick) {
     return (

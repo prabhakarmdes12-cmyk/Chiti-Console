@@ -249,3 +249,9 @@
     animation-duration: 0ms !important;
   }
 }
+
+@media (max-width: 640px) {
+  .display-metrics {
+    font-size: 28px;
+  }
+}

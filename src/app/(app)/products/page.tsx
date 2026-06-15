@@ -100,7 +100,7 @@ export default async function ProductsPage({
         <FilterSelect param="stock" options={[{ value: "low", label: "Low Stock" }, { value: "out", label: "Out of Stock" }]} placeholder="All Stock" />
       </div>
 
-      <div className="bg-surface-1 border border-white/10 rounded-xl overflow-hidden">
+      <div className="bg-surface-1 border border-white/10 rounded-xl overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-white/10 text-text-muted">

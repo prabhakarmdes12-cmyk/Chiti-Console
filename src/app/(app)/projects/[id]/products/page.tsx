@@ -66,7 +66,7 @@ export default async function ProjectProductsPage({ params }: { params: Promise<
           <p className="text-text-muted/60 text-xs">Create your first product using the &quot;New&quot; button above.</p>
         </div>
       )}
-      {products.length > 0 && <div className="bg-surface-1 border border-white/10 rounded-xl overflow-hidden">
+      {products.length > 0 && <div className="bg-surface-1 border border-white/10 rounded-xl overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-white/10 text-text-muted">
