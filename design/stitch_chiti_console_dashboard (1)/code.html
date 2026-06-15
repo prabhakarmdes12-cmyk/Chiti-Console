@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Chiti Console | Fresh Morning</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Outfit:wght@300;400;700;800&amp;family=JetBrains+Mono:wght@400;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --glass-border: rgba(255, 255, 255, 0.05);
+            --glass-bg: rgba(20, 22, 31, 0.4);
+        }
+        body {
+            background-color: #0A0B10;
+            color: #e3e1e9;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--glass-border);
+        }
+        .mint-glow {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0) 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#10b981",
+                        "primary-light": "#34d399",
+                        "secondary": "#bdf4ff",
+                        "surface-1": "#14161F",
+                        "surface-2": "#1E212E",
+                        "on-surface": "#e3e1e9",
+                        "on-surface-variant": "#94A3B8",
+                        "primary-container": "#064e3b",
+                        "on-primary-container": "#d1fae5",
+                        "success": "#10B981",
+                        "warning": "#F59E0B",
+                        "error": "#EF4444"
+                    },
+                    "spacing": {
+                        "margin-page": "40px",
+                        "topnav-height": "80px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Outfit"],
+                        "headline-md": ["Outfit"],
+                        "display-metrics": ["Outfit"],
+                        "label-caps": ["JetBrains Mono"],
+                        "data-table": ["JetBrains Mono"],
+                        "body-md": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen flex flex-col bg-[#0A0B10]">
+<!-- Background Decor -->
+<div class="mint-glow -top-20 -left-20"></div>
+<div class="mint-glow top-1/2 right-0 opacity-50"></div>
+<!-- Top Navigation (Primary Hierarchy) -->
+<header class="sticky top-0 w-full h-[80px] z-50 bg-surface-1/40 backdrop-blur-md border-b border-white/5">
+<div class="flex justify-between items-center h-full px-10 max-w-[1600px] mx-auto">
+<div class="flex items-center gap-12">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-black font-bold">bolt</span>
+</div>
+<div>
+<h1 class="font-headline-md text-xl font-bold text-on-surface tracking-tight leading-none">Project Alpha</h1>
+<p class="text-[10px] text-primary font-label-caps tracking-widest uppercase">Operations Hub</p>
+</div>
+</div>
+<nav class="hidden md:flex items-center gap-1">
+<a class="px-4 py-2 text-primary font-medium flex items-center gap-2 rounded-lg bg-primary/10" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span> Dashboard
+                    </a>
+<a class="px-4 py-2 text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2" href="#">
+<span class="material-symbols-outlined text-[20px]">shopping_cart</span> Orders
+                    </a>
+<a class="px-4 py-2 text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2" href="#">
+<span class="material-symbols-outlined text-[20px]">group</span> Customers
+                    </a>
+<a class="px-4 py-2 text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2" href="#">
+<span class="material-symbols-outlined text-[20px]">analytics</span> Analytics
+                    </a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative group hidden sm:block">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant text-[18px]">search</span>
+<input class="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-primary/50 focus:ring-0 w-48 transition-all focus:w-64" placeholder="Search operations..." type="text"/>
+</div>
+<div class="flex gap-4">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">notifications</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">settings</button>
+</div>
+<div class="h-8 w-px bg-white/10"></div>
+<div class="flex items-center gap-3">
+<div class="text-right hidden sm:block">
+<p class="text-sm font-semibold">Prabhakar</p>
+<p class="text-[10px] text-primary font-medium">System Admin</p>
+</div>
+<img alt="User Avatar" class="w-10 h-10 rounded-full border border-primary/30 p-0.5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6jMrsDaEvI8rW7S4SWYypjEQyGg2sEhW91er7VXtujlFEAQYB4tR6pZ2uVyGLPKHHGvp6mbSpgd_px5dqHUuFSTim1ftyt0xK_YMpTeSG-Zxdb_jnzflKPhxvwr6Ktxf_AFHRop3lR0jEeRi75hs1E80w_o1rqIgqz07h6_-YaypJVhLw6sCbM1EeBV8ZcV9Js5sv5SbQM_sbUVQxY-A3kHFEKkO6adsHufPepYDJRnyjadP1xg_U"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Content Area -->
+<main class="px-10 py-10 flex-1 max-w-[1600px] mx-auto w-full space-y-10 relative">
+<!-- Welcome Header -->
+<header class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Good Morning, Prabhakar</h2>
+<div class="flex items-center gap-4 mt-2">
+<span class="flex items-center gap-1.5 text-primary text-sm font-medium">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                        System Vitality: Excellent
+                    </span>
+<span class="text-on-surface-variant text-sm">•</span>
+<span class="text-on-surface-variant text-sm">New Growth: <span class="text-primary-light font-bold">+18%</span></span>
+</div>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all text-sm font-semibold">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span> Schedule
+                </button>
+<button class="flex items-center gap-2 px-5 py-2.5 bg-primary text-black hover:opacity-90 rounded-xl transition-all text-sm font-bold shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[18px]">add</span> New Project
+                </button>
+</div>
+</header>
+<!-- KPI Row -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+<!-- KPI 1 -->
+<div class="glass-panel p-8 rounded-[2rem] relative overflow-hidden group hover:border-primary/20 transition-all">
+<p class="text-on-surface-variant text-sm font-medium mb-2">Total Visitors</p>
+<div class="flex items-baseline gap-2">
+<h3 class="font-display-metrics text-4xl text-on-surface font-light">12.5k</h3>
+<span class="text-primary text-xs font-bold">+12%</span>
+</div>
+<div class="mt-4 h-1 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[70%]"></div>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="glass-panel p-8 rounded-[2rem] relative overflow-hidden group hover:border-primary/20 transition-all">
+<p class="text-on-surface-variant text-sm font-medium mb-2">Orders Today</p>
+<div class="flex items-baseline gap-2">
+<h3 class="font-display-metrics text-4xl text-on-surface font-light">42</h3>
+<span class="text-primary text-xs font-bold">+8%</span>
+</div>
+<div class="mt-4 h-1 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[45%]"></div>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="glass-panel p-8 rounded-[2rem] relative overflow-hidden group hover:border-primary/20 transition-all">
+<p class="text-on-surface-variant text-sm font-medium mb-2">Open Leads</p>
+<div class="flex items-baseline gap-2">
+<h3 class="font-display-metrics text-4xl text-on-surface font-light">15</h3>
+<span class="text-error text-xs font-bold">-2%</span>
+</div>
+<div class="mt-4 h-1 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[30%]"></div>
+</div>
+</div>
+<!-- KPI 4 -->
+<div class="glass-panel p-8 rounded-[2rem] relative overflow-hidden group hover:border-primary/20 transition-all">
+<p class="text-on-surface-variant text-sm font-medium mb-2">Revenue MTD</p>
+<div class="flex items-baseline gap-2">
+<h3 class="font-display-metrics text-4xl text-primary font-light">₹4.52L</h3>
+<span class="text-primary text-xs font-bold">+15%</span>
+</div>
+<div class="mt-4 h-1 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[85%]"></div>
+</div>
+</div>
+</section>
+<!-- Priorities - Now a Horizontal Grid -->
+<section>
+<div class="flex items-center justify-between mb-6">
+<h4 class="font-headline-md text-xl">Morning Priorities</h4>
+<button class="text-sm text-primary font-semibold">Manage Tasks</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="glass-panel p-6 rounded-2xl border-l-4 border-error flex items-start gap-4">
+<div class="p-3 bg-error/10 rounded-xl">
+<span class="material-symbols-outlined text-error">inventory_2</span>
+</div>
+<div>
+<p class="font-semibold text-on-surface">8 Low stock alerts</p>
+<p class="text-xs text-on-surface-variant mt-1">Inventory replenishment needed for Project Alpha.</p>
+</div>
+</div>
+<div class="glass-panel p-6 rounded-2xl border-l-4 border-primary flex items-start gap-4">
+<div class="p-3 bg-primary/10 rounded-xl">
+<span class="material-symbols-outlined text-primary">chat</span>
+</div>
+<div>
+<p class="font-semibold text-on-surface">5 New Inquiries</p>
+<p class="text-xs text-on-surface-variant mt-1">Pending responses for Bighi &amp; Giriraj clients.</p>
+</div>
+</div>
+<div class="glass-panel p-6 rounded-2xl border-l-4 border-warning flex items-start gap-4">
+<div class="p-3 bg-warning/10 rounded-xl">
+<span class="material-symbols-outlined text-warning">schedule</span>
+</div>
+<div>
+<p class="font-semibold text-on-surface">3 Pending orders</p>
+<p class="text-xs text-on-surface-variant mt-1">Approval required for orders older than 24h.</p>
+</div>
+</div>
+</div>
+</section>
+<section class="grid grid-cols-12 gap-10">
+<!-- Main Content Area -->
+<div class="col-span-12 lg:col-span-8 space-y-10">
+<!-- Revenue Graph -->
+<div class="glass-panel p-8 rounded-[2rem]">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h4 class="font-headline-md text-xl">Performance Insight</h4>
+<p class="text-on-surface-variant text-sm">Revenue growth compared to previous quarter</p>
+</div>
+<div class="flex bg-white/5 p-1 rounded-lg">
+<button class="px-4 py-1.5 text-xs font-semibold rounded-md bg-white/10 text-on-surface">Weekly</button>
+<button class="px-4 py-1.5 text-xs font-semibold rounded-md text-on-surface-variant">Monthly</button>
+</div>
+</div>
+<!-- Mock Graph -->
+<div class="h-[280px] w-full flex items-end justify-between px-4 pb-4 bg-primary/5 rounded-2xl relative overflow-hidden">
+<svg class="absolute bottom-0 left-0 w-full h-[60%] opacity-20" preserveaspectratio="none" viewbox="0 0 100 100">
+<path d="M0 100 L0 80 Q25 60 50 70 T100 40 L100 100 Z" fill="#10b981"></path>
+</svg>
+<div class="relative z-10 flex w-full justify-between items-end h-full px-6">
+<div class="flex flex-col items-center gap-3">
+<div class="h-24 w-2 bg-primary/20 rounded-full"></div>
+<span class="font-label-caps text-[10px] text-on-surface-variant">MON</span>
+</div>
+<div class="flex flex-col items-center gap-3">
+<div class="h-32 w-2 bg-primary/20 rounded-full"></div>
+<span class="font-label-caps text-[10px] text-on-surface-variant">TUE</span>
+</div>
+<div class="flex flex-col items-center gap-3">
+<div class="h-40 w-2 bg-primary/40 rounded-full"></div>
+<span class="font-label-caps text-[10px] text-on-surface-variant">WED</span>
+</div>
+<div class="flex flex-col items-center gap-3">
+<div class="h-48 w-2 bg-primary/60 rounded-full"></div>
+<span class="font-label-caps text-[10px] text-on-surface-variant">THU</span>
+</div>
+<div class="flex flex-col items-center gap-3">
+<div class="h-56 w-2 bg-primary shadow-[0_0_15px_rgba(16,185,129,0.4)] rounded-full"></div>
+<span class="font-label-caps text-[10px] text-primary font-bold">FRI</span>
+</div>
+<div class="flex flex-col items-center gap-3">
+<div class="h-36 w-2 bg-primary/20 rounded-full"></div>
+<span class="font-label-caps text-[10px] text-on-surface-variant">SAT</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Recent Activity -->
+<div class="glass-panel rounded-[2rem] overflow-hidden">
+<div class="px-8 py-6 flex items-center justify-between">
+<h4 class="font-headline-md text-xl">Recent Activity</h4>
+<button class="text-primary text-sm font-semibold hover:underline">View Ledger</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-white/2 text-on-surface-variant font-label-caps text-[11px] uppercase tracking-wider">
+<tr>
+<th class="px-8 py-4">Transaction</th>
+<th class="px-8 py-4">Entity</th>
+<th class="px-8 py-4">Value</th>
+<th class="px-8 py-4">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/5 font-data-table text-on-surface">
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="px-8 py-5">
+<div class="flex flex-col">
+<span class="font-semibold text-primary">#ORD-9021</span>
+<span class="text-[10px] text-on-surface-variant uppercase">Rahul Sharma</span>
+</div>
+</td>
+<td class="px-8 py-5 text-sm">Bighi</td>
+<td class="px-8 py-5 text-sm font-bold">₹1,240</td>
+<td class="px-8 py-5">
+<span class="px-2 py-1 rounded bg-success/10 text-success text-[10px] font-bold">SHIPPED</span>
+</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="px-8 py-5">
+<div class="flex flex-col">
+<span class="font-semibold text-primary">#ORD-9020</span>
+<span class="text-[10px] text-on-surface-variant uppercase">Anita Desai</span>
+</div>
+</td>
+<td class="px-8 py-5 text-sm">TS Aromatics</td>
+<td class="px-8 py-5 text-sm font-bold">₹4,890</td>
+<td class="px-8 py-5">
+<span class="px-2 py-1 rounded bg-warning/10 text-warning text-[10px] font-bold">PENDING</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Sidebar Context -->
+<div class="col-span-12 lg:col-span-4 space-y-10">
+<!-- Project Health -->
+<div class="glass-panel p-8 rounded-[2rem]">
+<h4 class="font-headline-md text-xl mb-8">System Health</h4>
+<div class="space-y-8">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<span class="text-sm font-medium">Bighi Operations</span>
+</div>
+<span class="text-sm font-bold text-primary">92%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="text-sm font-medium">TS Aromatics</span>
+</div>
+<span class="text-sm font-bold text-secondary">78%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-success"></div>
+<span class="text-sm font-medium">Giriraj Supply</span>
+</div>
+<span class="text-sm font-bold text-success">85%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-error"></div>
+<span class="text-sm font-medium">Project Delta</span>
+</div>
+<span class="text-sm font-bold text-error">42%</span>
+</div>
+</div>
+<button class="w-full mt-10 py-3 border border-white/10 rounded-xl text-xs font-bold hover:bg-white/5 transition-all uppercase tracking-widest">Run Diagnostics</button>
+</div>
+<!-- Quick Actions -->
+<div class="glass-panel p-8 rounded-[2rem] bg-primary/5">
+<h4 class="font-headline-md text-lg mb-4">Quick Insights</h4>
+<p class="text-sm text-on-surface-variant mb-6 leading-relaxed">
+                        Your performance is <span class="text-primary font-bold">8% higher</span> than this time yesterday. Focusing on pending orders could boost MTD revenue by 12%.
+                    </p>
+<div class="space-y-3">
+<button class="w-full flex items-center justify-between p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all group">
+<span class="text-sm font-medium">Optimization Report</span>
+<span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">chevron_right</span>
+</button>
+<button class="w-full flex items-center justify-between p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all group">
+<span class="text-sm font-medium">Supply Chain Audit</span>
+<span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Floating Action Button -->
+<button class="fixed bottom-10 right-10 w-16 h-16 bg-primary text-black rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50 group">
+<span class="material-symbols-outlined text-[32px] font-bold">bolt</span>
+<span class="absolute right-full mr-4 bg-surface-1 px-4 py-2 rounded-xl border border-white/10 text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Quick Command</span>
+</button>
+</body></html>

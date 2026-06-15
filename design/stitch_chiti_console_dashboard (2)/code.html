@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Chiti Console | Operations Pulse</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Outfit:wght@300;400;700;800&amp;family=JetBrains+Mono:wght@400;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --ocean-border: rgba(14, 165, 233, 0.2);
+            --ocean-bg: rgba(10, 11, 16, 0.9);
+            --electric-blue: #0ea5e9;
+            --arctic-white: #f8fafc;
+        }
+        body {
+            background-color: #05060a;
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: var(--ocean-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--ocean-border);
+            box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.5);
+        }
+        .crisp-card {
+            background: #0d1117;
+            border: 1px solid rgba(248, 250, 252, 0.1);
+            transition: all 0.2s ease;
+        }
+        .crisp-card:hover {
+            border-color: var(--electric-blue);
+            box-shadow: 0 0 15px rgba(14, 165, 233, 0.15);
+        }
+        .ocean-glow {
+            box-shadow: 0 0 20px rgba(14, 165, 233, 0.1);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#0ea5e9",
+                        "secondary": "#f8fafc",
+                        "surface-1": "#0a0b10",
+                        "surface-2": "#0d1117",
+                        "on-surface": "#f8fafc",
+                        "on-surface-variant": "#94a3b8",
+                        "primary-container": "#0369a1",
+                        "on-primary-container": "#f0f9ff",
+                        "success": "#10b981",
+                        "warning": "#f59e0b",
+                        "error": "#ef4444"
+                    },
+                    "spacing": {
+                        "margin-page": "32px",
+                        "sidebar-width": "260px",
+                        "topnav-height": "64px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Outfit"],
+                        "headline-md": ["Outfit"],
+                        "display-metrics": ["Outfit"],
+                        "label-caps": ["JetBrains Mono"],
+                        "data-table": ["JetBrains Mono"],
+                        "body-md": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen">
+<!-- Sidebar -->
+<aside class="fixed left-0 top-0 h-full w-[260px] bg-surface-1 border-r border-white/5 z-50 flex flex-col py-6">
+<div class="px-6 mb-10">
+<h1 class="font-headline-md text-headline-md font-extrabold text-primary tracking-tighter">PROJECT ALPHA</h1>
+<p class="text-[10px] text-on-surface-variant font-label-caps tracking-[0.2em] uppercase mt-1">Global Intelligence</p>
+</div>
+<nav class="flex-1 px-4 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-primary bg-primary/5 rounded-lg border-l-4 border-primary transition-all" href="#">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="font-body-md font-semibold">Pulse Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-secondary hover:bg-white/5 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-body-md">Order Streams</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-secondary hover:bg-white/5 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">hub</span>
+<span class="font-body-md">Node Network</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-secondary hover:bg-white/5 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">database</span>
+<span class="font-body-md">Inventory Hub</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-secondary hover:bg-white/5 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="font-body-md">Deep Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-secondary hover:bg-white/5 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">forum</span>
+<span class="font-body-md">Active Channels</span>
+</a>
+</nav>
+<div class="px-6 pt-6 mt-auto border-t border-white/5">
+<button class="w-full flex items-center justify-center gap-2 py-3 bg-primary text-white rounded-lg font-bold text-sm ocean-glow hover:brightness-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+<span>LAUNCH PROJECT</span>
+</button>
+</div>
+</aside>
+<!-- Main Content -->
+<div class="ml-[260px] min-h-screen flex flex-col">
+<!-- Header -->
+<header class="sticky top-0 w-full h-[64px] z-40 bg-surface-1/90 backdrop-blur-md border-b border-white/5">
+<div class="flex justify-between items-center h-full px-8 max-w-[1600px] mx-auto">
+<div class="flex items-center gap-12">
+<div class="flex flex-col">
+<span class="font-headline-md text-xl font-bold text-on-surface">Operations Pulse</span>
+<span class="text-[10px] text-success font-label-caps uppercase flex items-center gap-1">
+<span class="w-1.5 h-1.5 bg-success rounded-full animate-pulse"></span>
+                        System Online: 100%
+                    </span>
+</div>
+<div class="relative w-80">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant text-[20px]">search</span>
+<input class="bg-surface-2 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-xs focus:outline-none focus:border-primary w-full transition-all" placeholder="Query systems..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex gap-2">
+<div class="bg-surface-2 p-2 rounded-lg border border-white/5 hover:border-primary/50 transition-colors cursor-pointer relative">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-surface-2"></span>
+</div>
+<div class="bg-surface-2 p-2 rounded-lg border border-white/5 hover:border-primary/50 transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">grid_view</span>
+</div>
+</div>
+<div class="h-6 w-px bg-white/10"></div>
+<div class="flex items-center gap-3 bg-surface-2 pl-3 pr-2 py-1.5 rounded-lg border border-white/5">
+<div class="text-right">
+<p class="text-xs font-bold">Chiti Admin</p>
+<p class="text-[10px] text-primary uppercase font-label-caps">Root Access</p>
+</div>
+<img alt="User Avatar" class="w-8 h-8 rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6jMrsDaEvI8rW7S4SWYypjEQyGg2sEhW91er7VXtujlFEAQYB4tR6pZ2uVyGLPKHHGvp6mbSpgd_px5dqHUuFSTim1ftyt0xK_YMpTeSG-Zxdb_jnzflKPhxvwr6Ktxf_AFHRop3lR0jEeRi75hs1E80w_o1rqIgqz07h6_-YaypJVhLw6sCbM1EeBV8ZcV9Js5sv5SbQM_sbUVQxY-A3kHFEKkO6adsHufPepYDJRnyjadP1xg_U"/>
+</div>
+</div>
+</div>
+</header>
+<main class="p-8 flex-1 max-w-[1600px] mx-auto w-full space-y-10">
+<!-- Global Metrics Section -->
+<section class="space-y-4">
+<div class="flex items-center justify-between">
+<h2 class="text-xs font-label-caps tracking-widest text-on-surface-variant uppercase">Global Command Metrics</h2>
+<div class="text-[10px] font-label-caps bg-primary/10 text-primary px-3 py-1 rounded-full border border-primary/20">LIVE UPDATE 2S AGO</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="crisp-card p-5 rounded-xl">
+<div class="flex justify-between items-center mb-4">
+<span class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg text-xl">group</span>
+<span class="text-success text-[10px] font-bold">+12% VELOCITY</span>
+</div>
+<p class="text-on-surface-variant text-xs mb-1">Active Visitors</p>
+<h3 class="font-display-metrics text-4xl font-light text-secondary">12,504</h3>
+</div>
+<div class="crisp-card p-5 rounded-xl">
+<div class="flex justify-between items-center mb-4">
+<span class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg text-xl">shopping_cart</span>
+<span class="text-success text-[10px] font-bold">STABLE</span>
+</div>
+<p class="text-on-surface-variant text-xs mb-1">Orders Today</p>
+<h3 class="font-display-metrics text-4xl font-light text-secondary">42</h3>
+</div>
+<div class="crisp-card p-5 rounded-xl">
+<div class="flex justify-between items-center mb-4">
+<span class="material-symbols-outlined text-error bg-error/10 p-2 rounded-lg text-xl">priority_high</span>
+<span class="text-error text-[10px] font-bold">ATTENTION</span>
+</div>
+<p class="text-on-surface-variant text-xs mb-1">Open Leads</p>
+<h3 class="font-display-metrics text-4xl font-light text-secondary">15</h3>
+</div>
+<div class="crisp-card p-5 rounded-xl border-primary/30">
+<div class="flex justify-between items-center mb-4">
+<span class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg text-xl">payments</span>
+<span class="text-success text-[10px] font-bold">↑ 15% MTD</span>
+</div>
+<p class="text-on-surface-variant text-xs mb-1">Revenue Stream</p>
+<h3 class="font-display-metrics text-4xl font-light text-secondary">₹4.52L</h3>
+</div>
+</div>
+</section>
+<!-- Command View: Live Project Sync -->
+<section class="space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<h2 class="text-xs font-label-caps tracking-widest text-on-surface-variant uppercase">Live Project Sync</h2>
+<span class="text-[10px] bg-surface-2 px-2 py-0.5 rounded border border-white/5 text-on-surface-variant">Active Channels: 12/12</span>
+</div>
+</div>
+<div class="grid grid-cols-12 gap-6">
+<!-- Project Health Command View (Now Integrated) -->
+<div class="col-span-12 lg:col-span-12 grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="crisp-card p-6 rounded-xl flex items-center justify-between">
+<div>
+<p class="text-sm font-bold text-secondary">Bighi</p>
+<p class="text-[10px] text-success uppercase font-label-caps">Optimized</p>
+</div>
+<div class="relative w-14 h-14 flex items-center justify-center">
+<svg class="absolute inset-0 transform -rotate-90" viewbox="0 0 36 36">
+<path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3"></path>
+<path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#0ea5e9" stroke-dasharray="92, 100" stroke-width="3"></path>
+</svg>
+<span class="text-xs font-bold text-primary">92%</span>
+</div>
+</div>
+<div class="crisp-card p-6 rounded-xl flex items-center justify-between">
+<div>
+<p class="text-sm font-bold text-secondary">TS Aromatics</p>
+<p class="text-[10px] text-warning uppercase font-label-caps">Throttled</p>
+</div>
+<div class="relative w-14 h-14 flex items-center justify-center">
+<svg class="absolute inset-0 transform -rotate-90" viewbox="0 0 36 36">
+<path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3"></path>
+<path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" opacity="0.6" stroke="#0ea5e9" stroke-dasharray="78, 100" stroke-width="3"></path>
+</svg>
+<span class="text-xs font-bold text-primary">78%</span>
+</div>
+</div>
+<div class="crisp-card p-6 rounded-xl flex items-center justify-between">
+<div>
+<p class="text-sm font-bold text-secondary">Giriraj</p>
+<p class="text-[10px] text-success uppercase font-label-caps">Stable</p>
+</div>
+<div class="relative w-14 h-14 flex items-center justify-center">
+<svg class="absolute inset-0 transform -rotate-90" viewbox="0 0 36 36">
+<path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3"></path>
+<path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#10b981" stroke-dasharray="85, 100" stroke-width="3"></path>
+</svg>
+<span class="text-xs font-bold text-success">85%</span>
+</div>
+</div>
+<div class="crisp-card p-6 rounded-xl flex items-center justify-between">
+<div>
+<p class="text-sm font-bold text-secondary">Project Delta</p>
+<p class="text-[10px] text-error uppercase font-label-caps">Critical</p>
+</div>
+<div class="relative w-14 h-14 flex items-center justify-center">
+<svg class="absolute inset-0 transform -rotate-90" viewbox="0 0 36 36">
+<path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3"></path>
+<path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#ef4444" stroke-dasharray="42, 100" stroke-width="3"></path>
+</svg>
+<span class="text-xs font-bold text-error">42%</span>
+</div>
+</div>
+</div>
+<!-- Main Activity Stream -->
+<div class="col-span-12 lg:col-span-8 space-y-4">
+<div class="crisp-card rounded-xl overflow-hidden">
+<div class="px-6 py-4 flex items-center justify-between border-b border-white/5 bg-white/2">
+<h3 class="text-sm font-bold tracking-tight">Recent Activity Stream</h3>
+<button class="text-[10px] font-label-caps text-primary hover:underline">ACCESS ARCHIVE</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-surface-1 text-on-surface-variant font-label-caps text-[10px] uppercase tracking-[0.1em]">
+<tr>
+<th class="px-6 py-4">Node ID</th>
+<th class="px-6 py-4">Client Entity</th>
+<th class="px-6 py-4">Project</th>
+<th class="px-6 py-4 text-right">Value</th>
+<th class="px-6 py-4">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/5 font-data-table text-xs text-on-surface">
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="px-6 py-4 text-primary font-bold">#ORD-9021</td>
+<td class="px-6 py-4 font-medium text-arctic-white">Rahul Sharma</td>
+<td class="px-6 py-4">Bighi</td>
+<td class="px-6 py-4 text-right">₹1,240</td>
+<td class="px-6 py-4">
+<span class="bg-success/10 text-success px-2 py-0.5 rounded text-[10px] font-bold uppercase">DESTRUCTED</span>
+</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="px-6 py-4 text-primary font-bold">#ORD-9020</td>
+<td class="px-6 py-4 font-medium text-arctic-white">Anita Desai</td>
+<td class="px-6 py-4">TS Aromatics</td>
+<td class="px-6 py-4 text-right">₹4,890</td>
+<td class="px-6 py-4">
+<span class="bg-warning/10 text-warning px-2 py-0.5 rounded text-[10px] font-bold uppercase">PENDING</span>
+</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="px-6 py-4 text-primary font-bold">#ORD-9019</td>
+<td class="px-6 py-4 font-medium text-arctic-white">Vikram Singh</td>
+<td class="px-6 py-4">Giriraj</td>
+<td class="px-6 py-4 text-right">₹2,100</td>
+<td class="px-6 py-4">
+<span class="bg-primary/10 text-primary px-2 py-0.5 rounded text-[10px] font-bold uppercase">LOCKED</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Right Priority Stack -->
+<div class="col-span-12 lg:col-span-4 flex flex-col gap-4">
+<div class="crisp-card p-6 rounded-xl flex-1">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary text-xl">bolt</span>
+<h3 class="text-sm font-bold uppercase tracking-widest">Priority Directives</h3>
+</div>
+<div class="space-y-4">
+<div class="flex items-start gap-3 p-3 bg-error/5 border border-error/20 rounded-lg hover:border-error/50 transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-error text-lg mt-0.5">warning</span>
+<div>
+<p class="text-xs font-bold text-on-surface">Critical Stock Alert</p>
+<p class="text-[10px] text-on-surface-variant mt-1">8 SKU items below safety threshold.</p>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 bg-primary/5 border border-primary/20 rounded-lg hover:border-primary/50 transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-primary text-lg mt-0.5">chat_bubble</span>
+<div>
+<p class="text-xs font-bold text-on-surface">Unread Comms</p>
+<p class="text-[10px] text-on-surface-variant mt-1">5 active threads in WhatsApp Bridge.</p>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 bg-warning/5 border border-warning/20 rounded-lg hover:border-warning/50 transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-warning text-lg mt-0.5">schedule</span>
+<div>
+<p class="text-xs font-bold text-on-surface">Stalled Pipeline</p>
+<p class="text-[10px] text-on-surface-variant mt-1">3 nodes pending confirmation &gt; 24h.</p>
+</div>
+</div>
+</div>
+<button class="mt-6 w-full py-3 text-[10px] font-label-caps tracking-widest text-primary hover:text-secondary border border-primary/20 rounded-lg transition-colors">SYNC ALL TASKS</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Dynamic Visualization -->
+<section class="crisp-card p-6 rounded-xl">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h3 class="text-sm font-bold uppercase tracking-widest">Performance Trajectory</h3>
+<p class="text-[10px] text-on-surface-variant font-label-caps mt-1">Real-time throughput analysis</p>
+</div>
+<div class="flex gap-2">
+<button class="px-4 py-1.5 text-[10px] font-bold rounded bg-surface-1 border border-white/10 hover:border-primary transition-colors uppercase">Export Data</button>
+<button class="px-4 py-1.5 text-[10px] font-bold rounded bg-primary text-white hover:brightness-110 transition-colors uppercase">Advanced Report</button>
+</div>
+</div>
+<div class="h-[280px] w-full bg-surface-1/50 rounded-lg border border-white/5 relative overflow-hidden flex items-end">
+<!-- Abstract Graph Pattern -->
+<svg class="absolute inset-0 w-full h-full" preserveaspectratio="none">
+<defs>
+<lineargradient id="line-grad" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.3"></stop>
+<stop offset="100%" stop-color="#0ea5e9" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<path class="opacity-20" d="M0,200 Q50,150 100,180 T200,100 T300,140 T400,60 T500,120 T600,40 V300 H0 Z" fill="url(#line-grad)"></path>
+<path class="opacity-50" d="M0,200 Q50,150 100,180 T200,100 T300,140 T400,60 T500,120 T600,40" fill="none" stroke="#0ea5e9" stroke-width="2"></path>
+</svg>
+<div class="relative z-10 w-full h-full flex items-end justify-around px-8 pb-4">
+<div class="flex flex-col items-center gap-2">
+<div class="h-24 w-1 bg-white/10 rounded-full group-hover:bg-primary transition-colors"></div>
+<span class="text-[9px] font-label-caps uppercase text-on-surface-variant">T-6</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="h-32 w-1 bg-white/10 rounded-full"></div>
+<span class="text-[9px] font-label-caps uppercase text-on-surface-variant">T-5</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="h-40 w-1 bg-white/10 rounded-full"></div>
+<span class="text-[9px] font-label-caps uppercase text-on-surface-variant">T-4</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="h-28 w-1 bg-white/10 rounded-full"></div>
+<span class="text-[9px] font-label-caps uppercase text-on-surface-variant">T-3</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="h-48 w-1 bg-primary rounded-full shadow-[0_0_10px_#0ea5e9]"></div>
+<span class="text-[9px] font-label-caps uppercase text-primary font-bold">Now</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="h-36 w-1 bg-white/10 rounded-full"></div>
+<span class="text-[9px] font-label-caps uppercase text-on-surface-variant">T+1</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- Quick Command FAB -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-primary text-white rounded-xl shadow-[0_0_30px_rgba(14,165,233,0.4)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-50 group overflow-hidden">
+<div class="absolute inset-0 bg-white/20 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300"></div>
+<span class="material-symbols-outlined text-[28px] font-bold relative z-10">add_task</span>
+</button>
+</body></html>

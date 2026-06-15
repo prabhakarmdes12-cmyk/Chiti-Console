@@ -4,6 +4,7 @@ interface ChitiCardProps {
   padding?: "sm" | "md" | "lg";
   hover?: boolean;
   glass?: boolean;
+  glow?: boolean;
 }
 
 const paddings = {
@@ -12,7 +13,7 @@ const paddings = {
   lg: "p-8",
 };
 
-export default function ChitiCard({ children, className = "", padding = "md", hover = false, glass = false }: ChitiCardProps) {
+export default function ChitiCard({ children, className = "", padding = "md", hover = false, glass = false, glow = false }: ChitiCardProps) {
   const base = glass
     ? "glass-card"
     : "bg-surface-1 border border-white/10 rounded-xl";
@@ -23,8 +24,9 @@ export default function ChitiCard({ children, className = "", padding = "md", ho
     : "";
 
   return (
-    <div className={`${base} rounded-xl ${paddings[padding]} ${hov} ${className}`}>
-      {children}
+    <div className={`relative overflow-hidden ${base} rounded-xl ${paddings[padding]} ${hov} ${className}`}>
+      {glow && <div className="chiti-glow -top-20 -right-20" />}
+      <div className="relative z-10">{children}</div>
     </div>
   );
 }

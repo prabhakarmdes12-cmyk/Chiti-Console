@@ -19,6 +19,9 @@ import {
   ChevronRight,
   Building2,
   Sparkles,
+  HelpCircle,
+  LogOut,
+  Plus,
 } from "lucide-react";
 
 const navItems = [
@@ -38,6 +41,8 @@ const navItems = [
 export default function Sidebar({ projects }: { projects: { id: string; name: string }[] }) {
   const pathname = usePathname();
   const [expanded, setExpanded] = useState(pathname.startsWith("/projects"));
+
+  const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
 
   return (
     <aside className="w-60 min-h-screen bg-surface-1 border-r border-white/10 flex flex-col">
@@ -59,7 +64,7 @@ export default function Sidebar({ projects }: { projects: { id: string; name: st
             onClick={() => setExpanded(!expanded)}
             className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150 ${
               pathname.startsWith("/projects")
-                ? "gradient-brand/10 text-brand-primary font-medium"
+                ? "text-brand-primary font-medium"
                 : "text-text-muted hover:text-text-main hover:bg-surface-2"
             }`}
           >
@@ -84,13 +89,13 @@ export default function Sidebar({ projects }: { projects: { id: string; name: st
                 All Projects
               </Link>
               {projects.map((p) => {
-                const isActive = pathname === `/projects/${p.id}` || pathname.startsWith(`/projects/${p.id}/`);
+                const active = pathname === `/projects/${p.id}` || pathname.startsWith(`/projects/${p.id}/`);
                 return (
                   <Link
                     key={p.id}
                     href={`/projects/${p.id}`}
                     className={`flex items-center gap-3 pl-10 pr-3 py-1.5 rounded-lg text-xs transition-all duration-150 ${
-                      isActive
+                      active
                         ? "text-brand-primary font-medium"
                         : "text-text-muted hover:text-text-main"
                     }`}
@@ -106,40 +111,45 @@ export default function Sidebar({ projects }: { projects: { id: string; name: st
 
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname.startsWith(item.href);
+          const active = isActive(item.href);
           return (
             <Link
               key={item.href}
               href={item.href}
               className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150 group ${
-                isActive
-                  ? "text-brand-primary font-medium bg-brand-primary/10 glow-brand-sm"
+                active
+                  ? "text-brand-primary font-medium bg-brand-primary/10 active-glow"
                   : "text-text-muted hover:text-text-main hover:bg-surface-2"
               }`}
             >
-              {isActive && (
+              {active && (
                 <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full gradient-brand" />
               )}
               <div className="w-4 h-4 flex items-center justify-center">
-                <Icon className={`w-4 h-4 ${isActive ? "text-brand-primary" : "text-text-muted group-hover:text-text-main transition-colors"}`} />
+                <Icon className={`w-4 h-4 ${active ? "text-brand-primary" : "text-text-muted group-hover:text-text-main transition-colors"}`} />
               </div>
               <span>{item.label}</span>
             </Link>
           );
         })}
       </nav>
-      <div className="p-4 border-t border-white/10">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full gradient-brand flex items-center justify-center shadow-lg shadow-purple-500/20">
-            <span className="text-xs text-white font-bold">PK</span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm text-text-main font-medium truncate">Prabhakar Kumar</p>
-            <p className="text-xs text-text-muted truncate flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-success" />
-              Super Admin
-            </p>
-          </div>
+      <div className="p-3 border-t border-white/10 space-y-1">
+        <Link
+          href="/projects/new"
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-primary-container text-on-primary-container text-sm font-semibold hover:opacity-90 active:scale-95 transition-all"
+        >
+          <Plus className="w-4 h-4" />
+          Add Project
+        </Link>
+        <div className="pt-2 space-y-1">
+          <Link href="/help" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-text-muted hover:text-text-main hover:bg-surface-2 transition-all">
+            <HelpCircle className="w-4 h-4" />
+            Help
+          </Link>
+          <Link href="/login" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-text-muted hover:text-text-main hover:bg-surface-2 transition-all">
+            <LogOut className="w-4 h-4" />
+            Logout
+          </Link>
         </div>
       </div>
     </aside>

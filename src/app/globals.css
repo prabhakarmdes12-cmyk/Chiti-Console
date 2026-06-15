@@ -10,6 +10,9 @@
   --color-bg-light: hsl(0, 0%, 98%);
   --color-text-main: hsl(0, 0%, 98%);
   --color-text-muted: hsl(220, 10%, 65%);
+  --color-on-surface-variant: #cbc3d7;
+  --color-primary-container: #a078ff;
+  --color-on-primary-container: #340080;
   --color-success: hsl(150, 80%, 40%);
   --color-error: hsl(350, 80%, 55%);
   --color-info: hsl(210, 90%, 50%);
@@ -77,6 +80,57 @@
       radial-gradient(ellipse 80% 60% at 0% 20%, hsla(260, 100%, 65%, 0.08) 0%, transparent 60%),
       radial-gradient(ellipse 60% 50% at 100% 80%, hsla(190, 100%, 50%, 0.06) 0%, transparent 60%),
       radial-gradient(ellipse 50% 40% at 50% 50%, hsla(260, 100%, 70%, 0.04) 0%, transparent 50%);
+  }
+  .chiti-glow {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, hsla(260, 100%, 65%, 0.15) 0%, hsla(260, 100%, 65%, 0) 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .active-glow {
+    box-shadow: 0 0 20px hsla(260, 100%, 65%, 0.1);
+  }
+  .display-metrics {
+    font-family: Outfit, sans-serif;
+    font-size: 48px;
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  .headline-lg {
+    font-family: Outfit, sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .headline-md {
+    font-family: Outfit, sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .label-caps {
+    font-family: JetBrains Mono, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .data-table {
+    font-family: JetBrains Mono, monospace;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.2;
+  }
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
   }
 }
 
@@ -161,6 +215,9 @@
     --color-bg-dark: hsl(0, 0%, 98%);
     --color-text-main: hsl(220, 10%, 15%);
     --color-text-muted: hsl(220, 10%, 50%);
+    --color-on-surface-variant: hsl(260, 10%, 40%);
+    --color-primary-container: hsl(260, 100%, 90%);
+    --color-on-primary-container: hsl(260, 100%, 20%);
     --color-success: hsl(150, 60%, 35%);
     --color-error: hsl(350, 70%, 50%);
   }

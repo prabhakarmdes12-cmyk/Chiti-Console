@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Chiti Console | Mission Control</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Outfit:wght@300;400;700;800&amp;family=JetBrains+Mono:wght@400;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=JetBrains+Mono:wght@100..900&amp;family=Outfit:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-bg: rgba(20, 22, 31, 0.8);
+        }
+        body {
+            background-color: #0A0B10;
+            color: #e3e1e9;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+        }
+        .chiti-glow {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(208, 188, 255, 0.15) 0%, rgba(208, 188, 255, 0) 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .active-glow {
+            box-shadow: 0 0 20px rgba(208, 188, 255, 0.1);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#d0bcff",
+                        "secondary": "#bdf4ff",
+                        "surface-1": "#14161F",
+                        "surface-2": "#1E212E",
+                        "on-surface": "#e3e1e9",
+                        "on-surface-variant": "#cbc3d7",
+                        "primary-container": "#a078ff",
+                        "on-primary-container": "#340080",
+                        "success": "#10B981",
+                        "warning": "#F59E0B",
+                        "error": "#EF4444"
+                    },
+                    "spacing": {
+                        "margin-page": "32px",
+                        "sidebar-width": "260px",
+                        "topnav-height": "64px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Outfit"],
+                        "headline-md": ["Outfit"],
+                        "display-metrics": ["Outfit"],
+                        "label-caps": ["JetBrains Mono"],
+                        "data-table": ["JetBrains Mono"],
+                        "body-md": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen">
+<!-- Global Background Animation Overlay -->
+
+<!-- SideNavBar (Shared Component Logic) -->
+<aside class="fixed left-0 top-0 h-full w-[260px] bg-surface-1/80 backdrop-blur-xl border-r border-white/10 shadow-2xl z-50 flex flex-col py-6">
+<div class="px-6 mb-10">
+<h1 class="font-headline-md text-headline-md font-bold text-primary tracking-tight">Project Alpha</h1>
+<p class="text-[12px] text-on-surface-variant font-label-caps tracking-widest uppercase">Operations Hub</p>
+</div>
+<nav class="flex-1 px-3 space-y-1">
+<!-- Active State Logic: Dashboard is active -->
+<a class="flex items-center gap-3 px-3 py-2.5 text-primary bg-primary/10 border-r-2 border-primary transition-all duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="font-body-md text-body-md">Orders</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-body-md text-body-md">Customers</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-body-md text-body-md">Products</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-body-md text-body-md">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">chat</span>
+<span class="font-body-md text-body-md">WhatsApp</span>
+</a>
+</nav>
+<div class="px-6 pt-4 mt-auto space-y-4 border-t border-white/5">
+<button class="w-full flex items-center justify-center gap-2 py-3 bg-primary-container text-on-primary-container rounded-xl font-semibold hover:opacity-90 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span class="text-sm">Add Project</span>
+</button>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="text-sm">Help</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="text-sm">Logout</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Wrapper -->
+<div class="ml-[260px] min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="sticky top-0 w-full h-[64px] z-40 bg-surface-1/80 backdrop-blur-xl border-b border-white/10">
+<div class="flex justify-between items-center h-full px-8 max-w-[1440px] mx-auto">
+<div class="flex items-center gap-8">
+<span class="font-headline-md text-headline-md font-bold text-on-surface">Mission Control</span>
+<div class="relative group">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant text-[20px]">search</span>
+<input class="bg-surface-2/50 border border-white/10 rounded-full pl-10 pr-4 py-1.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-64 transition-all" placeholder="Search data..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex gap-4">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">notifications</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">apps</button>
+</div>
+<div class="h-8 w-px bg-white/10"></div>
+<div class="flex items-center gap-3">
+<div class="text-right hidden sm:block">
+<p class="text-sm font-semibold">Chiti Admin</p>
+<p class="text-xs text-on-surface-variant">System Master</p>
+</div>
+<img alt="User Avatar" class="w-10 h-10 rounded-full border-2 border-primary/20" data-alt="A professional headshot of a person with a modern, tech-focused appearance, set against a dark, minimalist background with subtle cyan rim lighting to match a high-tech console interface aesthetic. The portrait should convey expertise and calm control." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6jMrsDaEvI8rW7S4SWYypjEQyGg2sEhW91er7VXtujlFEAQYB4tR6pZ2uVyGLPKHHGvp6mbSpgd_px5dqHUuFSTim1ftyt0xK_YMpTeSG-Zxdb_jnzflKPhxvwr6Ktxf_AFHRop3lR0jEeRi75hs1E80w_o1rqIgqz07h6_-YaypJVhLw6sCbM1EeBV8ZcV9Js5sv5SbQM_sbUVQxY-A3kHFEKkO6adsHufPepYDJRnyjadP1xg_U"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Content Area -->
+<main class="p-8 flex-1 max-w-[1440px] mx-auto w-full space-y-8 relative">
+<!-- KPI Row (4 cards) -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- KPI 1 -->
+<div class="glass-panel p-6 rounded-2xl relative overflow-hidden group">
+<div class="chiti-glow -top-20 -right-20"></div>
+<div class="flex justify-between items-start relative z-10">
+<div>
+<p class="text-on-surface-variant text-sm font-medium mb-1">Total Visitors</p>
+<h3 class="font-display-metrics text-display-metrics text-primary leading-none">12.5k</h3>
+</div>
+<span class="text-success text-xs font-label-caps bg-success/10 px-2 py-1 rounded-full">+12%</span>
+</div>
+<div class="mt-4 flex items-center gap-2 text-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span>vs last month</span>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="glass-panel p-6 rounded-2xl relative overflow-hidden group">
+<div class="flex justify-between items-start relative z-10">
+<div>
+<p class="text-on-surface-variant text-sm font-medium mb-1">Orders Today</p>
+<h3 class="font-display-metrics text-display-metrics text-on-surface leading-none">42</h3>
+</div>
+<span class="text-success text-xs font-label-caps bg-success/10 px-2 py-1 rounded-full">+8%</span>
+</div>
+<div class="mt-4 flex items-center gap-2 text-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">shopping_bag</span>
+<span>24h trend positive</span>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="glass-panel p-6 rounded-2xl relative overflow-hidden group">
+<div class="flex justify-between items-start relative z-10">
+<div>
+<p class="text-on-surface-variant text-sm font-medium mb-1">Open Leads</p>
+<h3 class="font-display-metrics text-display-metrics text-on-surface leading-none">15</h3>
+</div>
+<span class="text-error text-xs font-label-caps bg-error/10 px-2 py-1 rounded-full">-2%</span>
+</div>
+<div class="mt-4 flex items-center gap-2 text-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">leaderboard</span>
+<span>requires attention</span>
+</div>
+</div>
+<!-- KPI 4 -->
+<div class="glass-panel p-6 rounded-2xl relative overflow-hidden group">
+<div class="flex justify-between items-start relative z-10">
+<div>
+<p class="text-on-surface-variant text-sm font-medium mb-1">Revenue MTD</p>
+<h3 class="font-display-metrics text-display-metrics text-secondary leading-none">₹4.52L</h3>
+</div>
+<span class="text-success text-xs font-label-caps bg-success/10 px-2 py-1 rounded-full">+15%</span>
+</div>
+<div class="mt-4 flex items-center gap-2 text-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">payments</span>
+<span>Target: ₹6L</span>
+</div>
+</div>
+</section>
+<!-- Revenue Overview & Priorities -->
+<section class="grid grid-cols-12 gap-6">
+<!-- Revenue Graph -->
+<div class="col-span-12 lg:col-span-8 glass-panel p-6 rounded-2xl">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h4 class="font-headline-md text-headline-md">Revenue Overview</h4>
+<p class="text-on-surface-variant text-sm">6-month growth analysis</p>
+</div>
+<div class="flex gap-2">
+<button class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white/5 border border-white/10 hover:border-primary/40">Download CSV</button>
+<button class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary text-on-primary">Full Report</button>
+</div>
+</div>
+<!-- Placeholder for Chart -->
+<div class="h-[300px] w-full flex items-end justify-between px-4 pb-4 bg-surface-2/30 rounded-xl relative overflow-hidden">
+<div class="absolute inset-0 flex flex-col justify-between p-4 pointer-events-none opacity-20">
+<div class="w-full h-px bg-white"></div>
+<div class="w-full h-px bg-white"></div>
+<div class="w-full h-px bg-white"></div>
+<div class="w-full h-px bg-white"></div>
+</div>
+<!-- Mock Area Graph with CSS -->
+<svg class="absolute bottom-0 left-0 w-full h-[80%] opacity-40" preserveaspectratio="none" viewbox="0 0 100 100">
+<path d="M0 100 L0 80 Q25 60 50 70 T100 40 L100 100 Z" fill="url(#grad1)"></path>
+<defs>
+<lineargradient id="grad1" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:var(--tw-primary);stop-opacity:0.8"></stop>
+<stop offset="100%" style="stop-color:var(--tw-primary);stop-opacity:0"></stop>
+</lineargradient>
+</defs>
+</svg>
+<div class="relative z-10 flex w-full justify-between items-end h-full">
+<div class="flex flex-col items-center gap-2">
+<div class="h-1/2 w-1.5 bg-primary/20 rounded-t-full"></div>
+<span class="font-label-caps text-[10px] uppercase text-on-surface-variant">Jan</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="h-2/3 w-1.5 bg-primary/20 rounded-t-full"></div>
+<span class="font-label-caps text-[10px] uppercase text-on-surface-variant">Feb</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="h-3/4 w-1.5 bg-primary/40 rounded-t-full"></div>
+<span class="font-label-caps text-[10px] uppercase text-on-surface-variant">Mar</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="h-1/2 w-1.5 bg-primary/20 rounded-t-full"></div>
+<span class="font-label-caps text-[10px] uppercase text-on-surface-variant">Apr</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="h-5/6 w-1.5 bg-primary rounded-t-full shadow-[0_0_15px_rgba(208,188,255,0.5)]"></div>
+<span class="font-label-caps text-[10px] uppercase text-on-surface-variant">May</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="h-2/3 w-1.5 bg-primary/20 rounded-t-full"></div>
+<span class="font-label-caps text-[10px] uppercase text-on-surface-variant">Jun</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Today's Priorities -->
+<div class="col-span-12 lg:col-span-4 glass-panel p-6 rounded-2xl flex flex-col">
+<h4 class="font-headline-md text-headline-md mb-6">Today's Priorities</h4>
+<div class="space-y-4 flex-1">
+<div class="flex items-center gap-4 p-4 bg-error/10 border-l-4 border-error rounded-r-xl group hover:bg-error/15 transition-all">
+<span class="material-symbols-outlined text-error">inventory_2</span>
+<div>
+<p class="text-on-surface font-semibold text-sm">8 Low stock alerts</p>
+<p class="text-on-surface-variant text-xs">Action required immediately</p>
+</div>
+<span class="ml-auto material-symbols-outlined text-[18px] opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+</div>
+<div class="flex items-center gap-4 p-4 bg-primary/10 border-l-4 border-primary rounded-r-xl group hover:bg-primary/15 transition-all">
+<span class="material-symbols-outlined text-primary">chat</span>
+<div>
+<p class="text-on-surface font-semibold text-sm">5 Unread WhatsApp messages</p>
+<p class="text-on-surface-variant text-xs">Bighi &amp; Giriraj customers</p>
+</div>
+<span class="ml-auto material-symbols-outlined text-[18px] opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+</div>
+<div class="flex items-center gap-4 p-4 bg-warning/10 border-l-4 border-warning rounded-r-xl group hover:bg-warning/15 transition-all">
+<span class="material-symbols-outlined text-warning">schedule</span>
+<div>
+<p class="text-on-surface font-semibold text-sm">3 Pending orders &gt; 24h</p>
+<p class="text-on-surface-variant text-xs">Awaiting confirmation</p>
+</div>
+<span class="ml-auto material-symbols-outlined text-[18px] opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+</div>
+</div>
+<button class="mt-6 w-full py-3 text-center text-sm font-label-caps tracking-widest text-on-surface-variant hover:text-on-surface transition-colors">VIEW ALL TASKS</button>
+</div>
+</section>
+<!-- Recent Activity & Project Health -->
+<section class="grid grid-cols-12 gap-6">
+<!-- Recent Activity Table -->
+<div class="col-span-12 lg:col-span-9 glass-panel rounded-2xl overflow-hidden">
+<div class="px-6 py-5 flex items-center justify-between border-b border-white/5">
+<h4 class="font-headline-md text-headline-md">Recent Activity</h4>
+<button class="text-primary text-sm font-semibold hover:underline">View All</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-surface-2/50 text-on-surface-variant font-label-caps text-[11px] uppercase tracking-wider">
+<tr>
+<th class="px-6 py-4">Order ID</th>
+<th class="px-6 py-4">Customer</th>
+<th class="px-6 py-4">Project</th>
+<th class="px-6 py-4">Amount</th>
+<th class="px-6 py-4">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/5 font-data-table text-on-surface">
+<tr class="hover:bg-white/5 transition-colors">
+<td class="px-6 py-4 text-primary">#ORD-9021</td>
+<td class="px-6 py-4">Rahul Sharma</td>
+<td class="px-6 py-4">Bighi</td>
+<td class="px-6 py-4">₹1,240</td>
+<td class="px-6 py-4">
+<span class="flex items-center gap-1.5 text-[11px] font-bold uppercase text-success">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                                            Shipped
+                                        </span>
+</td>
+</tr>
+<tr class="bg-white/2 hover:bg-white/5 transition-colors">
+<td class="px-6 py-4 text-primary">#ORD-9020</td>
+<td class="px-6 py-4">Anita Desai</td>
+<td class="px-6 py-4">TS Aromatics</td>
+<td class="px-6 py-4">₹4,890</td>
+<td class="px-6 py-4">
+<span class="flex items-center gap-1.5 text-[11px] font-bold uppercase text-warning">
+<span class="w-1.5 h-1.5 rounded-full bg-warning"></span>
+                                            Pending
+                                        </span>
+</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors">
+<td class="px-6 py-4 text-primary">#ORD-9019</td>
+<td class="px-6 py-4">Vikram Singh</td>
+<td class="px-6 py-4">Giriraj</td>
+<td class="px-6 py-4">₹2,100</td>
+<td class="px-6 py-4">
+<span class="flex items-center gap-1.5 text-[11px] font-bold uppercase text-info">
+<span class="w-1.5 h-1.5 rounded-full bg-info"></span>
+                                            Confirmed
+                                        </span>
+</td>
+</tr>
+<tr class="bg-white/2 hover:bg-white/5 transition-colors">
+<td class="px-6 py-4 text-primary">#ORD-9018</td>
+<td class="px-6 py-4">Sunita Rao</td>
+<td class="px-6 py-4">Bighi</td>
+<td class="px-6 py-4">₹850</td>
+<td class="px-6 py-4">
+<span class="flex items-center gap-1.5 text-[11px] font-bold uppercase text-success">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                                            Shipped
+                                        </span>
+</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors">
+<td class="px-6 py-4 text-primary">#ORD-9017</td>
+<td class="px-6 py-4">Karan Malhotra</td>
+<td class="px-6 py-4">Giriraj</td>
+<td class="px-6 py-4">₹3,420</td>
+<td class="px-6 py-4">
+<span class="flex items-center gap-1.5 text-[11px] font-bold uppercase text-info">
+<span class="w-1.5 h-1.5 rounded-full bg-info"></span>
+                                            Confirmed
+                                        </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Project Health -->
+<div class="col-span-12 lg:col-span-3 glass-panel p-6 rounded-2xl">
+<h4 class="font-headline-md text-headline-md mb-6">Project Health</h4>
+<div class="space-y-6">
+<div class="flex items-center justify-between">
+<span class="text-sm font-medium">Bighi</span>
+<div class="relative w-12 h-12 flex items-center justify-center">
+<svg class="absolute inset-0 transform -rotate-90" viewbox="0 0 36 36">
+<path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3"></path>
+<path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--tw-primary)" stroke-dasharray="92, 100" stroke-width="3"></path>
+</svg>
+<span class="text-[10px] font-label-caps">92</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-sm font-medium">TS Aromatics</span>
+<div class="relative w-12 h-12 flex items-center justify-center">
+<svg class="absolute inset-0 transform -rotate-90" viewbox="0 0 36 36">
+<path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3"></path>
+<path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--tw-secondary)" stroke-dasharray="78, 100" stroke-width="3"></path>
+</svg>
+<span class="text-[10px] font-label-caps">78</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-sm font-medium">Giriraj</span>
+<div class="relative w-12 h-12 flex items-center justify-center">
+<svg class="absolute inset-0 transform -rotate-90" viewbox="0 0 36 36">
+<path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3"></path>
+<path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--tw-success)" stroke-dasharray="85, 100" stroke-width="3"></path>
+</svg>
+<span class="text-[10px] font-label-caps">85</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-sm font-medium">Project Delta</span>
+<div class="relative w-12 h-12 flex items-center justify-center">
+<svg class="absolute inset-0 transform -rotate-90" viewbox="0 0 36 36">
+<path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3"></path>
+<path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--tw-error)" stroke-dasharray="42, 100" stroke-width="3"></path>
+</svg>
+<span class="text-[10px] font-label-caps">42</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- Floating Action Button (Shared Logic) -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50 group">
+<span class="material-symbols-outlined text-[28px] font-bold">add</span>
+<span class="absolute right-full mr-4 bg-surface-1 px-3 py-1.5 rounded-lg border border-white/10 text-xs font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Quick Order</span>
+</button>
+</body></html>

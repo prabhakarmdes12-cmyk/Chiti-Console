@@ -34,6 +34,7 @@ type StatusType = "order" | "payment" | "lead" | "default";
 interface ChitiStatusBadgeProps {
   status: string;
   type?: StatusType;
+  dot?: boolean;
 }
 
 const styleMap: Record<string, string> = {
@@ -44,9 +45,26 @@ const styleMap: Record<string, string> = {
   info: "bg-info/10 text-info",
 };
 
-export default function ChitiStatusBadge({ status, type = "default" }: ChitiStatusBadgeProps) {
+const dotColorMap: Record<string, string> = {
+  default: "bg-text-muted",
+  success: "bg-success",
+  warning: "bg-warning",
+  error: "bg-error",
+  info: "bg-info",
+};
+
+export default function ChitiStatusBadge({ status, type = "default", dot = false }: ChitiStatusBadgeProps) {
   const map = STATUS_MAPS[type];
   const variant = map?.[status] || "default";
+
+  if (dot) {
+    return (
+      <span className={`flex items-center gap-1.5 label-caps ${styleMap[variant]}`}>
+        <span className={`status-dot ${dotColorMap[variant]}`} />
+        {status}
+      </span>
+    );
+  }
 
   return (
     <span className={`inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-full ${styleMap[variant]}`}>
