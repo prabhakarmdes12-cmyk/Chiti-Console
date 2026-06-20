@@ -94,10 +94,63 @@ enum ProjectRole {
   VIEWER
 }
 
+enum VendorCategory {
+  HOTEL
+  CAB
+  RESTAURANT
+  TOUR_GUIDE
+  EXPERIENCE
+}
+
+enum VendorStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  REJECTED
+}
+
+enum EnquiryType {
+  HOTEL
+  CAB
+  PACKAGE
+  RESTAURANT
+  CONTACT
+  AI_PLAN
+}
+
+enum EnquiryStatus {
+  NEW
+  ASSIGNED
+  IN_DISCUSSION
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
 enum StockMovementType {
   IN
   OUT
   ADJUSTMENT
+}
+
+enum ListingType {
+  HOTEL
+  CAB
+  RESTAURANT
+  TOUR_GUIDE
+  EXPERIENCE
+  PACKAGE
+}
+
+enum ListingStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FLAT
 }
 
 model Project {
@@ -114,6 +167,11 @@ model Project {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
+  vendors             Vendor[]
+  enquiries           Enquiry[]
+  listings            Listing[]
+  promotions          Promotion[]
+  destinations        Destination[]
   orders              Order[]
   customers           Customer[]
   products            Product[]
@@ -125,6 +183,130 @@ model Project {
   analyticsEvents     AnalyticsEvent[]
   whatsappConversations WhatsAppConversation[]
   users               UserProject[]
+}
+
+model Vendor {
+  id              String         @id @default(uuid())
+  projectId       String
+  businessName    String
+  ownerName       String
+  category        VendorCategory
+  phone           String
+  email           String?
+  gst             String?
+  district        String
+  address         String?
+  status          VendorStatus   @default(PENDING)
+  documents       Json?          @default("[]")
+  responseRate    Int?           @default(0)
+  avgResponseTime String?
+  rejectionReason String?
+  suspensionReason String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  enquiries Enquiry[]
+  listings  Listing[]
+  project   Project  @relation(fields: [projectId], references: [id])
+
+  @@unique([projectId, businessName])
+  @@index([projectId, status])
+}
+
+model Listing {
+  id          String        @id @default(uuid())
+  projectId   String
+  vendorId    String?
+  type        ListingType
+  name        String
+  description String?
+  images      Json?         @default("[]")
+  pricing     Json?         @default("[]")
+  location    Json?         @default("{}")
+  amenities   String[]      @default([])
+  tags        String[]      @default([])
+  status      ListingStatus @default(DRAFT)
+  rating      Float?        @default(0)
+  reviewCount Int?          @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id])
+  vendor  Vendor?  @relation(fields: [vendorId], references: [id])
+
+  @@index([projectId, status])
+  @@index([projectId, vendorId])
+}
+
+model Promotion {
+  id              String       @id @default(uuid())
+  projectId       String
+  code            String
+  type            DiscountType
+  value           Int
+  minCartValue    Int?         @default(0)
+  maxDiscount     Int?         @default(0)
+  applicableTypes String[]     @default([])
+  usageLimit      Int?         @default(0)
+  perUserLimit    Int?         @default(1)
+  usedCount       Int          @default(0)
+  validFrom       DateTime?
+  validTo         DateTime?
+  isActive        Boolean      @default(true)
+  description     String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@unique([projectId, code])
+  @@index([projectId, isActive])
+}
+
+model Destination {
+  id          String   @id @default(uuid())
+  projectId   String
+  name        String
+  slug        String?
+  description String?
+  district    String?
+  imageUrl    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@unique([projectId, name])
+  @@index([projectId, isActive])
+}
+
+model Enquiry {
+  id             String         @id @default(uuid())
+  projectId      String
+  type           EnquiryType
+  customerName   String
+  customerPhone  String
+  customerEmail  String?
+  customerCity   String?
+  listingName    String?
+  vendorId       String?
+  details        Json?          @default("{}")
+  status         EnquiryStatus  @default(NEW)
+  assignedTo     String?
+  priority       String?        @default("medium")
+  source         String?
+  language       String?        @default("English")
+  messages       Json?          @default("[]")
+  notes          Json?          @default("[]")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id])
+  vendor  Vendor?  @relation(fields: [vendorId], references: [id])
+
+  @@index([projectId, status])
+  @@index([projectId, vendorId])
 }
 
 model Customer {

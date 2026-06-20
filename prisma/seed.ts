@@ -20,6 +20,8 @@ async function main() {
   await prisma.stockMovement.deleteMany();
   await prisma.contentEntry.deleteMany();
   await prisma.analyticsEvent.deleteMany();
+  await prisma.enquiry.deleteMany();
+  await prisma.vendor.deleteMany();
   await prisma.userProject.deleteMany();
   await prisma.session.deleteMany();
   await prisma.account.deleteMany();
@@ -74,6 +76,18 @@ async function main() {
     },
   });
 
+  const bj = await prisma.project.create({
+    data: {
+      name: "Booking Jharkhand",
+      slug: "booking-jharkhand",
+      type: "CUSTOM",
+      domain: "booking-jharkhand.vercel.app",
+      integrationType: "API",
+      apiKey: "bj-api-key-chiti-console-2026",
+      isActive: true,
+    },
+  });
+
   // ──────────────────────────────────────────────
   // ADMIN USER
   // ──────────────────────────────────────────────
@@ -92,7 +106,126 @@ async function main() {
       { userId: admin.id, projectId: hog.id, role: "ADMIN" },
       { userId: admin.id, projectId: tsa.id, role: "ADMIN" },
       { userId: admin.id, projectId: bmc.id, role: "ADMIN" },
+      { userId: admin.id, projectId: bj.id, role: "ADMIN" },
     ],
+  });
+
+  // ──────────────────────────────────────────────
+  // BOOKING JHARKHAND — Tourism Platform
+  // ──────────────────────────────────────────────
+
+  // BJ Users
+  const bjAdmin = await prisma.user.create({
+    data: { email: "admin@bookingjharkhand.com", name: "Admin User", role: "PROJECT_ADMIN" },
+  });
+  const anjuUser = await prisma.user.create({
+    data: { email: "anjali@foresthomestay.com", name: "Anjali Mahato", role: "SUPPORT_AGENT" },
+  });
+  const rahulUser = await prisma.user.create({
+    data: { email: "rahul@email.com", name: "Rahul Sharma", role: "CLIENT_VIEWER" },
+  });
+  const priyaUser = await prisma.user.create({
+    data: { email: "priya@email.com", name: "Priya Mukherjee", role: "CLIENT_VIEWER" },
+  });
+  const mohanUser = await prisma.user.create({
+    data: { email: "mohan@sarandaresort.com", name: "Mohan Lakra", role: "SUPPORT_AGENT" },
+  });
+
+  await prisma.userProject.createMany({
+    data: [
+      { userId: bjAdmin.id, projectId: bj.id, role: "ADMIN" },
+      { userId: anjuUser.id, projectId: bj.id, role: "EDITOR" },
+      { userId: rahulUser.id, projectId: bj.id, role: "VIEWER" },
+      { userId: priyaUser.id, projectId: bj.id, role: "VIEWER" },
+      { userId: mohanUser.id, projectId: bj.id, role: "EDITOR" },
+    ],
+  });
+
+  // BJ Vendors
+  const v1 = await prisma.vendor.create({
+    data: { id: "bj-v001", projectId: bj.id, businessName: "The Forest Homestay", ownerName: "Anjali Mahato", category: "HOTEL", phone: "+91-9876543210", email: "anjali@foresthomestay.com", district: "Latehar", address: "3 km from Netarhat Main Gate", status: "ACTIVE", documents: [{ name: "GST Certificate", status: "verified" }, { name: "Aadhaar Card", status: "verified" }, { name: "Property Proof", status: "pending" }] as any, responseRate: 98, avgResponseTime: "1.2h" },
+  });
+  const v2 = await prisma.vendor.create({
+    data: { id: "bj-v002", projectId: bj.id, businessName: "Raj Cab Service", ownerName: "Rajesh Kumar", category: "CAB", phone: "+91-8765432109", email: "rajesh@rajcabs.com", district: "Ranchi", address: "Ratu Road, Ranchi", status: "ACTIVE", documents: [{ name: "GST Certificate", status: "verified" }, { name: "Aadhaar Card", status: "verified" }] as any, responseRate: 95, avgResponseTime: "0.8h" },
+  });
+  const v3 = await prisma.vendor.create({
+    data: { id: "bj-v003", projectId: bj.id, businessName: "Jungle Cafe & Kitchen", ownerName: "Suman Toppo", category: "RESTAURANT", phone: "+91-7654321098", email: "suman@junglecafe.com", district: "Latehar", address: "Netarhat Main Road", status: "SUSPENDED", documents: [{ name: "GST Certificate", status: "not_uploaded" }, { name: "Aadhaar Card", status: "verified" }] as any, responseRate: 70, avgResponseTime: "4.5h" },
+  });
+  const v4 = await prisma.vendor.create({
+    data: { id: "bj-v004", projectId: bj.id, businessName: "Saranda Eco Resort", ownerName: "Mohan Lakra", category: "HOTEL", phone: "+91-6543210987", email: "mohan@sarandaresort.com", district: "West Singhbhum", address: "Saranda Forest, West Singhbhum", status: "PENDING", documents: [{ name: "GST Certificate", status: "pending" }, { name: "Aadhaar Card", status: "verified" }, { name: "Fire Safety", status: "not_uploaded" }] as any },
+  });
+  const v5 = await prisma.vendor.create({
+    data: { id: "bj-v005", projectId: bj.id, businessName: "Betla Jungle Lodge", ownerName: "Suman Tigga", category: "HOTEL", phone: "+91-5432109876", email: "suman@betlalodge.com", district: "Palamu", address: "Betla National Park Road", status: "ACTIVE", documents: [{ name: "GST Certificate", status: "verified" }, { name: "Aadhaar Card", status: "verified" }, { name: "Wildlife Clearance", status: "verified" }] as any, responseRate: 88, avgResponseTime: "2.0h" },
+  });
+  const v6 = await prisma.vendor.create({
+    data: { id: "bj-v006", projectId: bj.id, businessName: "Patratu Lake Boating", ownerName: "Vikram Oraon", category: "EXPERIENCE", phone: "+91-4321098765", email: "vikram@patratuboats.com", district: "Ramgarh", address: "Patratu Lake, Ramgarh", status: "PENDING", documents: [{ name: "Aadhaar Card", status: "verified" }] as any },
+  });
+
+  // BJ Listings
+  await prisma.listing.create({
+    data: { id: "bj-l001", projectId: bj.id, vendorId: v1.id, type: "HOTEL", name: "Netarhat Forest Retreat", description: "Premium cottages amidst pine forests with bonfire and organic dining.", pricing: [{ name: "Standard Room", price: 2500, qty: 3 }, { name: "Deluxe Room", price: 4000, qty: 2 }, { name: "Dormitory", price: 800, qty: 8 }] as any, location: { district: "Latehar", address: "Netarhat" } as any, amenities: ["WiFi", "Bonfire", "Parking", "Restaurant"], tags: ["forest", "netarhat", "budget"], status: "PUBLISHED", rating: 4.5, reviewCount: 23 },
+  });
+  await prisma.listing.create({
+    data: { id: "bj-l002", projectId: bj.id, vendorId: v2.id, type: "CAB", name: "Raj Cab Service", description: "Sedan, SUV and Tempo Traveller for local and outstation trips.", pricing: [{ name: "Sedan", price: 12, unit: "km" }, { name: "SUV", price: 18, unit: "km" }, { name: "Tempo Traveller", price: 25, unit: "km" }] as any, location: { district: "Ranchi", address: "Ratu Road" } as any, amenities: ["GPS", "AC", "Music System"], tags: ["cab", "taxi", "ranchi"], status: "PUBLISHED", rating: 4.3, reviewCount: 38 },
+  });
+
+  // BJ Enquiries
+  await prisma.enquiry.create({
+    data: { projectId: bj.id, type: "HOTEL", customerName: "Rahul Sharma", customerPhone: "+91-9876543210", customerEmail: "rahul@email.com", customerCity: "Mumbai", listingName: "Netarhat Forest Retreat", vendorId: v1.id, details: { checkIn: "2026-06-25", checkOut: "2026-06-27", guests: "2 Adults, 1 Child", roomType: "Deluxe", budget: "₹3,000-4,000/night", specialRequests: "Prefer ground floor" } as any, status: "ASSIGNED", assignedTo: "Anjali Mahato", priority: "medium", source: "/hotel-netarhat.html", language: "Hindi", messages: [{ from: "customer", text: "Is the deluxe room available for 25-27 June? We are a family of 3.", time: "2026-06-20T10:42:00" }, { from: "vendor", text: "Yes, deluxe room is available. ₹4,000/night incl. breakfast.", time: "2026-06-20T11:15:00" }, { from: "agent", text: "Sent confirmation to customer via WhatsApp.", time: "2026-06-20T12:30:00" }] as any },
+  });
+  await prisma.enquiry.create({
+    data: { projectId: bj.id, type: "CAB", customerName: "Priya Mukherjee", customerPhone: "+91-8765432109", customerEmail: "priya@email.com", customerCity: "Kolkata", listingName: "Ranchi to Deoghar", vendorId: v2.id, details: { pickup: "Ranchi Airport", dropoff: "Deoghar", date: "2026-06-28", time: "08:00", cabType: "Sedan", passengers: "2" } as any, status: "CONFIRMED", assignedTo: "Rajesh Kumar", priority: "medium", source: "/cab-booking.html", language: "English", messages: [{ from: "customer", text: "Need a sedan from Ranchi Airport to Deoghar on 28 June.", time: "2026-06-20T09:15:00" }, { from: "vendor", text: "Confirmed. Sedan at ₹3,500. Driver will wait at arrival gate.", time: "2026-06-20T09:45:00" }] as any },
+  });
+  await prisma.enquiry.create({
+    data: { projectId: bj.id, type: "PACKAGE", customerName: "Amit Kumar", customerPhone: "+91-7654321098", customerEmail: "amit@email.com", customerCity: "Delhi", listingName: "Betla Wildlife Safari", details: { duration: "2 Days / 1 Night", adults: "4", accommodation: "Jungle Lodge", preferredDate: "2026-07-10" } as any, status: "NEW", priority: "high", source: "/packages.html", language: "Hindi" },
+  });
+  await prisma.enquiry.create({
+    data: { projectId: bj.id, type: "RESTAURANT", customerName: "Deepak Sinha", customerPhone: "+91-6543210987", customerEmail: "deepak@email.com", customerCity: "Jamshedpur", listingName: "Jungle Cafe & Kitchen", vendorId: v3.id, details: { date: "2026-06-22", time: "19:00", guests: "6", occasion: "Birthday dinner", cuisine: "Tribal" } as any, status: "IN_DISCUSSION", assignedTo: "Suman Toppo", priority: "low", source: "/restaurants.html", language: "English", messages: [{ from: "customer", text: "Table for 6 on 22 June for birthday dinner.", time: "2026-06-19T14:00:00" }, { from: "vendor", text: "We can accommodate. Available slots: 7 PM or 8:30 PM.", time: "2026-06-19T15:30:00" }] as any },
+  });
+  await prisma.enquiry.create({
+    data: { projectId: bj.id, type: "HOTEL", customerName: "Neha Gupta", customerPhone: "+91-5432109876", customerEmail: "neha@email.com", customerCity: "Patna", listingName: "Betla Jungle Lodge", vendorId: v5.id, details: { checkIn: "2026-07-05", checkOut: "2026-07-07", guests: "2 Adults", roomType: "Standard", budget: "₹2,000-2,500/night" } as any, status: "CONFIRMED", assignedTo: "Suman Tigga", priority: "low", source: "/hotels.html", language: "Hindi", messages: [{ from: "customer", text: "Standard room available for 5-7 July?", time: "2026-06-18T16:00:00" }, { from: "vendor", text: "Yes, ₹2,200/night. Confirmed.", time: "2026-06-18T16:30:00" }] as any },
+  });
+  await prisma.enquiry.create({
+    data: { projectId: bj.id, type: "CONTACT", customerName: "Vikas Pandey", customerPhone: "+91-4321098765", customerEmail: "vikas@travelagency.com", customerCity: "Lucknow", details: { message: "I want to partner with Booking Jharkhand. We are a travel agency based in Lucknow organizing group tours." } as any, status: "NEW", priority: "medium", source: "/contact.html", language: "English" },
+  });
+
+  // BJ Promotions
+  await prisma.promotion.create({
+    data: { projectId: bj.id, code: "MONSOON25", type: "PERCENTAGE", value: 25, minCartValue: 1000, maxDiscount: 5000, applicableTypes: ["hotel"], usageLimit: 500, perUserLimit: 1, usedCount: 142, validFrom: new Date("2026-07-01"), validTo: new Date("2026-08-31"), isActive: true, description: "Monsoon Madness - 25% off on all hotels" },
+  });
+  await prisma.promotion.create({
+    data: { projectId: bj.id, code: "WELCOMEJHARK", type: "FLAT", value: 500, minCartValue: 1500, maxDiscount: 500, applicableTypes: ["cab"], usageLimit: 200, perUserLimit: 1, usedCount: 89, validFrom: new Date("2026-01-01"), validTo: new Date("2026-12-31"), isActive: true, description: "₹500 off on first cab booking" },
+  });
+  await prisma.promotion.create({
+    data: { projectId: bj.id, code: "NETHAT20", type: "PERCENTAGE", value: 20, minCartValue: 5000, maxDiscount: 3000, applicableTypes: ["package"], usageLimit: 100, perUserLimit: 1, usedCount: 34, validFrom: new Date("2026-02-01"), validTo: new Date("2026-03-15"), isActive: false, description: "20% off on Netarhat packages" },
+  });
+
+  // BJ Destinations
+  await Promise.all([
+    prisma.destination.create({ data: { projectId: bj.id, name: "Netarhat", slug: "netarhat", description: "Netarhat — the Queen of Chotanagpur. Rolling hills, pine forests, and breathtaking sunsets.", district: "Latehar", isActive: true } }),
+    prisma.destination.create({ data: { projectId: bj.id, name: "Deoghar", slug: "deoghar", description: "Deoghar — the holy city of Baba Baidyanath. Pilgrimage and spiritual tourism.", district: "Deoghar", isActive: true } }),
+    prisma.destination.create({ data: { projectId: bj.id, name: "Ranchi", slug: "ranchi", description: "Ranchi — the capital city with waterfalls, lakes, and urban conveniences.", district: "Ranchi", isActive: true } }),
+    prisma.destination.create({ data: { projectId: bj.id, name: "Betla", slug: "betla", description: "Betla National Park — one of India's oldest tiger reserves with rich biodiversity.", district: "Palamu", isActive: true } }),
+    prisma.destination.create({ data: { projectId: bj.id, name: "Patratu", slug: "patratu", description: "Patratu Lake — an artificial lake ideal for boating and birdwatching.", district: "Ramgarh", isActive: true } }),
+  ]);
+
+  // BJ Lead
+  await prisma.lead.create({
+    data: { projectId: bj.id, name: "Ramesh Gupta", email: "ramesh@travelagency.com", phone: "+91-9988776655", company: "Happy Tours", source: "WEBSITE_FORM", status: "NEW", message: "We organize group tours for corporate teams. Interested in packages at Netarhat and Betla for 20+ people." },
+  });
+
+  // BJ Content
+  await prisma.contentEntry.create({
+    data: { projectId: bj.id, title: "About Booking Jharkhand", type: "Page", status: "published", body: "Booking Jharkhand is the premier travel platform for Jharkhand tourism. We connect travelers with verified local vendors — hotels, cabs, restaurants, tour guides, and unique experiences across the state." },
+  });
+
+  // BJ Order (for revenue data)
+  await prisma.order.create({
+    data: {
+      orderNumber: "BJ-0001", projectId: bj.id, source: "MANUAL", status: "DELIVERED", paymentStatus: "PAID", paymentMethod: "UPI", totalAmount: 4000,
+      items: { create: [{ productName: "Netarhat Forest Retreat — Deluxe Room (2 nights)", quantity: 1, unitPrice: 4000, lineTotal: 4000 }] },
+      timeline: { create: { status: "DELIVERED", note: "Booking completed successfully" } },
+    },
   });
 
   // ═══════════════════════════════════════════════
@@ -515,12 +648,13 @@ async function main() {
   // SUMMARY
   // ──────────────────────────────────────────────
 
-  console.log("✓ Seeded 4 projects with real business data\n");
-  console.log("  Bighi Brothers       — 7 products, 4 customers, 4 orders, 3 leads, 4 content, 3 WhatsApp");
-  console.log("  House of Giriraj     — 5 products, 2 customers, 1 order, 1 lead, 2 content, 1 WhatsApp");
-  console.log("  Ts Aromatics         — 7 products, 4 customers, 1 order, 1 lead, 2 content, 1 WhatsApp");
-  console.log("  Bhatia Master Classes — 6 products, 3 customers, 3 orders, 2 leads, 4 content, 1 WhatsApp");
-  console.log(`  Users: 1 (admin@chiti.com)`);
+  console.log("✓ Seeded 5 projects with real business data\n");
+  console.log("  Bighi Brothers        — 7 products, 4 customers, 4 orders, 3 leads, 4 content, 3 WhatsApp");
+  console.log("  House of Giriraj      — 5 products, 2 customers, 1 order, 1 lead, 2 content, 1 WhatsApp");
+  console.log("  Ts Aromatics          — 7 products, 4 customers, 1 order, 1 lead, 2 content, 1 WhatsApp");
+  console.log("  Bhatia Master Classes  — 6 products, 3 customers, 3 orders, 2 leads, 4 content, 1 WhatsApp");
+  console.log("  Booking Jharkhand     — 6 vendors, 2 listings, 6 enquiries, 5 users, 3 promotions, 5 destinations, 1 order, 1 lead, 1 content");
+  console.log(`  Users: 7 (admin@chiti.com + 6 BJ users)`);
 }
 
 main()
