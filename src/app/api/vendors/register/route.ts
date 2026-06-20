@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import type { VendorCategory } from "@/generated/prisma/client";
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db/prisma";
-import { authenticateApiKey } from "@/lib/api/auth";
+import { authenticate } from "@/lib/api/auth";
 import { vendorCreateSchema, validate } from "@/lib/api/validation";
 
 export async function POST(request: Request) {
-  const { error, project } = await authenticateApiKey(request);
+  const { error, project } = await authenticate(request);
   if (error) return error;
 
   const body = await request.json();

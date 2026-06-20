@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
-import { authenticate } from "@/lib/api/auth";
 
 export async function POST(request: Request) {
-  const auth = await authenticate(request);
-  if (auth.error) return auth.error;
-
   const body = await request.json();
   const { name, email, phone, message, company } = body;
 
@@ -13,9 +9,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Name and message are required" }, { status: 400 });
   }
 
+  const project = await prisma.project.findFirst({ where: { slug: "booking-jharkhand" } });
+  if (!project) {
+    return NextResponse.json({ error: "Project not configured" }, { status: 500 });
+  }
+
   const lead = await prisma.lead.create({
     data: {
-      projectId: auth.project!.id,
+      projectId: project.id,
       name,
       email: email || null,
       phone: phone || null,

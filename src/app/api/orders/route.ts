@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
-import { authenticateApiKey } from "@/lib/api/auth";
+import { authenticate } from "@/lib/api/auth";
 import { orderCreateSchema, paginationSchema, validate } from "@/lib/api/validation";
 
 export async function GET(request: Request) {
-  const { error, project } = await authenticateApiKey(request);
+  const { error, project } = await authenticate(request);
   if (error) return error;
 
   const { searchParams } = new URL(request.url);
@@ -31,7 +31,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const { error, project } = await authenticateApiKey(request);
+  const { error, project } = await authenticate(request);
   if (error) return error;
 
   const body = await request.json();

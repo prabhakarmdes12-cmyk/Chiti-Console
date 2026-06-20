@@ -2,12 +2,12 @@ import { NextResponse } from "next/server";
 import type { VendorStatus } from "@/generated/prisma/client";
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db/prisma";
-import { authenticateApiKey } from "@/lib/api/auth";
+import { authenticate } from "@/lib/api/auth";
 import { vendorUpdateSchema, validate } from "@/lib/api/validation";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const request = new Request(_request);
-  const { error, project } = await authenticateApiKey(request);
+  const { error, project } = await authenticate(request);
   if (error) return error;
 
   const { id } = await params;
@@ -20,7 +20,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 }
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { error, project } = await authenticateApiKey(request);
+  const { error, project } = await authenticate(request);
   if (error) return error;
 
   const { id } = await params;
@@ -49,7 +49,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 }
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { error, project } = await authenticateApiKey(request);
+  const { error, project } = await authenticate(request);
   if (error) return error;
 
   const { id } = await params;
