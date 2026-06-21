@@ -1,11 +1,45 @@
 import { cookies } from "next/headers";
 import { prisma } from "./prisma";
 import { auth } from "@/lib/auth/auth";
+import { redirect } from "next/navigation";
+
+const ADMIN_ROLES = ["SUPER_ADMIN", "PROJECT_ADMIN"] as const;
+const FINANCE_ROLES = ["SUPER_ADMIN", "PROJECT_ADMIN", "FINANCE_MANAGER"] as const;
+const ALL_ROLES = ["SUPER_ADMIN", "PROJECT_ADMIN", "FINANCE_MANAGER", "SUPPORT_AGENT", "VENDOR_USER", "CLIENT_VIEWER", "CONTENT_EDITOR"] as const;
+
+export type UserRoleType = (typeof ALL_ROLES)[number];
+
+export async function getCurrentUser() {
+  const session = await auth();
+  if (!session?.user?.id) return null;
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { id: true, name: true, email: true, role: true },
+  });
+  return user;
+}
+
+export async function getCurrentUserRole(): Promise<UserRoleType | null> {
+  const user = await getCurrentUser();
+  return user?.role ?? null;
+}
+
+export function roleAtLeast(role: UserRoleType, minimum: UserRoleType): boolean {
+  const hierarchy: UserRoleType[] = ["SUPER_ADMIN", "PROJECT_ADMIN", "FINANCE_MANAGER", "SUPPORT_AGENT", "VENDOR_USER", "CONTENT_EDITOR", "CLIENT_VIEWER"];
+  return hierarchy.indexOf(role) <= hierarchy.indexOf(minimum);
+}
+
+export function requireRole(roles: UserRoleType[], currentRole: UserRoleType | null): boolean {
+  if (!currentRole) return false;
+  return roles.includes(currentRole);
+}
 
 export async function getProject() {
   const cookieStore = await cookies();
   const projectId = cookieStore.get("chiti_project")?.value;
   if (!projectId || projectId === "all") return null;
+  const hasAccess = await verifyProjectAccess(projectId);
+  if (!hasAccess) return null;
   return prisma.project.findUnique({ where: { id: projectId } });
 }
 
@@ -34,6 +68,28 @@ export async function verifyProjectAccess(projectId: string): Promise<boolean> {
     where: { userId_projectId: { userId, projectId } },
   });
   return membership !== null;
+}
+
+export async function getAccessibleProjects() {
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) return [];
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true },
+  });
+  if (!user) return [];
+  if (user.role === "SUPER_ADMIN") {
+    return prisma.project.findMany({ select: { id: true, name: true, slug: true }, orderBy: { name: "asc" } });
+  }
+
+  const memberships = await prisma.userProject.findMany({
+    where: { userId },
+    select: { project: { select: { id: true, name: true, slug: true } } },
+    orderBy: { project: { name: "asc" } },
+  });
+  return memberships.map((m) => m.project);
 }
 
 export async function getProjectHealth(projectId: string) {

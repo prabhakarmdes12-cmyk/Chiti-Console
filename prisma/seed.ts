@@ -11,6 +11,13 @@ async function main() {
   // Clean all existing data (reverse dependency order)
   await prisma.whatsAppMessage.deleteMany();
   await prisma.whatsAppConversation.deleteMany();
+  await prisma.walletTransaction.deleteMany();
+  await prisma.vendorWallet.deleteMany();
+  await prisma.payout.deleteMany();
+  await prisma.refund.deleteMany();
+  await prisma.escrow.deleteMany();
+  await prisma.vendorBankAccount.deleteMany();
+  await prisma.commission.deleteMany();
   await prisma.orderItem.deleteMany();
   await prisma.orderTimeline.deleteMany();
   await prisma.order.deleteMany();
@@ -80,7 +87,7 @@ async function main() {
     data: {
       name: "Booking Jharkhand",
       slug: "booking-jharkhand",
-      type: "CUSTOM",
+      type: "MARKETPLACE",
       domain: "booking-jharkhand.vercel.app",
       integrationType: "API",
       apiKey: "bj-api-key-chiti-console-2026",
@@ -130,6 +137,15 @@ async function main() {
   const mohanUser = await prisma.user.create({
     data: { email: "mohan@sarandaresort.com", name: "Mohan Lakra", role: "SUPPORT_AGENT" },
   });
+  const financeUser = await prisma.user.create({
+    data: { email: "finance@chiti.com", name: "Finance Manager", role: "FINANCE_MANAGER" },
+  });
+  const vendorUser = await prisma.user.create({
+    data: { email: "vendor@foresthomestay.com", name: "Vendor User", role: "VENDOR_USER" },
+  });
+  const contentUser = await prisma.user.create({
+    data: { email: "content@chiti.com", name: "Content Editor", role: "CONTENT_EDITOR" },
+  });
 
   await prisma.userProject.createMany({
     data: [
@@ -138,6 +154,10 @@ async function main() {
       { userId: rahulUser.id, projectId: bj.id, role: "VIEWER" },
       { userId: priyaUser.id, projectId: bj.id, role: "VIEWER" },
       { userId: mohanUser.id, projectId: bj.id, role: "EDITOR" },
+      { userId: financeUser.id, projectId: bj.id, role: "ADMIN" },
+      { userId: financeUser.id, projectId: bb.id, role: "VIEWER" },
+      { userId: vendorUser.id, projectId: bj.id, role: "VIEWER" },
+      { userId: contentUser.id, projectId: bmc.id, role: "EDITOR" },
     ],
   });
 
@@ -219,14 +239,87 @@ async function main() {
     data: { projectId: bj.id, title: "About Booking Jharkhand", type: "Page", status: "published", body: "Booking Jharkhand is the premier travel platform for Jharkhand tourism. We connect travelers with verified local vendors — hotels, cabs, restaurants, tour guides, and unique experiences across the state." },
   });
 
-  // BJ Order (for revenue data)
-  await prisma.order.create({
+  // BJ marketplace finance setup
+  await prisma.commission.createMany({
+    data: [
+      { projectId: bj.id, category: "HOTEL", rate: 14 },
+      { projectId: bj.id, category: "CAB", rate: 12 },
+      { projectId: bj.id, category: "RESTAURANT", rate: 10 },
+      { projectId: bj.id, category: "TOUR_GUIDE", rate: 15 },
+      { projectId: bj.id, category: "EXPERIENCE", rate: 15 },
+    ],
+  });
+
+  await Promise.all([
+    prisma.vendorBankAccount.create({ data: { projectId: bj.id, vendorId: v1.id, accountHolder: "Anjali Mahato", bankName: "State Bank of India", accountNumber: "XXXX1023", ifscCode: "SBIN0000123", upiId: "anjali@upi", isVerified: true } }),
+    prisma.vendorBankAccount.create({ data: { projectId: bj.id, vendorId: v2.id, accountHolder: "Rajesh Kumar", bankName: "HDFC Bank", accountNumber: "XXXX8821", ifscCode: "HDFC0000342", upiId: "rajcabs@upi", isVerified: true } }),
+    prisma.vendorBankAccount.create({ data: { projectId: bj.id, vendorId: v5.id, accountHolder: "Suman Tigga", bankName: "Axis Bank", accountNumber: "XXXX4410", ifscCode: "UTIB0000981", upiId: "betlalodge@upi", isVerified: true } }),
+  ]);
+
+  const rahulCustomer = await prisma.customer.create({ data: { projectId: bj.id, name: "Rahul Sharma", phone: "+91-9876543210", email: "rahul@email.com", tags: ["family", "hotel"], totalOrders: 1, totalSpent: 8500, lastOrderAt: new Date() } });
+  const priyaCustomer = await prisma.customer.create({ data: { projectId: bj.id, name: "Priya Mukherjee", phone: "+91-8765432109", email: "priya@email.com", tags: ["cab"], totalOrders: 1, totalSpent: 3500, lastOrderAt: new Date() } });
+  const nehaCustomer = await prisma.customer.create({ data: { projectId: bj.id, name: "Neha Gupta", phone: "+91-5432109876", email: "neha@email.com", tags: ["wildlife", "hotel"], totalOrders: 1, totalSpent: 4400, lastOrderAt: new Date() } });
+  const amitCustomer = await prisma.customer.create({ data: { projectId: bj.id, name: "Amit Kumar", phone: "+91-7654321098", email: "amit@email.com", tags: ["package", "group"], totalOrders: 1, totalSpent: 12500, lastOrderAt: new Date() } });
+
+  const order1 = await prisma.order.create({
     data: {
-      orderNumber: "BJ-0001", projectId: bj.id, source: "MANUAL", status: "DELIVERED", paymentStatus: "PAID", paymentMethod: "UPI", totalAmount: 4000,
-      items: { create: [{ productName: "Netarhat Forest Retreat — Deluxe Room (2 nights)", quantity: 1, unitPrice: 4000, lineTotal: 4000 }] },
-      timeline: { create: { status: "DELIVERED", note: "Booking completed successfully" } },
+      orderNumber: "BJ-0001", projectId: bj.id, vendorId: v1.id, customerId: rahulCustomer.id, source: "MANUAL", status: "DELIVERED", paymentStatus: "PAID", paymentMethod: "UPI", totalAmount: 8500, commissionAmount: 1190, platformFee: 1190, gstAmount: 214.2, checkIn: new Date("2026-06-25"), checkOut: new Date("2026-06-27"), guests: 3, roomType: "Deluxe Room",
+      items: { create: [{ productName: "Netarhat Forest Retreat - Deluxe Room (2 nights)", quantity: 1, unitPrice: 8500, lineTotal: 8500 }] },
+      timeline: { create: { status: "DELIVERED", note: "Stay completed and payment released to wallet" } },
     },
   });
+  const order2 = await prisma.order.create({
+    data: {
+      orderNumber: "BJ-0002", projectId: bj.id, vendorId: v2.id, customerId: priyaCustomer.id, source: "WEB_CHECKOUT", status: "CONFIRMED", paymentStatus: "PAID", paymentMethod: "RAZORPAY", totalAmount: 3500, commissionAmount: 420, platformFee: 420, gstAmount: 75.6, pickupLocation: "Ranchi Airport", dropoffLocation: "Deoghar", guests: 2,
+      items: { create: [{ productName: "Ranchi Airport to Deoghar - Sedan", quantity: 1, unitPrice: 3500, lineTotal: 3500 }] },
+      timeline: { create: { status: "CONFIRMED", note: "Cab booking confirmed; escrow held" } },
+    },
+  });
+  const order3 = await prisma.order.create({
+    data: {
+      orderNumber: "BJ-0003", projectId: bj.id, vendorId: v5.id, customerId: nehaCustomer.id, source: "WHATSAPP", status: "PROCESSING", paymentStatus: "PAID", paymentMethod: "UPI", totalAmount: 4400, commissionAmount: 616, platformFee: 616, gstAmount: 110.88, checkIn: new Date("2026-07-05"), checkOut: new Date("2026-07-07"), guests: 2, roomType: "Standard Room",
+      items: { create: [{ productName: "Betla Jungle Lodge - Standard Room (2 nights)", quantity: 1, unitPrice: 4400, lineTotal: 4400 }] },
+      timeline: { create: { status: "PROCESSING", note: "Awaiting check-in" } },
+    },
+  });
+  const order4 = await prisma.order.create({
+    data: {
+      orderNumber: "BJ-0004", projectId: bj.id, customerId: amitCustomer.id, source: "MANUAL", status: "PENDING", paymentStatus: "PARTIAL", paymentMethod: "BANK_TRANSFER", totalAmount: 12500, commissionAmount: 1500, platformFee: 1500, gstAmount: 270, guests: 4, notes: "Betla Wildlife Safari package deposit received",
+      items: { create: [{ productName: "Betla Wildlife Safari Package - 2D/1N", quantity: 1, unitPrice: 12500, lineTotal: 12500 }] },
+      timeline: { create: { status: "PENDING", note: "Vendor assignment pending" } },
+    },
+  });
+
+  await prisma.escrow.createMany({
+    data: [
+      { projectId: bj.id, orderId: order1.id, grossAmount: 8500, commissionAmount: 1190, vendorAmount: 7310, gstAmount: 214.2, status: "RELEASED", releasedAt: new Date(), notes: "Released after completed stay" },
+      { projectId: bj.id, orderId: order2.id, grossAmount: 3500, commissionAmount: 420, vendorAmount: 3080, gstAmount: 75.6, status: "HELD", releaseDueAt: new Date("2026-06-29"), notes: "Release after ride completion" },
+      { projectId: bj.id, orderId: order3.id, grossAmount: 4400, commissionAmount: 616, vendorAmount: 3784, gstAmount: 110.88, status: "HELD", releaseDueAt: new Date("2026-07-08"), notes: "Release after checkout" },
+      { projectId: bj.id, orderId: order4.id, grossAmount: 12500, commissionAmount: 1500, vendorAmount: 11000, gstAmount: 270, status: "HELD", releaseDueAt: new Date("2026-07-12"), notes: "Package deposit in escrow" },
+    ],
+  });
+
+  const wallet1 = await prisma.vendorWallet.create({ data: { projectId: bj.id, vendorId: v1.id, balance: 7310, pendingBalance: 0, totalEarned: 7310, totalWithdrawn: 0 } });
+  const wallet2 = await prisma.vendorWallet.create({ data: { projectId: bj.id, vendorId: v2.id, balance: 0, pendingBalance: 3080, totalEarned: 3080, totalWithdrawn: 0 } });
+  const wallet5 = await prisma.vendorWallet.create({ data: { projectId: bj.id, vendorId: v5.id, balance: 0, pendingBalance: 3784, totalEarned: 3784, totalWithdrawn: 0 } });
+
+  await prisma.walletTransaction.createMany({
+    data: [
+      { projectId: bj.id, walletId: wallet1.id, vendorId: v1.id, type: "CREDIT", amount: 7310, referenceId: order1.id, description: "Released escrow for BJ-0001" },
+      { projectId: bj.id, walletId: wallet2.id, vendorId: v2.id, type: "HOLD", amount: 3080, referenceId: order2.id, description: "Pending escrow for BJ-0002" },
+      { projectId: bj.id, walletId: wallet5.id, vendorId: v5.id, type: "HOLD", amount: 3784, referenceId: order3.id, description: "Pending escrow for BJ-0003" },
+    ],
+  });
+
+  await prisma.payout.createMany({
+    data: [
+      { projectId: bj.id, vendorId: v1.id, amount: 7310, status: "PENDING", scheduledFor: new Date(), notes: "Today's hotel payout" },
+      { projectId: bj.id, vendorId: v2.id, amount: 3080, status: "PENDING", scheduledFor: new Date("2026-06-29"), notes: "Cab payout after ride completion" },
+      { projectId: bj.id, vendorId: v5.id, amount: 3784, status: "PROCESSING", scheduledFor: new Date("2026-07-08"), notes: "Hotel payout awaiting checkout" },
+    ],
+  });
+
+  await prisma.refund.create({ data: { projectId: bj.id, orderId: order4.id, amount: 0, reason: "No refund requested; placeholder for dashboard health", status: "REJECTED" } });
 
   // ═══════════════════════════════════════════════
   // BIGHI BROTHERS — Handmade Natural Skincare

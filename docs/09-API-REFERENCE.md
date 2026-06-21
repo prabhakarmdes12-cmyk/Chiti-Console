@@ -1,21 +1,54 @@
 # Chiti Console — API Reference
 
-**Version:** 1.0  
-**Status:** Draft  
+**Version:** 1.1  
+**Status:** Updated — June 2026  
 
 ---
 
 ## 1. Base URL
 
-- **Production:** `https://console.chiti.tech/api`
+- **Production:** `https://chiti-console.vercel.app/api`
 - **Development:** `http://localhost:3000/api`
+
+---
 
 ## 2. Authentication
 
+Chiti Console supports two auth methods for API routes:
+
 | Method | Header | Description |
 |--------|--------|-------------|
-| Session | HTTP-only cookie (automatic) | For browser-based requests |
-| API Key | `Authorization: Bearer pk_live_xxx` | For project tracker + integrations |
+| JWT | `Authorization: Bearer <jwt>` | From `POST /api/auth/login` response |
+| API Key | `x-api-key: <project-api-key>` | Static key for webhook integrations |
+
+### Auth Flow
+
+1. **Login:** `POST /api/auth/login` with `{ email, password }` → returns `{ token, user }`
+2. **Use token:** Pass `Authorization: Bearer <token>` on all subsequent requests
+3. **Fallback:** API key via `x-api-key` header (used by external services)
+
+### Public Routes (no auth)
+
+| Route | Description |
+|-------|-------------|
+| `GET /api/health` | Health check |
+| `POST /api/contact` | Contact form (BJ project) |
+| `POST /api/auth/login` | Returns JWT |
+| `POST /api/auth/register` | Create account (disabled unless `ALLOW_PUBLIC_REGISTER=true`) |
+
+### Webhook Routes (API key only)
+
+| Route | Service | Auth Method |
+|-------|---------|-------------|
+| `POST /api/webhook/whatsapp` | WhatsApp Cloud API | HMAC signature |
+| `POST /api/webhook/stripe` | Stripe | Stripe webhook secret |
+| `POST /api/webhook/razorpay` | Razorpay | HMAC signature |
+| `POST /api/webhook/github` | GitHub | GitHub secret |
+
+### Role Gating
+
+Finance mutation endpoints (`POST/PATCH /api/finance/payouts`, `POST/PATCH /api/finance/refunds`) require:
+- `SUPER_ADMIN`, `PROJECT_ADMIN`, or `FINANCE_MANAGER` role
 
 ---
 
@@ -25,10 +58,10 @@
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET` | `/orders` | List orders (query: `projectId`, `status`, `customerId`, `page`, `limit`) |
+| `GET` | `/orders` | List orders (query: `projectId`, `status`, `customerId`, `vendorId`, `page`, `limit`) |
 | `POST` | `/orders` | Create order |
-| `GET` | `/orders/[id]` | Get order detail |
-| `PATCH` | `/orders/[id]` | Update order (status, payment status, notes) |
+| `GET` | `/orders/[id]` | Get order detail (includes items, timeline, escrow, refunds, vendor) |
+| `PATCH` | `/orders/[id]` | Update order (status, payment status, notes, checkIn/out, guests, etc.) |
 | `DELETE` | `/orders/[id]` | Soft-delete order |
 | `GET` | `/orders/[id]/timeline` | Get order timeline entries |
 | `POST` | `/orders/[id]/timeline` | Add timeline entry |
@@ -37,24 +70,36 @@
 ```json
 {
   "projectId": "uuid",
+  "vendorId": "uuid (optional, marketplace)",
   "customerId": "uuid (optional)",
-  "customer": {                    // if no customerId, create new
+  "customer": {
     "name": "string",
     "phone": "string",
     "email": "string?",
     "address": { "line1": "string", "city": "string", "pincode": "string" }
   },
   "items": [
-    { "productId": "uuid?", "productName": "string", "quantity": 5, "unitPrice": 299 }
+    { "productId": "uuid?", "productName": "string", "quantity": 1, "unitPrice": 299 }
   ],
   "totalAmount": 1495,
   "discount": 0,
+  "commissionAmount": 0,
+  "platformFee": 0,
+  "gstAmount": 0,
+  "checkIn": "2026-07-01T00:00:00Z",
+  "checkOut": "2026-07-03T00:00:00Z",
+  "guests": 2,
+  "roomType": "Deluxe",
+  "pickupLocation": "Ranchi Airport",
+  "dropoffLocation": "Forest Homestay",
   "paymentMethod": "UPI",
   "paymentStatus": "unpaid",
   "source": "manual",
   "notes": "string?"
 }
 ```
+
+---
 
 ### 3.2 Customers
 
@@ -66,6 +111,8 @@
 | `PATCH` | `/customers/[id]` | Update customer name, phone, email, tags, notes |
 | `DELETE` | `/customers/[id]` | Delete customer |
 | `GET` | `/customers/[id]/orders` | Get all orders for a customer |
+
+---
 
 ### 3.3 Products
 
@@ -79,6 +126,8 @@
 | `GET` | `/products/[id]/stock` | Get stock movement history |
 | `POST` | `/products/[id]/stock` | Record stock movement |
 
+---
+
 ### 3.4 Leads
 
 | Method | Path | Description |
@@ -89,6 +138,8 @@
 | `PATCH` | `/leads/[id]` | Update lead (status, assignedTo, notes, nextFollowUp) |
 | `POST` | `/leads/[id]/convert` | Convert lead to customer + order |
 | `DELETE` | `/leads/[id]` | Delete lead |
+
+---
 
 ### 3.5 Projects
 
@@ -101,7 +152,90 @@
 | `DELETE` | `/projects/[id]` | Deactivate project |
 | `POST` | `/projects/[id]/regenerate-key` | Regenerate API key |
 
-### 3.6 Analytics (Internal)
+---
+
+### 3.6 Vendors (Marketplace)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/vendors` | List vendors (query: `projectId`, `status`, `type`, `page`, `limit`) |
+| `POST` | `/vendors` | Create vendor |
+| `GET` | `/vendors/[id]` | Get vendor (includes bank accounts, wallet, listings, orders) |
+| `PATCH` | `/vendors/[id]` | Update vendor (name, status, commission rate, KYC documents) |
+| `DELETE` | `/vendors/[id]` | Deactivate vendor |
+
+---
+
+### 3.7 Enquiries (Marketplace)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/enquiries` | List enquiries (query: `projectId`, `vendorId`, `status`, `page`, `limit`) |
+| `POST` | `/enquiries` | Create enquiry |
+| `GET` | `/enquiries/[id]` | Get enquiry detail |
+| `PATCH` | `/enquiries/[id]` | Update enquiry (status, notes, assignedTo) |
+| `POST` | `/enquiries/[id]/convert` | Convert enquiry to booking (creates confirmed order + escrow + wallet tx + payout) |
+
+---
+
+### 3.8 Listings (Marketplace)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/listings` | List listings (query: `projectId`, `vendorId`, `type`, `isActive`, `page`, `limit`) |
+| `POST` | `/listings` | Create listing |
+| `GET` | `/listings/[id]` | Get listing detail |
+| `PATCH` | `/listings/[id]` | Update listing |
+| `DELETE` | `/listings/[id]` | Deactivate listing |
+
+---
+
+### 3.9 Finance (Marketplace)
+
+#### 3.9.1 Marketplace Summary
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/finance/marketplace` | Marketplace finance summary (revenue, gbv, commissions, escrow, pending payouts, vendor stats) |
+
+#### 3.9.2 Payouts
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/finance/payouts` | List payouts (query: `projectId`, `vendorId`, `status`, `page`, `limit`) |
+| `POST` | `/finance/payouts` | Create payout (requires FINANCE_ROLES) |
+| `GET` | `/finance/payouts/[id]` | Get payout detail |
+| `PATCH` | `/finance/payouts/[id]` | Update payout status (requires FINANCE_ROLES) |
+
+**POST /finance/payouts** (FINANCE_MANAGER+)
+```json
+{
+  "projectId": "uuid",
+  "vendorId": "uuid",
+  "orderId": "uuid?",
+  "amount": 5000.00,
+  "commissionDeducted": 600.00,
+  "platformFee": 50.00,
+  "tdsAmount": 100.00,
+  "netAmount": 4250.00,
+  "mode": "BANK_TRANSFER",
+  "bankAccountId": "uuid?",
+  "notes": "Payout for order #BJ-0042"
+}
+```
+
+#### 3.9.3 Refunds
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/finance/refunds` | List refunds (query: `projectId`, `orderId`, `status`, `page`, `limit`) |
+| `POST` | `/finance/refunds` | Create refund (requires FINANCE_ROLES) |
+| `GET` | `/finance/refunds/[id]` | Get refund detail |
+| `PATCH` | `/finance/refunds/[id]` | Update refund status (requires FINANCE_ROLES) |
+
+---
+
+### 3.10 Analytics
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -128,7 +262,9 @@
 }
 ```
 
-### 3.7 WhatsApp
+---
+
+### 3.11 WhatsApp
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -138,7 +274,9 @@
 | `POST` | `/whatsapp/templates` | Create quick reply template |
 | `GET` | `/whatsapp/templates` | List templates |
 
-### 3.8 Content
+---
+
+### 3.12 Content
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -146,13 +284,55 @@
 | `GET` | `/content/[id]` | Get content detail |
 | `POST` | `/content/sync` | Trigger manual content sync for a project |
 
-### 3.9 Webhooks (External)
+---
+
+### 3.13 Export
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/export/customers` | Export customers as CSV (query: `projectId`) |
+| `GET` | `/export/orders` | Export orders as CSV (query: `projectId`, `dateFrom`, `dateTo`) |
+
+---
+
+### 3.14 Booking Jharkhand Dashboard
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/bj/dashboard` | BJ marketplace CEO dashboard data (revenue, GBV, orders, commissions, platform fees, escrow, vendor health, funnel, priorities) |
+
+**Response:**
+```json
+{
+  "totalRevenue": 125000.00,
+  "totalGbv": 150000.00,
+  "totalOrders": 42,
+  "totalCommissions": 15000.00,
+  "totalPlatformFees": 2500.00,
+  "totalGst": 2700.00,
+  "activeVendors": 12,
+  "pendingPayouts": 35000.00,
+  "escrowHeld": 28000.00,
+  "customerFunnel": { "new": 15, "contacted": 8, "quoted": 5, "confirmed": 3 },
+  "moneyByCategory": { "HOTEL": 65000, "HOMESTAY": 35000, "CAB": 12000, "TOUR_PACKAGE": 38000 },
+  "vendorHealth": { "active": 12, "pending_kyc": 3, "suspended": 1 },
+  "priorities": [
+    { "title": "3 vendors pending KYC", "severity": "warning", "action": "/vendors?kyc=pending" }
+  ]
+}
+```
+
+---
+
+### 3.15 Webhooks (External)
 
 | Method | Path | Source | Description |
 |--------|------|--------|-------------|
-| `POST` | `/webhooks/whatsapp` | WhatsApp Cloud API | Incoming WhatsApp messages |
-| `POST` | `/webhooks/github` | GitHub | Content change notifications |
-| `POST` | `/webhooks/stripe` | Stripe | Payment events |
+| `POST` | `/webhook/whatsapp` | WhatsApp Cloud API | Incoming WhatsApp messages |
+| `POST` | `/webhook/stripe` | Stripe | Payment events |
+| `POST` | `/webhook/razorpay` | Razorpay | Payment events |
+| `POST` | `/webhook/order` | External order sync | Receive order from external system |
+| `POST` | `/webhook/github` | GitHub | Content change notifications |
 
 ---
 

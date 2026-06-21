@@ -5,14 +5,20 @@ import { prisma } from "@/lib/db/prisma";
 import { getProjectId, verifyProjectAccess } from "@/lib/db/queries";
 
 export async function createOrder(formData: FormData) {
-  const projectId = await getProjectId();
+  const requestedProjectId = (formData.get("projectId") as string) || null;
+  const projectId = requestedProjectId || await getProjectId();
   if (!projectId) throw new Error("Project not found");
+  if (!await verifyProjectAccess(projectId)) throw new Error("Access denied");
 
   const customerId = formData.get("customerId") as string;
   const source = formData.get("source") as string;
   const totalAmount = parseFloat(formData.get("totalAmount") as string);
 
   if (isNaN(totalAmount)) throw new Error("Invalid amount");
+  if (customerId) {
+    const customer = await prisma.customer.findFirst({ where: { id: customerId, projectId }, select: { id: true } });
+    if (!customer) throw new Error("Customer not found in project");
+  }
 
   try {
     await prisma.order.create({
@@ -33,6 +39,7 @@ export async function createOrder(formData: FormData) {
   }
 
   revalidatePath("/orders");
+  revalidatePath(`/projects/${projectId}/orders`);
 }
 
 async function verifyOrderAccess(orderId: string): Promise<boolean> {

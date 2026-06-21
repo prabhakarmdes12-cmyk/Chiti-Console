@@ -4,7 +4,8 @@ import { rateLimit } from "@/lib/api/rate-limit";
 import { jwtVerify } from "jose";
 
 function getJWTSecret() {
-  const secret = process.env.JWT_SECRET || "chiti-jwt-dev-secret-change-in-production";
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error("JWT_SECRET is required");
   return new TextEncoder().encode(secret);
 }
 
@@ -48,10 +49,18 @@ export async function authenticateJWT(request: Request) {
     if (!project) {
       return { error: NextResponse.json({ error: "Project not found" }, { status: 403 }), project: null };
     }
+    const userId = payload.sub as string;
+    const role = payload.role as string;
+    if (role !== "SUPER_ADMIN") {
+      const membership = await prisma.userProject.findUnique({ where: { userId_projectId: { userId, projectId: project.id } } });
+      if (!membership) {
+        return { error: NextResponse.json({ error: "Project access denied" }, { status: 403 }), project: null };
+      }
+    }
     return {
       error: null,
       project,
-      user: { id: payload.sub as string, email: payload.email as string, role: payload.role as string },
+      user: { id: userId, email: payload.email as string, role },
     };
   } catch {
     return { error: NextResponse.json({ error: "Invalid or expired token" }, { status: 401 }), project: null };
@@ -65,3 +74,13 @@ export async function authenticate(request: Request) {
   }
   return authenticateApiKey(request);
 }
+
+export function requireRole(allowedRoles: string[], userRole?: string) {
+  if (!userRole || !allowedRoles.includes(userRole)) {
+    return NextResponse.json({ error: "Insufficient permissions" }, { status: 403 });
+  }
+  return null;
+}
+
+export const ADMIN_ROLES = ["SUPER_ADMIN", "PROJECT_ADMIN"] as const;
+export const FINANCE_ROLES = ["SUPER_ADMIN", "PROJECT_ADMIN", "FINANCE_MANAGER"] as const;

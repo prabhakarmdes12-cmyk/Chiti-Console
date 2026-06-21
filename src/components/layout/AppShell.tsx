@@ -9,9 +9,10 @@ interface AppShellProps {
   projects: { id: string; name: string; slug: string }[];
   currentProjectId: string | null;
   sidebarChildren?: React.ReactNode;
+  userRole?: string | null;
 }
 
-export default function AppShell({ children, projects, currentProjectId, sidebarChildren }: AppShellProps) {
+export default function AppShell({ children, projects, currentProjectId, sidebarChildren, userRole }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -35,7 +36,7 @@ export default function AppShell({ children, projects, currentProjectId, sidebar
     <div className="flex min-h-screen aurora-bg">
       {/* Desktop sidebar */}
       <div className="hidden lg:block">
-        <Sidebar projects={projects} />
+        <Sidebar projects={projects} userRole={userRole} />
       </div>
 
       {/* Mobile sidebar overlay */}
@@ -52,7 +53,7 @@ export default function AppShell({ children, projects, currentProjectId, sidebar
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <Sidebar projects={projects} onClose={() => setSidebarOpen(false)} />
+        <Sidebar projects={projects} onClose={() => setSidebarOpen(false)} userRole={userRole} />
       </div>
 
       {/* Main area */}

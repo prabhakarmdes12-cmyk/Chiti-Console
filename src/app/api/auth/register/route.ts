@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 
 export async function POST(request: Request) {
+  if (process.env.ALLOW_PUBLIC_REGISTER !== "true") {
+    return NextResponse.json({ error: "Public registration is disabled" }, { status: 403 });
+  }
+
   const body = await request.json();
   const { name, email, password } = body;
 

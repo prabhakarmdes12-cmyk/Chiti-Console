@@ -48,6 +48,7 @@ export default async function NewProjectPage() {
             <option value="CUSTOM">Custom</option>
             <option value="ECOMMERCE">E-Commerce</option>
             <option value="B2B_CATALOG">B2B Catalog</option>
+            <option value="MARKETPLACE">Marketplace</option>
             <option value="CONTENT">Content</option>
             <option value="SAAS">SaaS</option>
           </select>

@@ -1,5 +1,15 @@
 import { prisma } from "@/lib/db/prisma";
 import { verifyWebhook, extractIncomingMessage } from "@/lib/integrations/whatsapp";
+import { createHmac, timingSafeEqual } from "crypto";
+
+function verifySignature(rawBody: string, signature: string | null) {
+  const secret = process.env.WHATSAPP_APP_SECRET;
+  if (!secret || !signature?.startsWith("sha256=")) return false;
+  const expected = `sha256=${createHmac("sha256", secret).update(rawBody).digest("hex")}`;
+  const a = Buffer.from(signature);
+  const b = Buffer.from(expected);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -15,7 +25,12 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const payload = await request.json();
+  const rawBody = await request.text();
+  if (!verifySignature(rawBody, request.headers.get("x-hub-signature-256"))) {
+    return new Response("Invalid signature", { status: 403 });
+  }
+
+  const payload = JSON.parse(rawBody);
   const msg = extractIncomingMessage(payload);
 
   if (!msg) {
@@ -26,6 +41,10 @@ export async function POST(request: Request) {
     ? await findProjectByPhoneNumberId(msg.phoneNumberId)
     : null;
 
+  if (!projectId) {
+    return new Response("OK", { status: 200 });
+  }
+
   let conversation = await prisma.whatsAppConversation.findFirst({
     where: { waContactId: msg.from, ...(projectId ? { projectId } : {}) },
   });
@@ -35,11 +54,9 @@ export async function POST(request: Request) {
       ? await prisma.customer.findFirst({ where: { projectId, phone: { contains: msg.from.slice(-10) } } })
       : null;
 
-    const targetProjectId = projectId || existingCustomer?.projectId || null;
-
     conversation = await prisma.whatsAppConversation.create({
       data: {
-        projectId: targetProjectId || "unknown",
+        projectId,
         waContactId: msg.from,
         customerId: existingCustomer?.id || null,
         status: "ACTIVE",

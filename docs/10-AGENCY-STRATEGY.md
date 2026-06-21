@@ -37,6 +37,7 @@ The custom Next.js + Console approach competes on:
 
 - **Brands with multiple product lines / stores** — Bighi Brothers + another brand + another. They see everything in one Console.
 - **B2B businesses** — TS Aromatics type. Shopify can't handle live GC/MS data, batch tracking, technical documentation.
+- **Marketplaces / booking platforms** — Booking Jharkhand type. Console handles vendors, listings, enquiries, escrow, payouts, and refunds — no agency platform supports marketplace operations out of the box.
 - **Clients who want a "system" not a "website"** — The premium market already being targeted.
 
 **The moat:** *"I build you a custom digital system, and I manage your daily operations through Console. To leave me, you'd have to rebuild your entire operations workflow."*
@@ -66,7 +67,7 @@ Shopify agencies don't have this moat.
 ### What TO compete on:
 - ✅ "I can show you revenue, orders, and customer data across all your brands in one dashboard"
 - ✅ "Your store is a custom experience, not a template"
-- ✅ "I handle your WhatsApp orders, customer management, and analytics — you don't need 5 different tools"
+- ✅ "I handle your WhatsApp orders, vendor management, bookings, escrow, payouts — not just ecommerce"
 - ✅ "You can't outgrow this. Shopify templates break at scale. This grows with you."
 
 ---

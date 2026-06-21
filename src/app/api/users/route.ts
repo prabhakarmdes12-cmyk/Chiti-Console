@@ -5,6 +5,9 @@ import { authenticate } from "@/lib/api/auth";
 export async function GET(request: Request) {
   const auth = await authenticate(request);
   if (auth.error) return auth.error;
+  if (auth.user?.role !== "SUPER_ADMIN") {
+    return NextResponse.json({ error: "Super admin access required" }, { status: 403 });
+  }
 
   const { searchParams } = new URL(request.url);
   const role = searchParams.get("role");

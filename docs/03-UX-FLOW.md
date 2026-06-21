@@ -13,10 +13,17 @@
 │  └─ Email + Password
 │
 ├─ Dashboard (/dashboard) — HOME
-│  ├─ KPI Row (Total Visitors, Orders Today, Open Leads, Revenue MTD)
+│  ├─ KPI Row (Revenue, Orders Today, Customers, Conversion)
+│  ├─ Operating Model Section (varies by project type)
+│  │   ├─ MARKETPLACE: Money cards, marketplace health, funnel, priorities, money by category, vendor health
+│  │   ├─ ECOMMERCE: AOV, active/OOS products, repeat buyer rate, paid orders, top products
+│  │   ├─ B2B_CATALOG: Leads, products, won deals, conversion rate, pipeline stages
+│  │   ├─ SAAS: Enrollments, active students, batches, new leads, churn rate
+│  │   └─ CONTENT: Entries, published/draft, views, subscribers
 │  ├─ Orders Timeline (latest 10 across all projects)
 │  ├─ Revenue Graph (last 30 days)
-│  └─ Project Status Cards (Bighi, TS Aromatics, Giriraj, etc.)
+│  ├─ Project Priorities (actionable items per project)
+│  └─ Project Status Cards (Bighi, TS Aromatics, Giriraj, BJ, etc.)
 │
 ├─ Orders (/orders)
 │  ├─ List View (sortable, filterable table)
@@ -26,7 +33,11 @@
 │      ├─ Customer card
 │      ├─ Items table
 │      ├─ Timeline activity log
-│      └─ Actions (update status, assign, send WhatsApp)
+│      ├─ Financial Breakdown (gross, discount, commission, fees, GST, net)
+│      ├─ Vendor card (marketplace orders)
+│      ├─ Escrow card (marketplace orders)
+│      ├─ Refunds section
+│      └─ Actions (status transitions, mark paid, generate invoice, delete)
 │
 ├─ Customers (/customers)
 │  ├─ List View (searchable)
@@ -40,9 +51,35 @@
 │  ├─ Stock movement log
 │  └─ Low stock alerts
 │
+├─ Vendors (/vendors) — BOOKING JHARKHAND
+│  ├─ Grid View (vendor cards with type, rating, kyc)
+│  └─ Vendor Detail (/vendors/[id])
+│      ├─ Profile info & KYC documents
+│      ├─ Bank account(s)
+│      ├─ Wallet & transactions
+│      ├─ Listings
+│      ├─ Orders & payouts
+│      └─ Actions (status, approve KYC, edit bank)
+│
+├─ Listings (/listings) — BOOKING JHARKHAND
+│  ├─ Grid View (listing cards with type, vendor, price, rating)
+│  └─ Listing Detail (/listings/[id])
+│
+├─ Enquiries (/enquiries) — BOOKING JHARKHAND
+│  ├─ List View (pipeline: New → Contacted → Quoted → Confirmed)
+│  └─ Enquiry Detail (/enquiries/[id])
+│      └─ Action: Convert to Booking (creates order + escrow + wallet tx)
+│
 ├─ Leads (/leads)
 │  ├─ Kanban (New → Contacted → Qualified → Won/Lost)
 │  └─ Lead Detail (/leads/[id])
+│
+├─ Finance (/finance) — BOOKING JHARKHAND
+│  ├─ Escrow Management (held/released/cancelled)
+│  ├─ Vendor Wallets (balance, pending, lifetime earnings)
+│  ├─ Payouts (pending/processing/completed/failed)
+│  ├─ Refunds (pending/approved/processed/rejected)
+│  └─ Commission Rates (default + per-vendor overrides)
 │
 ├─ Analytics (/analytics)
 │  ├─ Cross-project overview
@@ -71,6 +108,17 @@
    ├─ API keys
    └─ Notifications
 ```
+
+## 1.1 Sidebar Visibility by Role
+
+| Role | Visible Nav Items |
+|------|-------------------|
+| SUPER_ADMIN / PROJECT_ADMIN | All items + "Add Project" |
+| FINANCE_MANAGER | Dashboard, Orders, Customers, Products, Analytics, Finance |
+| SUPPORT_AGENT | Dashboard, Orders, Customers, Vendors, Listings, Enquiries, Leads, WhatsApp |
+| VENDOR_USER | Dashboard, Orders, Products, Enquiries |
+| CLIENT_VIEWER | Dashboard, Analytics |
+| CONTENT_EDITOR | Dashboard, Content, Analytics |
 
 ---
 
@@ -122,6 +170,41 @@
 6. Click "Send WhatsApp" → template: "Sample available"
 7. Status → "contacted"
 8. Done (3 min)
+```
+
+### Journey E: Enquiry to Booking Conversion (Marketplace Admin)
+
+```
+1. Dashboard → Enquiries shows 12 new enquiries
+2. Click enquiry from "Rajesh — Forest Homestay, 3 nights"
+3. Review details: checkIn: 25-Jun, checkOut: 28-Jun, 2 guests, pickup needed
+4. Click "Convert to Booking"
+5. System creates: Order (CONFIRMED) + Escrow (HELD) + Wallet tx + Payout (PENDING)
+6. Opens order detail — see financial breakdown, escrow card, vendor card
+7. Done (1 min)
+```
+
+### Journey F: Vendor Payout Run (Finance Manager)
+
+```
+1. Login → Finance → Payouts
+2. See 5 pending payouts (18,500 total)
+3. Click each → verify escrow status = RELEASED
+4. Mark as "PROCESSING" → transfer via bank → enter reference ID
+5. Mark as "COMPLETED" — vendor wallet updates, balance deducted
+6. Done (3 min)
+```
+
+### Journey G: Vendor Onboarding (Support Agent)
+
+```
+1. Login → Vendors → "Add Vendor"
+2. Enter: name "Green Valley Camps", type "CAMPING", phone, email
+3. Upload KYC: PAN card, GST cert
+4. Add bank account: account holder, IFSC, account number
+5. Set commission override: 10% (default is 12%)
+6. Vendor appears in listings dropdown
+7. Done (2 min)
 ```
 
 ---

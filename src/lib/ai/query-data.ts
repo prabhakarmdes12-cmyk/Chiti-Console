@@ -52,19 +52,8 @@ export const queryToolSchemas = {
 
 export type ToolName = keyof typeof queryToolSchemas;
 
-async function getCookieProjectId(): Promise<string | null> {
-  try {
-    const { cookies } = await import("next/headers");
-    const cookieStore = await cookies();
-    const id = cookieStore.get("chiti_project")?.value;
-    return id && id !== "all" ? id : null;
-  } catch {
-    return null;
-  }
-}
-
-function pf(projectId: string | null) {
-  return projectId ? { projectId } : {};
+function pf(projectId: string) {
+  return { projectId };
 }
 
 type OrderArgs = { minAmount?: number; maxAmount?: number; status?: string; paymentStatus?: string; daysBack?: number; limit?: number };
@@ -73,13 +62,11 @@ type CustomerArgs = { minOrders?: number; topBySpend?: boolean; limit?: number }
 type ProductArgs = { outOfStock?: boolean; category?: string; limit?: number };
 type LeadArgs = { status?: string; minScore?: number; daysBack?: number; limit?: number };
 
-export async function executeTool(name: ToolName, rawArgs: Record<string, unknown>): Promise<unknown> {
-  const pid = await getCookieProjectId();
-
+export async function executeTool(name: ToolName, rawArgs: Record<string, unknown>, projectId: string): Promise<unknown> {
   switch (name) {
     case "getOrders": {
       const args = rawArgs as OrderArgs;
-      const where: any = { ...pf(pid) };
+      const where: any = { ...pf(projectId) };
       if (args.minAmount !== undefined || args.maxAmount !== undefined) {
         where.totalAmount = {};
         if (args.minAmount !== undefined) where.totalAmount.gte = args.minAmount;
@@ -105,7 +92,7 @@ export async function executeTool(name: ToolName, rawArgs: Record<string, unknow
 
     case "getRevenue": {
       const args = rawArgs as RevenueArgs;
-      const where: any = { ...pf(pid) };
+      const where: any = { ...pf(projectId), paymentStatus: "PAID", status: { not: "CANCELLED" } };
       if (args.daysBack) {
         const d = new Date(); d.setDate(d.getDate() - args.daysBack);
         where.createdAt = { gte: d };
@@ -116,7 +103,7 @@ export async function executeTool(name: ToolName, rawArgs: Record<string, unknow
 
     case "getCustomers": {
       const args = rawArgs as CustomerArgs;
-      const where: any = { ...pf(pid) };
+      const where: any = { ...pf(projectId) };
       if (args.minOrders) where.totalOrders = { gte: args.minOrders };
       const customers = await prisma.customer.findMany({
         where, orderBy: args.topBySpend ? { totalSpent: "desc" } : { createdAt: "desc" },
@@ -127,7 +114,7 @@ export async function executeTool(name: ToolName, rawArgs: Record<string, unknow
 
     case "getProducts": {
       const args = rawArgs as ProductArgs;
-      const where: any = { ...pf(pid), isActive: true };
+      const where: any = { ...pf(projectId), isActive: true };
       if (args.outOfStock) where.stock = 0;
       if (args.category) where.category = args.category;
       const products = await prisma.product.findMany({ where, orderBy: { createdAt: "desc" }, take: args.limit ?? 10 });
@@ -136,7 +123,7 @@ export async function executeTool(name: ToolName, rawArgs: Record<string, unknow
 
     case "getLeads": {
       const args = rawArgs as LeadArgs;
-      const where: any = { ...pf(pid) };
+      const where: any = { ...pf(projectId) };
       if (args.status) where.status = args.status;
       if (args.minScore) where.score = { gte: args.minScore };
       if (args.daysBack) {

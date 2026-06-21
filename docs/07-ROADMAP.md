@@ -135,7 +135,25 @@
 
 ---
 
-## Phase 8: Productization (Weeks 13-16)
+## Phase 8: Booking Jharkhand Integration (Weeks 13-14)
+
+**Goal:** Complete marketplace operations — finance, pages, tools for the BJ marketplace.
+
+| Task | Output |
+|------|--------|
+| Marketplace finance models (Commission, Escrow, VendorWallet, Payout, Refund) | Dedicated Prisma models + migration SQL |
+| Finance API routes (`/api/finance/marketplace`, `/api/finance/payouts`, `/api/finance/refunds`) | GET/POST/PATCH with auth + role gating |
+| First-class BJ pages (Vendors, Listings, Enquiries) | Grid + detail pages with KYC/bank/wallet/actions per vendor |
+| Finance console pages (Escrow, Wallets, Payouts, Refunds, Commissions) | Per-page management views |
+| Enquiry→Booking conversion action | Creates order + escrow + wallet tx + payout in one action |
+| Booking detail page (`/orders/[id]`) | Tourism-specific view: checkIn/out, guests, roomType, vendor card, escrow card, financial breakdown, refunds |
+| Marketplace dashboard (CEO Command Center) | Money cards, marketplace health, funnel, priorities, money by category, vendor health |
+
+**Milestone:** Can manage BJ marketplace end-to-end — vendor onboarding to payout release.
+
+---
+
+## Phase 9: Productization (Weeks 15-18)
 
 **Goal:** Console ready to sell as a product.
 
@@ -153,6 +171,38 @@
 
 ---
 
+## Phase 10: Platform Operating Models (Weeks 19-20)
+
+**Goal:** Dashboard adapts per project type — marketplace, ecommerce, b2b, saas, content each get a purpose-built view.
+
+| Task | Output |
+|------|--------|
+| ProjectType dispatch (`MARKETPLACE`, `ECOMMERCE`, `B2B_CATALOG`, `SAAS`, `CONTENT`) | Server-side fetch routing by `project.type` |
+| Marketplace section | CEO Command Center with money cards, marketplace health, funnel, vendor health |
+| Ecommerce section | AOV, active/OOS products, repeat buyer rate, paid orders, top products |
+| B2B section | Leads, products, won deals, conversion rate, pipeline stages |
+| SaaS section | Enrollments, active students, batches, new leads, churn rate |
+| Content section | Entries, published/draft, views, subscribers |
+
+**Milestone:** Each project type shows relevant metrics — ecommerce projects never see marketplace data.
+
+---
+
+## Phase 11: RBAC & Team Management (Weeks 21-22)
+
+**Goal:** Role-based access control with 7 roles, filtered sidebar, project membership scoping.
+
+| Task | Output |
+|------|--------|
+| Add FINANCE_MANAGER, VENDOR_USER roles | Schema enum update + migration |
+| Server-side RBAC helpers (`getCurrentUser()`, `requireRole()`, `getAccessibleProjects()`) | `src/lib/db/queries.ts` exports |
+| API route role gating | `requireRole(FINANCE_ROLES)` on finance mutations |
+| Sidebar filtered by role | 7 role profiles with nav allow-lists |
+| Project membership scoping | Non-SUPER_ADMIN users see only their projects |
+| Seed demo users | finance@chiti.com, vendor@foresthomestay.com, content@chiti.com |
+
+**Milestone:** Finance team can process payouts without seeing system settings; vendors see only their own orders and products.
+
 ## Success Criteria
 
 | Phase | Exit Criteria |
@@ -165,4 +215,7 @@
 | 5 | TS Aromatics lead capture via Console |
 | 6 | Content index populated from Giriraj |
 | 7 | All projects show green health status |
-| 8 | First non-Chiti client onboarded |
+| 8 | BJ marketplace fully operational — vendors, bookings, finance |
+| 9 | First non-Chiti client onboarded |
+| 10 | Dashboard adapts per project type |
+| 11 | Role-based access enforced across all pages + APIs |

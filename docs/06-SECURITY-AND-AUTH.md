@@ -1,21 +1,31 @@
 # Chiti Console — Security & Authentication
 
-**Version:** 1.0  
-**Status:** Draft  
+**Version:** 1.1  
+**Status:** Updated — June 2026  
 
 ---
 
-## 1. Authentication (Auth.js v5)
+## 1. Authentication
 
-### 1.1 Providers
+Chiti Console uses two parallel auth systems:
+
+| System | Purpose | Audience |
+|--------|---------|----------|
+| **Auth.js v5** (OAuth/Credentials) | Browser session | Console team members |
+| **JWT (jose)** via `/api/auth/login` | Bearer token | API clients, frontend apps |
+
+### 1.1 Auth.js v5 — Browser Sessions
+
+#### Providers
 
 | Provider | Use Case | Config |
 |----------|----------|--------|
 | **Google OAuth** | Primary login for team members | Google Cloud Console OAuth 2.0 |
 | **Email (Magic Link)** | Client viewers without Google accounts | Resend / SendGrid for emails |
 | **GitHub OAuth** | Dev team alternative | GitHub OAuth App |
+| **Credentials** | Dev login (email + password, gated by `AUTH_DEV_EMAIL`/`AUTH_DEV_PASSWORD`) | Dev only |
 
-### 1.2 Session Strategy
+#### Session Strategy
 
 ```
 Type: JWT (stateless)
@@ -24,11 +34,11 @@ Expiry: 7 days (rolling)
 Refresh: Sliding window — extends on each request
 ```
 
-### 1.3 Auth Flow
+#### Auth Flow
 
 ```
 1. User visits /login
-2. Clicks "Sign in with Google"
+2. Clicks "Sign in with Google" (or enters dev credentials)
 3. Auth.js redirects to Google OAuth consent screen
 4. On success, Google returns id_token + access_token
 5. Auth.js validates, creates/updates user record
@@ -37,36 +47,57 @@ Refresh: Sliding window — extends on each request
 8. Every subsequent API call validates JWT via middleware
 ```
 
-### 1.4 Auth.js Configuration
+### 1.2 JWT Login — API Clients
+
+Used by the Booking Jharkhand frontend (and other external apps) to authenticate API requests.
+
+#### Login Endpoint: `POST /api/auth/login`
+
+```
+Request:  { "email": "...", "password": "..." }
+Response: { "token": "eyJ...", "user": { id, email, role, name } }
+```
+
+- Returns signed HS256 JWT with 24h expiry
+- Claims: `sub` (userId), `email`, `role`, `projectSlug`
+- Password validated against `AUTH_DEV_PASSWORD` env var (hardcoded dev login)
+
+#### Dual Auth in API Routes: `authenticate()`
+
+All data API routes use `authenticate()` from `src/lib/api/auth.ts`:
+
+```
+1. Check Authorization: Bearer <jwt>
+   → Decode + verify JWT with jose (HS256)
+   → Extract { userId, email, role, projectSlug }
+2. Fallback: Check x-api-key header
+   → Find project with matching apiKey
+   → Return { userId: null, email: null, role: API_KEY, projectSlug }
+3. Neither → Return 401
+```
+
+Routes that use `authenticate()`:
+- `/api/orders/*`, `/api/customers`, `/api/products`, `/api/leads`
+- `/api/vendors/*`, `/api/enquiries/*`, `/api/listings`
+- `/api/finance/*`
+
+Routes that use `authenticateApiKey()` only (webhooks):
+- `/api/webhook/*` — Stripe, Razorpay, WhatsApp
+
+Public routes (no auth):
+- `/api/health` — health check
+- `/api/contact` — contact form
+- `/api/auth/login` — returns JWT
+- `/api/auth/register`
+
+#### Helper exports
 
 ```ts
-// src/lib/auth/auth.ts
-import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
-import Email from "next-auth/providers/nodemailer";
-import { PrismaAdapter } from "@auth/prisma-adapter";
+// src/lib/api/auth.ts
+ADMIN_ROLES = ["SUPER_ADMIN", "PROJECT_ADMIN"]
+FINANCE_ROLES = ["SUPER_ADMIN", "PROJECT_ADMIN", "FINANCE_MANAGER"]
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(prisma),
-  providers: [
-    Google({ clientId: process.env.AUTH_GOOGLE_ID, clientSecret: process.env.AUTH_GOOGLE_SECRET }),
-    Email({ server: process.env.EMAIL_SERVER, from: "console@chiti.tech" }),
-  ],
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.role = user.role;
-        token.projectScopes = await getUserProjectScopes(user.id);
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      session.user.role = token.role;
-      session.user.projectScopes = token.projectScopes;
-      return session;
-    },
-  },
-});
+requireRole(roles: string[]) // Returns 403 Response if not allowed
 ```
 
 ---
@@ -77,46 +108,63 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
 ```
 SUPER_ADMIN → everything
-PROJECT_ADMIN → read/write within assigned project(s)
-SUPPORT_AGENT → orders, customers, whatsapp within assigned project(s)
-CONTENT_EDITOR → content entries only
-CLIENT_VIEWER → read-only analytics for their project
+PROJECT_ADMIN → full CRUD within assigned project(s)
+FINANCE_MANAGER → orders, customers, products, analytics, finance ops
+SUPPORT_AGENT → orders, customers, vendors, listings, enquiries, leads, whatsapp
+VENDOR_USER → own orders, products, enquiries
+CLIENT_VIEWER → read-only dashboard + analytics
+CONTENT_EDITOR → content entries + analytics
 ```
 
-### 2.2 Permission Matrix
-
-| Resource | Super Admin | Project Admin | Support Agent | Content Editor | Client Viewer |
-|----------|-------------|---------------|---------------|----------------|---------------|
-| All projects | CRUD | Read | — | — | — |
-| Orders | CRUD | CRUD (own) | CRUD (own) | — | Read |
-| Customers | CRUD | CRUD | Read | — | Read |
-| Products | CRUD | CRUD | Read | Read | Read |
-| Leads | CRUD | CRUD | CRUD | — | — |
-| Content | CRUD | CRUD | — | CRUD (own) | Read |
-| Analytics | Read | Read (own) | — | — | Read (own) |
-| WhatsApp | CRUD | CRUD | CRUD | — | — |
-| Users (team) | CRUD | Read (own) | — | — | — |
-| Settings | CRUD | Read (own) | — | — | — |
-
-### 2.3 API Middleware
+### 2.2 Server-Side RBAC Helpers
 
 ```ts
-// src/middleware.ts
-export { auth as middleware } from "@/lib/auth/auth";
-
-// Per-endpoint check
-// src/app/api/orders/route.ts
-export async function POST(req: Request) {
-  const session = await auth();
-  if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
-
-  const body = await req.json();
-  if (!hasProjectAccess(session, body.projectId, "write")) {
-    return Response.json({ error: "Forbidden" }, { status: 403 });
-  }
-  // ... handle request
-}
+// src/lib/db/queries.ts
+getCurrentUser()              → User object (throws if no session)
+getCurrentUserRole()          → UserRole string
+requireRole(...roles)         → throws if not in list
+getAccessibleProjects()       → projects where user has membership (or all for SUPER_ADMIN)
+roleAtLeast(minimum: UserRole) → hierarchy comparison
 ```
+
+Used in server components and page loaders. For API routes, use the `requireRole()` from `src/lib/api/auth.ts`.
+
+### 2.3 Sidebar Nav Visibility by Role
+
+| Role | Visible Nav Items |
+|------|-------------------|
+| SUPER_ADMIN / PROJECT_ADMIN | All 14 items + Add Project button |
+| FINANCE_MANAGER | Dashboard, Orders, Customers, Products, Analytics, Finance |
+| SUPPORT_AGENT | Dashboard, Orders, Customers, Vendors, Listings, Enquiries, Leads, WhatsApp |
+| VENDOR_USER | Dashboard, Orders, Products, Enquiries |
+| CLIENT_VIEWER | Dashboard, Analytics |
+| CONTENT_EDITOR | Dashboard, Content, Analytics |
+
+### 2.4 Project Membership Scoping
+
+- `SUPER_ADMIN` sees all projects in project selector
+- All other roles see only projects they belong to (via `UserProject` table)
+- `getAccessibleProjects()` enforces this in the layout
+- `verifyProjectAccess()` prevents cross-project FK injection in API routes
+
+### 2.5 Permission Matrix
+
+| Resource | Super Admin | Project Admin | Finance Manager | Support Agent | Vendor User | Client Viewer | Content Editor |
+|----------|-------------|---------------|-----------------|---------------|-------------|---------------|----------------|
+| Projects | CRUD | Read | — | — | — | — | — |
+| Orders | CRUD | CRUD | Read | CRUD (own) | Read (own) | — | — |
+| Customers | CRUD | CRUD | Read | Read | — | — | — |
+| Products | CRUD | CRUD | Read | Read | Read (own) | — | — |
+| Leads | CRUD | CRUD | — | CRUD | — | — | — |
+| Content | CRUD | CRUD | — | — | — | — | CRUD (own) |
+| Analytics | Read | Read (own) | Read (own) | — | — | Read (own) | Read (own) |
+| Finance | CRUD | CRUD | CRUD | — | — | — | — |
+| Vendors | CRUD | CRUD | — | CRUD | Read (own) | — | — |
+| Listings | CRUD | CRUD | — | CRUD | Read (own) | — | — |
+| Enquiries | CRUD | CRUD | — | CRUD | CRUD (own) | — | — |
+| WhatsApp | CRUD | CRUD | — | CRUD | — | — | — |
+| Users | CRUD | Read (own) | — | — | — | — | — |
+| Settings | CRUD | Read (own) | — | — | — | — | — |
 
 ---
 
@@ -133,14 +181,26 @@ Each project gets a unique API key (UUID v4) used by the tracker script.
 
 ### 3.2 Request Validation
 
-- **All mutation endpoints:** Require valid session (HTTP-only cookie)
-- **Tracker endpoint:** Validates API key + HMAC signature
-- **Webhook endpoints:** Validates via HMAC signature verification
+- **Data API routes:** `authenticate()` — checks JWT first, falls back to API key
+- **Webhook endpoints:** Validates via HMAC signature (WhatsApp) or webhook secret (Stripe/Razorpay)
+- **Tracker endpoint:** Validates API key
 - **Rate limiting:** Per API key + per session (Sliding window)
 
-### 3.3 Webhook Security
+### 3.3 CORS
 
-All incoming webhooks (WhatsApp, GitHub, Stripe) verify payload signature before processing:
+Implemented in `src/proxy.ts` for all `/api/*` routes:
+
+```
+Access-Control-Allow-Origin: <request origin>
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type, Authorization, x-api-key
+```
+
+Preflight (OPTIONS) returns 204. Proxy bypasses auth check — API routes handle their own auth.
+
+### 3.4 Webhook Security
+
+All incoming webhooks verify payload signature before processing:
 
 ```ts
 // WhatsApp webhook verification
@@ -153,6 +213,24 @@ const verifyWhatsAppSignature = (req: Request, rawBody: string): boolean => {
   return `sha256=${expected}` === signature;
 };
 ```
+
+- **WhatsApp:** HMAC-SHA256 with `WHATSAPP_APP_SECRET`
+- **Stripe:** `stripe.webhooks.constructEvent()` with `STRIPE_WEBHOOK_SECRET`
+- **Razorpay:** HMAC-SHA256 with `RAZORPAY_WEBHOOK_SECRET`
+
+### 3.5 Security Hardening
+
+All HIGH-severity items:
+
+- `JWT_SECRET` required at startup — no fallback
+- CORS restricted to known origins via Set
+- AI query + WhatsApp routes require auth
+- Cross-project FK injection prevented via `verifyProjectAccess()`
+- User management APIs require SUPER_ADMIN
+- Register disabled unless `ALLOW_PUBLIC_REGISTER=true`
+- WhatsApp webhook signature verification
+- Finance mutations require admin or FINANCE_MANAGER role
+- Project membership required for all scoped operations
 
 ---
 
@@ -175,6 +253,7 @@ AUTH_GOOGLE_ID="..."
 AUTH_GOOGLE_SECRET="..."
 AUTH_GITHUB_ID="..."
 AUTH_GITHUB_SECRET="..."
+JWT_SECRET="must-be-set-required-at-startup"
 
 # Database
 DATABASE_URL="postgresql://..."
@@ -196,6 +275,15 @@ EMAIL_FROM="console@chiti.tech"
 # GitHub (for Giriraj content sync)
 GITHUB_TOKEN="..."
 GITHUB_REPO="prabhakarmdes12-cmyk/House-of-Giriraj"
+
+# Stripe
+STRIPE_SECRET_KEY="..."
+STRIPE_WEBHOOK_SECRET="..."
+
+# Razorpay
+RAZORPAY_KEY_ID="..."
+RAZORPAY_KEY_SECRET="..."
+RAZORPAY_WEBHOOK_SECRET="..."
 
 # Vercel
 NEXT_PUBLIC_CONSOLE_URL="https://console.chiti.tech"

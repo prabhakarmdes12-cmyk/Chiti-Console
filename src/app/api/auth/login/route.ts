@@ -3,7 +3,8 @@ import { prisma } from "@/lib/db/prisma";
 import { SignJWT } from "jose";
 
 function getJWTSecret() {
-  const secret = process.env.JWT_SECRET || "chiti-jwt-dev-secret-change-in-production";
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error("JWT_SECRET is required");
   return new TextEncoder().encode(secret);
 }
 

@@ -3,8 +3,15 @@ import { NextResponse } from "next/server";
 
 function corsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get("origin") || "*";
+  const allowed = new Set([
+    "https://chiti-console.vercel.app",
+    "https://booking-jharkhand-beta.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:5173",
+  ]);
+  const allowOrigin = origin === "*" || allowed.has(origin) ? origin : "https://chiti-console.vercel.app";
   return {
-    "Access-Control-Allow-Origin": origin,
+    "Access-Control-Allow-Origin": allowOrigin,
     "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization, x-api-key",
     "Access-Control-Allow-Credentials": "true",
@@ -25,7 +32,7 @@ export const proxy = auth((req) => {
   const isLoggedIn = !!req.auth;
   const { pathname } = req.nextUrl;
 
-  const isPublic = pathname === "/login" || pathname.startsWith("/api/auth") || pathname.startsWith("/api/health") || pathname.startsWith("/api/contact");
+  const isPublic = pathname === "/login" || pathname === "/manifest.webmanifest" || pathname.startsWith("/api/auth") || pathname.startsWith("/api/health") || pathname.startsWith("/api/contact");
   const isPortal = pathname.startsWith("/portal");
 
   if (isPortal || pathname.startsWith("/api/")) {

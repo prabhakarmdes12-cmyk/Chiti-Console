@@ -1,8 +1,8 @@
 # Chiti Console — System Journal & Decision Log
 
-> **Version:** 1.2.0  
+> **Version:** 1.3.0  
 > **Codename:** V1 AI  
-> **Last Updated:** 14 June 2026  
+> **Last Updated:** 22 June 2026  
 > **Maintainer:** Prabhakar Kumar  
 > **Audience:** Developers | Designers | Stakeholders
 
@@ -439,6 +439,44 @@ Clients log in with email + PIN. The JWT encodes `clientAccessId` for permission
 
 The `QueryBar` component floats above the dashboard. Users type natural language questions ("show revenue from last month", "which orders are pending?", "top customers"). The `performNLQuery` action uses intent classification to route to orders, financial, or customers data, returning structured results rendered inline.
 
+### 4.16 Marketplace — Booking Jharkhand
+
+| Aspect | Detail |
+|--------|--------|
+| **Location** | `/vendors`, `/listings`, `/enquiries`, `/finance/escrow`, `/finance/wallets`, `/finance/payouts`, `/finance/refunds`, `/finance/commissions` |
+| **Server actions** | `src/lib/actions/marketplace.ts` — `convertEnquiryToBooking()`; `src/lib/actions/vendors.ts` — `updateVendorStatus()`, `upsertVendorBankAccount()`, `updateVendorDocumentStatus()` |
+| **API routes** | `/api/vendors/*`, `/api/enquiries/*`, `/api/listings/*`, `/api/finance/marketplace`, `/api/finance/payouts`, `/api/finance/refunds`, `/api/bj/dashboard` |
+| **Status** | ✅ Complete |
+
+Marketplace finance uses dedicated Prisma models: `Commission`, `Escrow`, `VendorWallet`, `WalletTransaction`, `VendorBankAccount`, `Payout`, `Refund`. The `Order` model is extended with tourism-specific fields (`vendorId`, `checkIn`, `checkOut`, `guests`, `roomType`, `pickupLocation`, `dropoffLocation`) and finance fields (`commissionAmount`, `platformFee`, `gstAmount`).
+
+**Enquiry→Booking flow:** Admin clicks "Convert to Booking" → Server action creates CONFIRMED order (with commission/GST/tourism fields), marks enquiry CONFIRMED, creates escrow (HELD), adds pendingBalance to VendorWallet, creates PENDING payout — all in one atomic action. Duplicate-safe via `notes: "enquiry:{id}"` check.
+
+**BJ Dashboard** (`/api/bj/dashboard`): Returns CEO metrics (revenue, GBV, orders), marketplace health (active vendors, pending KYC, suspended), customer funnel (new → contacted → quoted → confirmed), vendor health by category, money by category, platform priorities. Uses `paymentStatus === "PAID"` AND `status !== "CANCELLED"` for revenue accuracy.
+
+### 4.17 Project Operating Models
+
+| Aspect | Detail |
+|--------|--------|
+| **Location** | `/dashboard` — server dispatch in `page.tsx`, client sections in `DashboardClient.tsx` |
+| **Dispatch** | `fetchDashboardData()` switches on `project.type` (MARKETPLACE/ECOMMERCE/B2B_CATALOG/SAAS/CONTENT/CUSTOM) |
+| **Shared** | `fetchSharedData()` extracts common stats, priorities, revenue, orders, projects |
+| **Status** | ✅ Complete |
+
+Project types get purpose-built dashboard views: Marketplace (CEO Command Center with money cards, funnel, vendor health), Ecommerce (AOV, OOS products, repeat buyers), B2B (leads, pipeline), SaaS (enrollments, churn), Content (views, subscribers).
+
+### 4.18 Role-Based Access Control (RBAC)
+
+| Aspect | Detail |
+|--------|--------|
+| **New roles** | `FINANCE_MANAGER`, `VENDOR_USER` added to `UserRole` enum |
+| **DB helpers** | `src/lib/db/queries.ts` — `getCurrentUser()`, `getCurrentUserRole()`, `requireRole()`, `getAccessibleProjects()`, `roleAtLeast()` |
+| **API helpers** | `src/lib/api/auth.ts` — `requireRole()`, `ADMIN_ROLES`, `FINANCE_ROLES` |
+| **Sidebar** | Nav items filtered via `rolePermissions` map in `Sidebar.tsx` |
+| **Status** | ✅ Complete |
+
+Seven roles with granular sidebar visibility, project membership scoping in the layout, API route role gating (finance mutations require FINANCE_ROLES), and demo users for all roles in seed data.
+
 ---
 
 ## 5. Data Architecture
@@ -458,14 +496,40 @@ Project ──1:N── Invoice
 Project ──1:N── Expense
 Project ──1:N── Budget
 Project ──1:N── ClientAccess
+Project ──1:N── Vendor                  (marketplace)
+Project ──1:N── Enquiry                 (marketplace)
+Project ──1:N── Listing                 (marketplace)
+Project ──1:N── Promotion               (marketplace)
+Project ──1:N── Destination             (marketplace)
+Project ──1:N── Commission              (marketplace finance)
+Project ──1:N── Escrow                  (marketplace finance)
+Project ──1:N── Payout                  (marketplace finance)
+Project ──1:N── Refund                  (marketplace finance)
+Project ──1:N── VendorWallet            (marketplace finance)
+Project ──1:N── VendorBankAccount       (marketplace finance)
+Project ──1:N── WalletTransaction       (marketplace finance)
 
 Customer ──1:N── Order
 Customer ──1:N── Lead
 Customer ──1:N── WhatsAppConversation
 Customer ──1:N── Invoice
+Customer ──1:N── Enquiry                (marketplace)
 
 Order ──1:N── OrderItem
 Order ──1:N── OrderTimeline
+Order ──1:1── Escrow                    (marketplace)
+Order ──1:N── Refund                    (marketplace)
+Order ──N:1── Vendor                    (marketplace)
+
+Vendor ──1:N── Listing                  (marketplace)
+Vendor ──1:N── Enquiry                  (marketplace)
+Vendor ──1:N── Commission               (marketplace finance)
+Vendor ──1:N── Escrow                   (marketplace finance)
+Vendor ──1:N── Payout                   (marketplace finance)
+Vendor ──1:N── Refund                   (marketplace finance)
+Vendor ──1:1── VendorWallet             (marketplace finance)
+Vendor ──1:N── VendorBankAccount        (marketplace finance)
+Vendor ──1:N── WalletTransaction        (marketplace finance)
 
 Product ──1:N── OrderItem
 Product ──1:N── StockMovement
@@ -474,6 +538,8 @@ Invoice ──1:N── InvoiceItem
 
 User ──1:N── Account (Auth.js)
 User ──1:N── Session (Auth.js)
+
+WalletTransaction ──N:1── VendorWallet  (marketplace finance)
 ```
 
 ### 5.2 Key Design Decisions
@@ -487,6 +553,12 @@ User ──1:N── Session (Auth.js)
 | **Decimal for currency** | `@db.Decimal(10, 2)` for all monetary fields; avoids IEEE 754 floating-point rounding in financial calculations |
 | **Nullable stock** | A product with `stock = null` means unlimited inventory (e.g., digital goods, made-to-order jewellery) |
 | **Auth.js standard models** | `Account`, `Session`, `VerificationToken` follow Auth.js conventions exactly; no custom modifications that could break adapter compatibility |
+| **Marketplace finance models** | Dedicated Prisma models (Commission, Escrow, VendorWallet, Payout, Refund, VendorBankAccount) — not JSON blobs — for proper queryability, referential integrity, and audit trails |
+| **Enquiry→Booking conversion** | Creates order with `notes: "enquiry:{id}"` for duplicate-safety; uses existing enquiry JSON `details` fields for checkIn/out/guests |
+| **Commission lookup chain** | vendor-specific rate → category-level rate (ordered by `effectiveFrom`) → 12% default fallback |
+| **Dashboard type dispatch** | Uses `project.type` enum (not slug comparison) — decouples view logic from project identity |
+| **Dual auth** | `authenticate()` tries JWT first, falls back to API key — webhooks remain API-key-only |
+| **`requireRole()` for API routes** | Exports `ADMIN_ROLES`, `FINANCE_ROLES` constants for role-gating mutations |
 
 ---
 
@@ -524,7 +596,14 @@ All API routes require `auth()` verification. Server actions throw if `session.u
 
 ### 6.4 API Security
 
-API endpoints use the same JWT session for browser-based requests. Programmatic access uses project-level API keys validated via `Bearer` token header.
+Chiti Console uses **dual authentication** for API routes:
+
+1. **JWT Bearer Token** (`Authorization: Bearer <jwt>`) — obtained from `POST /api/auth/login` with email/password. Token is HS256-signed with `JWT_SECRET`, 24h expiry, claims: `sub`, `email`, `role`, `projectSlug`.
+2. **API Key Fallback** (`x-api-key` header) — each project has a unique API key. Used by tracker scripts and webhook integrations.
+
+The `authenticate()` function in `src/lib/api/auth.ts` tries JWT first, falls back to API key. Webhook routes use `authenticateApiKey()` only. Public routes (`/api/health`, `/api/contact`, `/api/auth/login`) require no auth.
+
+**Role gating**: Finance mutation endpoints use `requireRole(FINANCE_ROLES)` (SUPER_ADMIN, PROJECT_ADMIN, or FINANCE_MANAGER). Server components use `getCurrentUserRole()` + `requireRole()` from `src/lib/db/queries.ts`.
 
 ### 6.5 Input Validation
 
@@ -632,7 +711,7 @@ The `validate()` helper returns a discriminated union — after checking `if (va
 | **Bighi Brothers** | `bighi-brothers` | ECOMMERCE | bighibrothers.shop | API | 7 (soaps ₹299, creams ₹499-₹599, lip balm ₹199) | 4 | 4 | 3 |
 | **House of Giriraj** | `house-of-giriraj` | ECOMMERCE | house-of-giriraj.vercel.app | WEBHOOK | 5 (jewellery ₹85K-₹3.5L) | 2 | 1 | 1 |
 | **Ts Aromatics** | `ts-aromatics` | B2B_CATALOG | tsaromatics.in | API | 7 (carrier oils ₹250-₹650, butters ₹350-₹450) | 4 | 1 | 1 |
-| **Bhatia Master Classes** | `bhatia-master-classes` | SAAS | bhatiamasterclasses.com | MANUAL | 6 (courses ₹299-₹4,999) | 3 | 3 | 2 |
+| **Booking Jharkhand** | `booking-jharkhand` | MARKETPLACE | booking-jharkhand.vercel.app | MANUAL | 6 (listings: hotel, homestay, cab, tour packages, camping) | 3 | 5 | 3 |
 
 ### 9.2 Admin Account
 
@@ -677,6 +756,14 @@ The `validate()` helper returns a discriminated union — after checking `if (va
 | **15** | Full AI Assistant | 🔴 Future | LLM-powered chat, context-aware suggestions, multi-step workflows |
 | **16** | **Visual Refresh** | ✅ Complete | Glassmorphism cards, Framer Motion primitives, brand glow effects |
 | **17** | **Security Hardening** | ✅ Complete | Signed portal JWT, CSP + HSTS, timing-safe webhook, authz checks, Zod validation |
+| **18** | **Marketplace Finance** | ✅ Complete | Commission, Escrow, VendorWallet, Payout, Refund models + API routes + finance pages |
+| **19** | **BJ Console Pages** | ✅ Complete | Vendors, Listings, Enquiries pages + Booking detail + Enquiry→Booking conversion |
+| **20** | **Project Operating Models** | ✅ Complete | Type-based dashboard dispatch (MARKETPLACE/ECOMMERCE/B2B/SAAS/CONTENT) |
+| **21** | **RBAC** | ✅ Complete | FINANCE_MANAGER/VENDOR_USER roles, sidebar filtering, project scoping, API role gating |
+| **22** | **Escrow Release Workflow** | 🔴 Future | Button to release HELD escrow after service completion |
+| **23** | **Invoice Automation** | 🔴 Future | Auto-generate GST invoice on booking conversion |
+| **24** | **Vendor Portal** | 🔴 Future | Vendor login, own bookings, listings, wallet view |
+| **25** | **Automation Engine** | 🔴 Future | Workflow triggers for booking/payment/checkout/payout/refund |
 
 ### Next Up
 
@@ -731,6 +818,9 @@ In alignment with Chiti Technologies standards:
 | **API Validation** | `src/lib/api/validation.ts` |
 | **Prisma Client** | `src/lib/db/prisma.ts` |
 | **DB Queries** | `src/lib/db/queries.ts` |
+| **Marketplace Actions** | `src/lib/actions/marketplace.ts` |
+| **Vendor Actions** | `src/lib/actions/vendors.ts` |
+| **API Auth** | `src/lib/api/auth.ts` |
 | **UI Components** | `src/components/ui/` |
 | **Motion Primitives** | `src/components/motion/` |
 | **Chart Components** | `src/components/charts/` |
@@ -739,11 +829,14 @@ In alignment with Chiti Technologies standards:
 | **Server Actions** | `src/lib/actions/` |
 | **AI Actions** | `src/lib/ai/` |
 | **Webhook Handlers** | `src/lib/integrations/` |
+| **CORS Proxy** | `src/proxy.ts` |
 | **Styles** | `src/app/globals.css` |
 | **Portal Pages** | `src/app/portal/` |
 | **Pricing Pages** | `src/app/pricing/` |
 | **Security Headers** | `next.config.ts` |
 | **Env Validation** | `src/lib/env.ts` |
+| **Sidebar** | `src/components/ui/Sidebar.tsx` |
+| **AppShell** | `src/components/layout/AppShell.tsx` |
 
 ---
 

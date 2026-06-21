@@ -5,8 +5,10 @@ import { prisma } from "@/lib/db/prisma";
 import { getProjectId, verifyProjectAccess } from "@/lib/db/queries";
 
 export async function createProduct(formData: FormData) {
-  const projectId = await getProjectId();
+  const requestedProjectId = (formData.get("projectId") as string) || null;
+  const projectId = requestedProjectId || await getProjectId();
   if (!projectId) throw new Error("Project not found");
+  if (!await verifyProjectAccess(projectId)) throw new Error("Access denied");
 
   try {
     await prisma.product.create({
@@ -26,9 +28,12 @@ export async function createProduct(formData: FormData) {
   }
 
   revalidatePath("/products");
+  revalidatePath(`/projects/${projectId}/products`);
 }
 
 export async function updateProduct(productId: string, formData: FormData) {
+  if (!await verifyProductAccess(productId)) throw new Error("Access denied");
+
   const name = formData.get("name") as string;
   const sku = formData.get("sku") as string;
   const category = formData.get("category") as string;

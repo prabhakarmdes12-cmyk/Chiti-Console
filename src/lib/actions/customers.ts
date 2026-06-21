@@ -5,8 +5,10 @@ import { prisma } from "@/lib/db/prisma";
 import { getProjectId, verifyProjectAccess } from "@/lib/db/queries";
 
 export async function createCustomer(formData: FormData) {
-  const projectId = await getProjectId();
+  const requestedProjectId = (formData.get("projectId") as string) || null;
+  const projectId = requestedProjectId || await getProjectId();
   if (!projectId) throw new Error("Project not found");
+  if (!await verifyProjectAccess(projectId)) throw new Error("Access denied");
 
   try {
     await prisma.customer.create({
@@ -23,6 +25,7 @@ export async function createCustomer(formData: FormData) {
   }
 
   revalidatePath("/customers");
+  revalidatePath(`/projects/${projectId}/customers`);
 }
 
 async function verifyCustomerAccess(customerId: string): Promise<boolean> {

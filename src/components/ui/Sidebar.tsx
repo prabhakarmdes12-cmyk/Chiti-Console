@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -19,15 +19,27 @@ import {
   ChevronRight,
   Building2,
   Sparkles,
-  HelpCircle,
   LogOut,
   Plus,
 } from "lucide-react";
+
+const rolePermissions: Record<string, string[]> = {
+  SUPER_ADMIN: ["/dashboard", "/orders", "/customers", "/vendors", "/listings", "/enquiries", "/products", "/leads", "/analytics", "/whatsapp", "/finance", "/content", "/system", "/settings"],
+  PROJECT_ADMIN: ["/dashboard", "/orders", "/customers", "/vendors", "/listings", "/enquiries", "/products", "/leads", "/analytics", "/whatsapp", "/finance", "/content", "/system", "/settings"],
+  FINANCE_MANAGER: ["/dashboard", "/orders", "/customers", "/products", "/analytics", "/finance"],
+  SUPPORT_AGENT: ["/dashboard", "/orders", "/customers", "/vendors", "/listings", "/enquiries", "/leads", "/whatsapp"],
+  VENDOR_USER: ["/dashboard", "/orders", "/products", "/enquiries"],
+  CLIENT_VIEWER: ["/dashboard", "/analytics"],
+  CONTENT_EDITOR: ["/dashboard", "/content", "/analytics"],
+};
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Orders", href: "/orders", icon: ShoppingCart },
   { label: "Customers", href: "/customers", icon: Users },
+  { label: "Vendors", href: "/vendors", icon: Building2 },
+  { label: "Listings", href: "/listings", icon: Sparkles },
+  { label: "Enquiries", href: "/enquiries", icon: MessageCircle },
   { label: "Products", href: "/products", icon: Package },
   { label: "Leads", href: "/leads", icon: Target },
   { label: "Analytics", href: "/analytics", icon: BarChart3 },
@@ -38,11 +50,18 @@ const navItems = [
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
-export default function Sidebar({ projects, onClose }: { projects: { id: string; name: string }[]; onClose?: () => void }) {
+export default function Sidebar({ projects, onClose, userRole }: { projects: { id: string; name: string }[]; onClose?: () => void; userRole?: string | null }) {
   const pathname = usePathname();
   const [expanded, setExpanded] = useState(pathname.startsWith("/projects"));
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
+
+  const visibleItems = useMemo(() => {
+    const allowed = rolePermissions[userRole || "CLIENT_VIEWER"] || rolePermissions.CLIENT_VIEWER;
+    return navItems.filter((item) => allowed.includes(item.href));
+  }, [userRole]);
+
+  const showNewProject = userRole === "SUPER_ADMIN" || userRole === "PROJECT_ADMIN";
 
   return (
     <aside className="w-60 min-h-screen bg-surface-1 border-r border-white/10 flex flex-col">
@@ -111,7 +130,7 @@ export default function Sidebar({ projects, onClose }: { projects: { id: string;
           )}
         </div>
 
-        {navItems.map((item) => {
+        {visibleItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.href);
           return (
@@ -137,6 +156,7 @@ export default function Sidebar({ projects, onClose }: { projects: { id: string;
         })}
       </nav>
       <div className="p-3 border-t border-white/10 space-y-1">
+        {showNewProject && (
         <Link
           href="/projects/new"
           onClick={onClose}
@@ -145,11 +165,8 @@ export default function Sidebar({ projects, onClose }: { projects: { id: string;
           <Plus className="w-4 h-4" />
           Add Project
         </Link>
+        )}
         <div className="pt-2 space-y-1">
-          <Link href="/help" onClick={onClose} className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-text-muted hover:text-text-main hover:bg-surface-2 transition-all">
-            <HelpCircle className="w-4 h-4" />
-            Help
-          </Link>
           <Link href="/login" onClick={onClose} className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-text-muted hover:text-text-main hover:bg-surface-2 transition-all">
             <LogOut className="w-4 h-4" />
             Logout

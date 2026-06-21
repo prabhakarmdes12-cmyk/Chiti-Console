@@ -37,6 +37,10 @@ export async function POST(request: Request) {
   const body = await request.json();
   const validated = validate(orderCreateSchema, body);
   if (validated.error) return validated.error;
+  if (validated.data.customerId) {
+    const customer = await prisma.customer.findFirst({ where: { id: validated.data.customerId, projectId: project!.id }, select: { id: true } });
+    if (!customer) return NextResponse.json({ error: "Customer not found in project" }, { status: 400 });
+  }
 
   const order = await prisma.order.create({
     data: {

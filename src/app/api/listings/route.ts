@@ -35,6 +35,10 @@ export async function POST(request: Request) {
   const body = await request.json();
   const validated = validate(listingCreateSchema, body);
   if (validated.error) return validated.error;
+  if (validated.data.vendorId) {
+    const vendor = await prisma.vendor.findFirst({ where: { id: validated.data.vendorId, projectId: auth.project!.id }, select: { id: true } });
+    if (!vendor) return NextResponse.json({ error: "Vendor not found in project" }, { status: 400 });
+  }
 
   const listing = await prisma.listing.create({
     data: {

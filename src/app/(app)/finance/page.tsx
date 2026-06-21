@@ -8,6 +8,7 @@ import { deleteExpense, updateInvoiceStatus } from "@/lib/actions/finance";
 import { Trash2, ArrowRight, Receipt, CreditCard, TrendingUp, Wallet } from "lucide-react";
 import FadeIn from "@/components/motion/FadeIn";
 import Link from "next/link";
+import FinanceCenterNav from "@/components/finance/FinanceCenterNav";
 
 const tabs = [
   { key: "invoices", label: "Invoices", icon: Receipt },
@@ -28,8 +29,25 @@ export default async function FinancePage({
     <div className="space-y-6">
       <ChitiPageHeader
         title="Finance"
-        description="Invoices, expenses, and profit & loss."
+        description="Invoices, expenses, marketplace escrow, vendor wallets, payouts, refunds, and commissions."
       />
+
+      <FinanceCenterNav />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3">
+        {[
+          { label: "Escrow", href: "/finance/escrow", desc: "Held booking money" },
+          { label: "Wallets", href: "/finance/wallets", desc: "Vendor balances" },
+          { label: "Payouts", href: "/finance/payouts", desc: "Settlement queue" },
+          { label: "Refunds", href: "/finance/refunds", desc: "Customer refunds" },
+          { label: "Commissions", href: "/finance/commissions", desc: "Platform take-rates" },
+        ].map((item) => (
+          <Link key={item.href} href={item.href} className="rounded-xl bg-surface-1 border border-white/10 p-4 hover:border-brand-primary/30 transition-colors">
+            <p className="text-sm font-semibold text-text-main mb-1">{item.label}</p>
+            <p className="text-xs text-text-muted">{item.desc}</p>
+          </Link>
+        ))}
+      </div>
 
       {/* Premium Tab Bar */}
       <div className="bg-surface-1 border border-white/10 rounded-xl p-1.5 flex items-center gap-1 w-fit">
