@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db/prisma";
 import { getProjectId, projectFilter } from "@/lib/db/queries";
 import { Prisma } from "@/generated/prisma/client";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
+import ChitiCard from "@/components/ui/ChitiCard";
 import ChitiButton from "@/components/ui/ChitiButton";
 import SearchBar from "@/components/ui/SearchBar";
 import FilterSelect from "@/components/ui/FilterSelect";
@@ -103,7 +104,7 @@ export default async function CustomersPage({
           const initials = (customer.name || "?").split(" ").map(n => n[0]).join("");
           const status = customer.totalOrders >= 10 ? "VIP" : customer.totalOrders >= 5 ? "Active" : "New";
           return (
-            <div key={customer.id} className="group bg-surface-1 border border-white/10 rounded-xl p-5 space-y-3 hover:border-white/20 transition-colors relative">
+            <ChitiCard key={customer.id} padding="sm" hover>
               <Link href={`/customers/${customer.id}`} className="absolute inset-0 z-0" />
               <div className="flex items-center justify-between relative z-10">
                 <div className="flex items-center gap-3">
@@ -111,7 +112,7 @@ export default async function CustomersPage({
                     <span className="text-sm text-brand-primary font-bold">{initials}</span>
                   </div>
                   <div>
-                    <p className="text-sm text-text-main font-medium group-hover:text-brand-primary transition-colors">{customer.name}</p>
+                    <p className="text-sm text-text-main font-medium">{customer.name}</p>
                     <p className="text-xs text-text-muted">{customer.phone || customer.email}</p>
                   </div>
                 </div>
@@ -138,7 +139,7 @@ export default async function CustomersPage({
                   </button>
                 </form>
               </div>
-            </div>
+            </ChitiCard>
           );
         })}
       </div>

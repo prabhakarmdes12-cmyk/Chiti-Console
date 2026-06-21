@@ -3,6 +3,8 @@ import { getProjectId, projectFilter } from "@/lib/db/queries";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiCard from "@/components/ui/ChitiCard";
 import ChitiStatusBadge from "@/components/ui/ChitiStatusBadge";
+import EmptyState from "@/components/ui/EmptyState";
+import { ClipboardList } from "lucide-react";
 
 export default async function ListingsPage() {
   const projectId = await getProjectId();
@@ -15,6 +17,9 @@ export default async function ListingsPage() {
   return (
     <div className="space-y-6">
       <ChitiPageHeader title="Listings" description="Bookable hotels, cabs, restaurants, guides, packages, and experiences." />
+      {listings.length === 0 ? (
+        <EmptyState icon={ClipboardList} title="No listings yet" description="Listings will appear here once vendors publish them." />
+      ) : (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {listings.map((listing) => {
           const location = listing.location as { district?: string; address?: string } | null;
@@ -38,6 +43,7 @@ export default async function ListingsPage() {
           );
         })}
       </div>
+      )}
     </div>
   );
 }

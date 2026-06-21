@@ -24,7 +24,8 @@ interface AttentionItem {
 }
 
 interface DashboardClientProps {
-  operatingModel: string;
+  capabilities?: string[];
+  sections?: string[];
   stats: Stat[];
   attentionItems: AttentionItem[];
   expectedRevenue: { current: number; previous: number; change: number };
@@ -447,15 +448,15 @@ function ContentSection({ contentMetrics }: DashboardClientProps) {
 }
 
 export default function DashboardClient(props: DashboardClientProps) {
-  const { operatingModel, stats, attentionItems, expectedRevenue, monthlyData, recentOrders, projects } = props;
+  const { capabilities = [], sections = [], stats, attentionItems, expectedRevenue, monthlyData, recentOrders, projects } = props;
 
   return (
     <>
-      {operatingModel === "MARKETPLACE" && <MarketplaceSection {...props} />}
-      {operatingModel === "ECOMMERCE" && <EcommerceSection {...props} />}
-      {operatingModel === "B2B_CATALOG" && <B2BSection {...props} />}
-      {operatingModel === "SAAS" && <SaasSection {...props} />}
-      {operatingModel === "CONTENT" && <ContentSection {...props} />}
+      {sections.includes("MARKETPLACE") && <MarketplaceSection {...props} />}
+      {sections.includes("ECOMMERCE") && <EcommerceSection {...props} />}
+      {sections.includes("B2B_CATALOG") && <B2BSection {...props} />}
+      {sections.includes("SAAS") && <SaasSection {...props} />}
+      {sections.includes("CONTENT") && <ContentSection {...props} />}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat, i) => (

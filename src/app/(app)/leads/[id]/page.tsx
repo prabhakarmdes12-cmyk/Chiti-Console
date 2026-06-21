@@ -4,6 +4,7 @@ import { getProjectId, projectFilter } from "@/lib/db/queries";
 import ChitiCard from "@/components/ui/ChitiCard";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiButton from "@/components/ui/ChitiButton";
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import LeadFollowUp from "@/components/ui/LeadFollowUp";
 import { updateLeadStatus, deleteLead } from "@/lib/actions/leads";
 import Link from "next/link";
@@ -32,6 +33,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="space-y-4">
+          <ErrorBoundary>
           <ChitiCard>
             <h3 className="text-sm font-medium text-text-muted mb-3">Lead Info</h3>
             <div className="space-y-2 text-sm">
@@ -76,8 +78,10 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
               )}
             </div>
           </ChitiCard>
+          </ErrorBoundary>
 
           {(lead.phone || lead.email) && (
+            <ErrorBoundary>
             <ChitiCard>
               <h3 className="text-sm font-medium text-text-muted mb-3">Contact</h3>
               <div className="space-y-1 text-sm">
@@ -85,13 +89,16 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
                 {lead.email && <p className="text-text-muted">{lead.email}</p>}
               </div>
             </ChitiCard>
+            </ErrorBoundary>
           )}
 
           {lead.message && (
+            <ErrorBoundary>
             <ChitiCard>
               <h3 className="text-sm font-medium text-text-muted mb-3">Message</h3>
               <p className="text-sm text-text-main">{lead.message}</p>
             </ChitiCard>
+            </ErrorBoundary>
           )}
         </div>
 

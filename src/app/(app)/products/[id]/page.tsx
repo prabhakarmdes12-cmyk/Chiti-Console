@@ -4,6 +4,7 @@ import { getProjectId, projectFilter } from "@/lib/db/queries";
 import ChitiCard from "@/components/ui/ChitiCard";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiButton from "@/components/ui/ChitiButton";
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import { updateProduct, deleteProduct, adjustStock } from "@/lib/actions/products";
 import Link from "next/link";
 import { ArrowLeft, Trash2 } from "lucide-react";
@@ -35,6 +36,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 space-y-4">
+          <ErrorBoundary>
           <ChitiCard>
             <h3 className="text-sm font-medium text-text-muted mb-3">Stock Movements</h3>
             {product.stockMovements.length === 0 ? (
@@ -59,6 +61,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               </div>
             )}
           </ChitiCard>
+          </ErrorBoundary>
 
           <ChitiCard>
             <h3 className="text-sm font-medium text-text-muted mb-3">Adjust Stock</h3>
@@ -118,6 +121,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         </div>
 
         <div className="space-y-4">
+          <ErrorBoundary>
           <ChitiCard>
             <h3 className="text-sm font-medium text-text-muted mb-3">Product Info</h3>
             <div className="space-y-2 text-sm">
@@ -139,6 +143,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               </div>
             </div>
           </ChitiCard>
+          </ErrorBoundary>
         </div>
       </div>
     </div>

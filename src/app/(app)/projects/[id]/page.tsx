@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db/prisma";
 import { notFound } from "next/navigation";
 import { getProjectHealth } from "@/lib/db/queries";
 import HealthScore from "@/components/ui/HealthScore";
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
 
 export default async function ProjectOverviewPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -31,6 +32,7 @@ export default async function ProjectOverviewPage({ params }: { params: Promise<
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <ErrorBoundary>
         <div className="bg-surface-1 border border-white/10 rounded-xl p-5 space-y-4">
           <h3 className="text-sm font-medium text-text-muted">Health Score</h3>
           <div className="flex items-center justify-center py-2">
@@ -44,7 +46,9 @@ export default async function ProjectOverviewPage({ params }: { params: Promise<
             <div className="flex justify-between"><span>Content (30d)</span><span className={health.contentCount > 0 ? "text-success" : "text-text-muted"}>{health.contentCount > 0 ? "✓" : "✗"}</span></div>
           </div>
         </div>
+        </ErrorBoundary>
 
+        <ErrorBoundary>
         <div className="bg-surface-1 border border-white/10 rounded-xl p-5 space-y-4">
           <h3 className="text-sm font-medium text-text-muted">Key Metrics</h3>
           <div className="grid grid-cols-2 gap-4">
@@ -67,7 +71,9 @@ export default async function ProjectOverviewPage({ params }: { params: Promise<
             <span className="text-text-main">{project.integrationType}</span>
           </div>
         </div>
+        </ErrorBoundary>
 
+        <ErrorBoundary>
         <div className="bg-surface-1 border border-white/10 rounded-xl p-5 space-y-4">
           <h3 className="text-sm font-medium text-text-muted">Recent Activity</h3>
           <div className="space-y-2 text-xs">
@@ -87,6 +93,7 @@ export default async function ProjectOverviewPage({ params }: { params: Promise<
             ))}
           </div>
         </div>
+        </ErrorBoundary>
       </div>
     </div>
   );

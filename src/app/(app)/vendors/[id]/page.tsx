@@ -6,6 +6,7 @@ import { verifyProjectAccess } from "@/lib/db/queries";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiCard from "@/components/ui/ChitiCard";
 import ChitiStatusBadge from "@/components/ui/ChitiStatusBadge";
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import { updateVendorStatus, updateVendorDocumentStatus, upsertVendorBankAccount } from "@/lib/actions/vendors";
 
 function money(value: unknown) {
@@ -38,6 +39,7 @@ export default async function VendorDetailPage({ params }: { params: Promise<{ i
       <ChitiPageHeader title={vendor.businessName} description={`${vendor.category.replace("_", " ")} partner in ${vendor.district}`} />
 
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
+        <ErrorBoundary>
         <ChitiCard padding="md" glass glow className="xl:col-span-2">
           <div className="flex items-start justify-between gap-4 mb-5">
             <div>
@@ -55,7 +57,9 @@ export default async function VendorDetailPage({ params }: { params: Promise<{ i
           </div>
           {vendor.address && <p className="mt-4 text-sm text-text-muted">{vendor.address}</p>}
         </ChitiCard>
+        </ErrorBoundary>
 
+        <ErrorBoundary>
         <ChitiCard padding="md" glass>
           <div className="flex items-center gap-2 mb-4"><Wallet className="w-4 h-4 text-brand-primary" /><h2 className="text-sm font-medium text-text-main">Wallet</h2></div>
           <div className="space-y-3 text-sm">
@@ -65,6 +69,7 @@ export default async function VendorDetailPage({ params }: { params: Promise<{ i
             <div className="flex justify-between"><span className="text-text-muted">Withdrawn</span><span className="text-text-main font-bold">₹{money(vendor.wallet?.totalWithdrawn)}</span></div>
           </div>
         </ChitiCard>
+        </ErrorBoundary>
 
         <ChitiCard padding="md" glass>
           <div className="flex items-center gap-2 mb-4"><Building2 className="w-4 h-4 text-brand-primary" /><h2 className="text-sm font-medium text-text-main">Actions</h2></div>
@@ -78,6 +83,7 @@ export default async function VendorDetailPage({ params }: { params: Promise<{ i
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <ErrorBoundary>
         <ChitiCard padding="md" glass>
           <div className="flex items-center gap-2 mb-4"><FileCheck className="w-4 h-4 text-brand-primary" /><h2 className="text-sm font-medium text-text-main">KYC Documents</h2></div>
           <div className="space-y-3">
@@ -99,6 +105,7 @@ export default async function VendorDetailPage({ params }: { params: Promise<{ i
             ))}
           </div>
         </ChitiCard>
+        </ErrorBoundary>
 
         <ChitiCard padding="md" glass>
           <div className="flex items-center gap-2 mb-4"><CreditCard className="w-4 h-4 text-brand-primary" /><h2 className="text-sm font-medium text-text-main">Bank Account</h2></div>
@@ -115,9 +122,9 @@ export default async function VendorDetailPage({ params }: { params: Promise<{ i
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <Section title="Listings" items={vendor.listings.map((l) => [l.name, `${l.type} · ${l.status}`])} />
-        <Section title="Recent Enquiries" items={vendor.enquiries.map((e) => [e.customerName, `${e.type} · ${e.status}`])} />
-        <Section title="Recent Payouts" items={vendor.payouts.map((p) => [`₹${money(p.amount)}`, `${p.status} · ${p.scheduledFor?.toLocaleDateString("en-IN") || "unscheduled"}`])} />
+        <ErrorBoundary><Section title="Listings" items={vendor.listings.map((l) => [l.name, `${l.type} · ${l.status}`])} /></ErrorBoundary>
+        <ErrorBoundary><Section title="Recent Enquiries" items={vendor.enquiries.map((e) => [e.customerName, `${e.type} · ${e.status}`])} /></ErrorBoundary>
+        <ErrorBoundary><Section title="Recent Payouts" items={vendor.payouts.map((p) => [`₹${money(p.amount)}`, `${p.status} · ${p.scheduledFor?.toLocaleDateString("en-IN") || "unscheduled"}`])} /></ErrorBoundary>
       </div>
     </div>
   );

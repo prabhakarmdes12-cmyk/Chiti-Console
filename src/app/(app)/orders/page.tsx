@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
 import { getProjectId, projectFilter } from "@/lib/db/queries";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
+import ChitiCard from "@/components/ui/ChitiCard";
 import ChitiStatusBadge from "@/components/ui/ChitiStatusBadge";
 import ChitiButton from "@/components/ui/ChitiButton";
 import SearchBar from "@/components/ui/SearchBar";
@@ -110,7 +111,8 @@ export default async function OrdersPage({
         <FilterSelect param="source" options={sourceOptions} placeholder="All Sources" />
       </div>
 
-      <div className="bg-surface-1 border border-white/10 rounded-xl overflow-x-auto">
+      <ChitiCard padding="sm">
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-white/10 text-text-muted">
@@ -159,7 +161,8 @@ export default async function OrdersPage({
           </tbody>
         </table>
         <PaginationBar total={total} pageSize={PAGE_SIZE} />
-      </div>
+        </div>
+      </ChitiCard>
     </div>
     </FadeIn>
   );

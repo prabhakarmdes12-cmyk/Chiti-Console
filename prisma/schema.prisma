@@ -16,6 +16,16 @@ enum ProjectType {
   CUSTOM
 }
 
+enum Capability {
+  COMMERCE
+  MARKETPLACE
+  CRM
+  FINANCE
+  CONTENT
+  ANALYTICS
+  AI
+}
+
 enum IntegrationType {
   API
   WEBHOOK
@@ -192,6 +202,7 @@ model Project {
   name            String
   slug            String          @unique
   type            ProjectType     @default(CUSTOM)
+  capabilities    Capability[]
   domain          String?
   logoUrl         String?
   integrationType IntegrationType @default(MANUAL)

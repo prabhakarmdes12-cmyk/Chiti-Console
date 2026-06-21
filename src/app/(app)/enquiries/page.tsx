@@ -3,6 +3,8 @@ import { getProjectId, projectFilter } from "@/lib/db/queries";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiCard from "@/components/ui/ChitiCard";
 import ChitiStatusBadge from "@/components/ui/ChitiStatusBadge";
+import EmptyState from "@/components/ui/EmptyState";
+import { MessageSquare } from "lucide-react";
 import { convertEnquiryToBooking } from "@/lib/actions/marketplace";
 
 export default async function EnquiriesPage() {
@@ -17,6 +19,9 @@ export default async function EnquiriesPage() {
   return (
     <div className="space-y-6">
       <ChitiPageHeader title="Enquiries" description="Booking requests, vendor discussions, and customer pipeline." />
+      {enquiries.length === 0 ? (
+        <EmptyState icon={MessageSquare} title="No enquiries yet" description="New customer enquiries will appear here as they come in." />
+      ) : (
       <div className="space-y-3">
         {enquiries.map((enquiry) => (
           <ChitiCard key={enquiry.id} padding="sm" glass hover>
@@ -58,6 +63,7 @@ export default async function EnquiriesPage() {
           </ChitiCard>
         ))}
       </div>
+      )}
     </div>
   );
 }

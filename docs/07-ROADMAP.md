@@ -203,6 +203,25 @@
 
 **Milestone:** Finance team can process payouts without seeing system settings; vendors see only their own orders and products.
 
+---
+
+## Phase 12: Engine Architecture (Weeks 23-24)
+
+**Goal:** Replace slug-based/project-type dispatch with capability-driven engine architecture. Business logic extracted into `src/engines/{engine}/lib/`. Nav and dashboard driven by capabilities ∩ role.
+
+| Task | Output |
+|------|--------|
+| Capability enum + field on Project | `prisma/schema.prisma` — 7 capabilities (COMMERCE, MARKETPLACE, CRM, FINANCE, CONTENT, ANALYTICS, AI) |
+| Engine registry (`ENGINE_REGISTRY`) | `src/engines/registry.ts` — nav items, dashboard section, dependencies per capability |
+| Identity engine | `src/engines/identity/lib/` — auth, rbac, capabilities helpers |
+| Marketplace, Finance, Commerce, CRM, Content, Analytics, AI, Integration engines | `src/engines/{engine}/lib/` — extracted business logic from actions |
+| Capability-driven sidebar | `capabilityNavMap` + role filter (∩ intersection) |
+| Capability-driven dashboard | `sections.includes(...)` replaces `operatingModel === "..."` |
+| New project form: capability checkboxes | Presets + dependency enforcement |
+| `docs/ENGINE-ARCHITECTURE.md` | Full documentation of the architecture |
+
+**Milestone:** Adding a new project type = adding a registry entry + an engine folder. No more switch statements across files.
+
 ## Success Criteria
 
 | Phase | Exit Criteria |

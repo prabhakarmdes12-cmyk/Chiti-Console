@@ -689,6 +689,8 @@ The `validate()` helper returns a discriminated union — after checking `if (va
 | 2026-06 | Webhook validation uses `crypto.timingSafeEqual` | Prevents timing attacks on webhook signature comparison |
 | 2026-06 | `verifyProjectAccess` called per-mutation (not middleware) | Explicit per-route authorization; simpler to audit than middleware-based checks |
 | 2026-06 | Zod v4 with discriminated union `validate()` helper | After `if (validated.error) return`, TypeScript narrows `validated.data` as defined |
+| 2026-06 | Capability-driven engine architecture | Each project has `capabilities` array; engines provide nav items & dashboard sections per capability; sidebar filters by capabilities ∩ role; dependencies enforced (FINANCE→MARKETPLACE→COMMERCE) |
+| 2026-06 | Business logic extracted from actions into `src/engines/{engine}/lib/` | Existing API routes/pages stay in place — engines are re-export layers; backward-compatible adapters; avoids massive file moves while centralizing logic |
 
 ### 8.3 Product Decisions
 

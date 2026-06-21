@@ -1,9 +1,11 @@
 import { prisma } from "@/lib/db/prisma";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
+import ChitiCard from "@/components/ui/ChitiCard";
 import HealthScore from "@/components/ui/HealthScore";
 import { getProjectHealth } from "@/lib/db/queries";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, LayoutDashboard } from "lucide-react";
+import EmptyState from "@/components/ui/EmptyState";
 
 type HealthCache = Record<string, Awaited<ReturnType<typeof getProjectHealth>>>;
 
@@ -54,34 +56,29 @@ export default async function ProjectsPage() {
       />
 
       {projectData.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="w-12 h-12 rounded-full bg-surface-2 flex items-center justify-center mb-3">
-            <span className="text-xl text-text-muted">+</span>
-          </div>
-          <p className="text-sm text-text-muted mb-1">No projects yet</p>
-          <p className="text-xs text-text-muted/60">Create your first project to get started.</p>
-        </div>
+        <EmptyState icon={LayoutDashboard} title="No projects yet" description="Create your first project to get started." action={{ label: "New Project", href: "/projects/new" }} />
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {projectData.map((p) => {
           const initials = (p.name || "?").split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase();
           return (
-            <a key={p.id} href={`/projects/${p.id}`} className="bg-surface-1 border border-white/10 rounded-xl p-5 space-y-4 hover:border-white/20 transition-colors group">
+            <ChitiCard key={p.id} padding="md" hover>
+              <Link href={`/projects/${p.id}`} className="absolute inset-0 z-0" />
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg bg-brand-primary/10 flex items-center justify-center">
                     <span className="text-sm text-brand-primary font-bold">{initials}</span>
                   </div>
                   <div>
-                    <h3 className="text-sm text-text-main font-medium group-hover:text-brand-primary transition-colors">{p.name}</h3>
+                    <h3 className="text-sm text-text-main font-medium">{p.name}</h3>
                     <p className="text-xs text-text-muted">{p.type}</p>
                   </div>
                 </div>
                 <HealthScore score={p.health.score} size="sm" />
               </div>
 
-              <div className="grid grid-cols-3 gap-3 text-sm">
+              <div className="grid grid-cols-3 gap-3 text-sm mt-4">
                 <div>
                   <p className="text-xs text-text-muted">Revenue</p>
                   <p className="text-text-main font-medium mt-0.5">₹{p.revenue.toLocaleString("en-IN")}</p>
@@ -96,13 +93,13 @@ export default async function ProjectsPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 text-xs text-text-muted">
+              <div className="flex items-center gap-3 text-xs text-text-muted mt-4">
                 <span className={p.isActive ? "text-success" : "text-error"}>● {p.isActive ? "Active" : "Inactive"}</span>
                 {p.domain && <span>{p.domain}</span>}
                 {p.health.oosCount > 0 && <span className="text-error">{p.health.oosCount} OOS</span>}
                 {p.health.totalUnread > 0 && <span className="text-warning">{p.health.totalUnread} unread</span>}
               </div>
-            </a>
+            </ChitiCard>
           );
         })}
       </div>

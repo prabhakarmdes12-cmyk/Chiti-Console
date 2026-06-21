@@ -81,12 +81,12 @@ export async function getAccessibleProjects() {
   });
   if (!user) return [];
   if (user.role === "SUPER_ADMIN") {
-    return prisma.project.findMany({ select: { id: true, name: true, slug: true }, orderBy: { name: "asc" } });
+    return prisma.project.findMany({ select: { id: true, name: true, slug: true, capabilities: true }, orderBy: { name: "asc" } });
   }
 
   const memberships = await prisma.userProject.findMany({
     where: { userId },
-    select: { project: { select: { id: true, name: true, slug: true } } },
+    select: { project: { select: { id: true, name: true, slug: true, capabilities: true } } },
     orderBy: { project: { name: "asc" } },
   });
   return memberships.map((m) => m.project);

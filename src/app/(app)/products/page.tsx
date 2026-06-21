@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
 import { getProjectId, projectFilter } from "@/lib/db/queries";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
+import ChitiCard from "@/components/ui/ChitiCard";
 import ChitiButton from "@/components/ui/ChitiButton";
 import SearchBar from "@/components/ui/SearchBar";
 import FilterSelect from "@/components/ui/FilterSelect";
@@ -100,7 +101,8 @@ export default async function ProductsPage({
         <FilterSelect param="stock" options={[{ value: "low", label: "Low Stock" }, { value: "out", label: "Out of Stock" }]} placeholder="All Stock" />
       </div>
 
-      <div className="bg-surface-1 border border-white/10 rounded-xl overflow-x-auto">
+      <ChitiCard padding="sm">
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-white/10 text-text-muted">
@@ -150,7 +152,8 @@ export default async function ProductsPage({
           </tbody>
         </table>
         <PaginationBar total={total} pageSize={PAGE_SIZE} />
-      </div>
+        </div>
+      </ChitiCard>
     </div>
     </FadeIn>
   );

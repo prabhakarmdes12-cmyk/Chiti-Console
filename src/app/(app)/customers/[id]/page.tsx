@@ -5,6 +5,7 @@ import FadeIn from "@/components/motion/FadeIn";
 import ChitiCard from "@/components/ui/ChitiCard";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiButton from "@/components/ui/ChitiButton";
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import ChitiStatusBadge from "@/components/ui/ChitiStatusBadge";
 import { updateCustomer, deleteCustomer } from "@/lib/actions/customers";
 import Link from "next/link";
@@ -38,6 +39,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="space-y-4">
+          <ErrorBoundary>
           <FadeIn direction="up" delay={0.1}>
             <ChitiCard>
               <div className="flex flex-col items-center text-center space-y-3">
@@ -51,7 +53,9 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
               </div>
             </ChitiCard>
           </FadeIn>
+          </ErrorBoundary>
 
+          <ErrorBoundary>
           <FadeIn direction="up" delay={0.2}>
             <ChitiCard>
               <h3 className="text-sm font-medium text-text-muted mb-3">Stats</h3>
@@ -67,6 +71,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
               </div>
             </ChitiCard>
           </FadeIn>
+          </ErrorBoundary>
 
           <FadeIn direction="up" delay={0.3}>
             <ChitiCard>
@@ -104,6 +109,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
             </ChitiCard>
           </FadeIn>
 
+          <ErrorBoundary>
           <FadeIn direction="up" delay={0.25}>
             <ChitiCard>
               <h3 className="text-sm font-medium text-text-muted mb-3">Recent Orders</h3>
@@ -127,6 +133,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
               )}
             </ChitiCard>
           </FadeIn>
+          </ErrorBoundary>
         </div>
       </div>
     </div>

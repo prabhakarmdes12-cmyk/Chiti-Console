@@ -3,6 +3,8 @@ import { getProjectId, projectFilter } from "@/lib/db/queries";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiCard from "@/components/ui/ChitiCard";
 import ChitiStatusBadge from "@/components/ui/ChitiStatusBadge";
+import EmptyState from "@/components/ui/EmptyState";
+import { Building2 } from "lucide-react";
 import Link from "next/link";
 
 export default async function VendorsPage() {
@@ -16,6 +18,9 @@ export default async function VendorsPage() {
   return (
     <div className="space-y-6">
       <ChitiPageHeader title="Vendors" description="Hotels, cabs, restaurants, guides, and experience partners." />
+      {vendors.length === 0 ? (
+        <EmptyState icon={Building2} title="No vendors yet" description="Vendors will appear here once they register or are added." />
+      ) : (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {vendors.map((vendor) => {
           const pendingPayout = vendor.payouts.filter((p) => p.status === "PENDING").reduce((sum, p) => sum + Number(p.amount), 0);
@@ -44,6 +49,7 @@ export default async function VendorsPage() {
           );
         })}
       </div>
+      )}
     </div>
   );
 }

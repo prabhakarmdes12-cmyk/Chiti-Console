@@ -138,3 +138,27 @@ Required env vars for Console (Vercel → Project Settings → Environment Varia
 | `VENDOR_USER` | Dashboard, Orders, Products, Enquiries |
 | `CLIENT_VIEWER` | Dashboard, Analytics |
 | `CONTENT_EDITOR` | Dashboard, Content, Analytics |
+
+---
+
+### 2026-06-22 — Capability-Based Engine Architecture
+
+**Goal:** Replace project-type operating model dispatch with capability-driven engine architecture. Each project gets a `capabilities` array, engines provide nav items + dashboard sections per capability, and the sidebar/dashboard filter by capabilities ∩ role.
+
+**Changes:**
+1. **schema:** Added `Capability` enum with 7 values (`COMMERCE, MARKETPLACE, CRM, FINANCE, CONTENT, ANALYTICS, AI`); `capabilities Capability[]` field on Project model; manual migration SQL (`prisma/migrations/20260622024600_add_capabilities/migration.sql`)
+2. **Engine registry:** `src/engines/registry.ts` — `ENGINE_REGISTRY` map with dependencies (FINANCE→MARKETPLACE→COMMERCE)
+3. **Capabilities utilities:** `src/engines/capabilities.ts` — `getEnabledEngines` (dep enforcement), `getDashboardSections`, `projectTypeToCapabilities`
+4. **9 engines:** identity, marketplace, finance, commerce, crm, content, analytics, ai, integration — each under `src/engines/{engine}/lib/` with extracted business logic
+5. **`queries.ts`:** `getAccessibleProjects()` now includes `capabilities`
+6. **`layout.tsx`:** Reads capabilities → passes to AppShell
+7. **`AppShell.tsx`:** Forwards capabilities to Sidebar
+8. **`Sidebar.tsx`:** Nav items = `defaultItems` ∪ `capabilityNavMap[cap]` per capability, ∩ role filter
+9. **`dashboard/page.tsx`:** Uses `getDashboardSections(capabilities)` to dispatch fetchers; passes `sections` to client
+10. **`DashboardClient.tsx`:** `sections.includes(...)` replaces `operatingModel === "..."` for section rendering
+11. **New project form:** Capability checkboxes (not type dropdown) with preset buttons + dependency enforcement
+12. **POST `/api/projects`:** New API route accepting `capabilities` array
+13. **`docs/ENGINE-ARCHITECTURE.md`:** Full documentation
+14. **Roadmap Phase 12 + journal decisions log** updated
+
+**Engine bug fixes:** whatsapp case mismatch, escrow/refund vendorId via order relation, removed non-existent fields from WalletTransaction/Payout/create, EARNING→CREDIT, effectiveTo removed, integration export

@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db/prisma";
 import { auth } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
+import { projectTypeToCapabilities } from "@/engines/capabilities";
+import type { Capability } from "@/engines/registry";
 
 export async function createProject(formData: FormData) {
   const session = await auth();
@@ -27,10 +29,15 @@ export async function createProject(formData: FormData) {
   const integrationType = formData.get("integrationType") as string || "MANUAL";
   const logoUrl = formData.get("logoUrl") as string || undefined;
 
+  const rawCaps = formData.getAll("capabilities") as string[];
+  const capabilities: Capability[] = rawCaps.length > 0
+    ? rawCaps as Capability[]
+    : projectTypeToCapabilities(type);
+
   let project;
   try {
     project = await prisma.project.create({
-      data: { name, slug, type: type as any, domain, integrationType: integrationType as any, logoUrl },
+      data: { name, slug, type: type as any, domain, integrationType: integrationType as any, logoUrl, capabilities },
     });
   } catch (e) {
     console.error("createProject create failed:", e);

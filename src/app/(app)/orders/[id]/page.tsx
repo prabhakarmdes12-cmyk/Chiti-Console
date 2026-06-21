@@ -6,6 +6,7 @@ import ChitiCard from "@/components/ui/ChitiCard";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import ChitiStatusBadge from "@/components/ui/ChitiStatusBadge";
 import ChitiButton from "@/components/ui/ChitiButton";
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import { updateOrderStatus, deleteOrder, markOrderPaid } from "@/lib/actions/orders";
 import { createInvoice } from "@/lib/actions/finance";
 import Link from "next/link";
@@ -83,6 +84,7 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
         <div className="lg:col-span-2 space-y-4">
 
           {hasBookingFields && (
+            <ErrorBoundary>
             <FadeIn direction="up" delay={0.05}>
               <ChitiCard padding="md" glass glow>
                 <h3 className="text-sm font-medium text-text-muted mb-4 flex items-center gap-2">
@@ -111,9 +113,11 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                 {order.notes && <p className="mt-4 text-sm text-text-muted border-t border-white/10 pt-3">{order.notes}</p>}
               </ChitiCard>
             </FadeIn>
+            </ErrorBoundary>
           )}
 
           <FadeIn direction="up" delay={0.1}>
+            <ErrorBoundary>
             <ChitiCard>
               <h3 className="text-sm font-medium text-text-muted mb-3">Items</h3>
               <div className="overflow-x-auto">
@@ -139,9 +143,11 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                 </table>
               </div>
             </ChitiCard>
+            </ErrorBoundary>
           </FadeIn>
 
           {order.refunds.length > 0 && (
+            <ErrorBoundary>
             <FadeIn direction="up" delay={0.15}>
               <ChitiCard>
                 <h3 className="text-sm font-medium text-text-muted mb-3">Refunds</h3>
@@ -158,8 +164,10 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                 </div>
               </ChitiCard>
             </FadeIn>
+            </ErrorBoundary>
           )}
 
+          <ErrorBoundary>
           <FadeIn direction="up" delay={0.2}>
             <ChitiCard>
               <h3 className="text-sm font-medium text-text-muted mb-3">Timeline</h3>
@@ -180,10 +188,12 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
               </div>
             </ChitiCard>
           </FadeIn>
+          </ErrorBoundary>
         </div>
 
         <div className="space-y-4">
 
+          <ErrorBoundary>
           <FadeIn direction="up" delay={0.1}>
             <ChitiCard padding="md" glass>
               <h3 className="text-sm font-medium text-text-muted mb-3 flex items-center gap-2">
@@ -200,7 +210,9 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
               </div>
             </ChitiCard>
           </FadeIn>
+          </ErrorBoundary>
 
+          <ErrorBoundary>
           <FadeIn direction="up" delay={0.15}>
             <ChitiCard padding="md" glass>
               <h3 className="text-sm font-medium text-text-muted mb-3 flex items-center gap-2">
@@ -220,8 +232,10 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
               </div>
             </ChitiCard>
           </FadeIn>
+          </ErrorBoundary>
 
           {order.customer && (
+            <ErrorBoundary>
             <FadeIn direction="up" delay={0.2}>
               <ChitiCard padding="md" glass>
                 <h3 className="text-sm font-medium text-text-muted mb-3">Customer</h3>
@@ -232,9 +246,11 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                 </div>
               </ChitiCard>
             </FadeIn>
+            </ErrorBoundary>
           )}
 
           {order.vendor && (
+            <ErrorBoundary>
             <FadeIn direction="up" delay={0.2}>
               <ChitiCard padding="md" glass>
                 <div className="flex items-center gap-2 mb-3">
@@ -250,9 +266,11 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                 </div>
               </ChitiCard>
             </FadeIn>
+            </ErrorBoundary>
           )}
 
           {order.escrow && (
+            <ErrorBoundary>
             <FadeIn direction="up" delay={0.25}>
               <ChitiCard padding="md" glass>
                 <div className="flex items-center gap-2 mb-3">
@@ -270,6 +288,7 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                 </div>
               </ChitiCard>
             </FadeIn>
+            </ErrorBoundary>
           )}
 
           <FadeIn direction="up" delay={0.3}>
