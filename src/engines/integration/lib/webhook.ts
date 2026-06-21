@@ -1,5 +1,4 @@
-import { prisma } from "@/lib/db/prisma";
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export async function handleWebhook(source: string, payload: any) {
   switch (source) {
     case "whatsapp":
@@ -13,14 +12,14 @@ export async function handleWebhook(source: string, payload: any) {
   }
 }
 
-async function handleWhatsApp(payload: any) {
+async function handleWhatsApp(_payload: any) {
   return { processed: true, source: "whatsapp" };
 }
 
-async function handleStripe(payload: any) {
+async function handleStripe(_payload: any) {
   return { processed: true, source: "stripe" };
 }
 
-async function handleRazorpay(payload: any) {
+async function handleRazorpay(_payload: any) {
   return { processed: true, source: "razorpay" };
 }

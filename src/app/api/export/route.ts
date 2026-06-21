@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth/auth";
+import { authenticate } from "@/lib/api/auth";
 import { prisma } from "@/lib/db/prisma";
-import { getProjectId } from "@/lib/db/queries";
 
 function toCSV(headers: string[], rows: string[][]): string {
   const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
@@ -9,12 +8,12 @@ function toCSV(headers: string[], rows: string[][]): string {
 }
 
 export async function GET(request: Request) {
-  const session = await auth();
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authResult = await authenticate(request);
+  if (authResult.error) return authResult.error;
 
   const { searchParams } = new URL(request.url);
   const entity = searchParams.get("entity") || "orders";
-  const projectId = await getProjectId();
+  const projectId = authResult.project?.id;
 
   if (!projectId) return NextResponse.json({ error: "Project not found" }, { status: 404 });
 

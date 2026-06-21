@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useMemo } from "react";
+import { useState, useMemo, type ComponentType } from "react";
 import {
   LayoutDashboard, ShoppingCart, Users, Package, Target,
-  BarChart3, MessageCircle, FileText, Wallet, ShieldCheck,
+  MessageCircle, FileText, Wallet, ShieldCheck,
   Settings, ChevronDown, ChevronRight, Building2, Sparkles,
   LogOut, Plus, ClipboardList, MessageSquare, ArrowUpRight,
   ArrowDownLeft, Percent, ChartColumn, Monitor,
@@ -21,7 +21,9 @@ const rolePermissions: Record<string, string[]> = {
   CONTENT_EDITOR: ["/dashboard","/content","/analytics"],
 };
 
-const capabilityNavMap: Record<string, { label: string; href: string; icon: any; children?: { label: string; href: string; icon: any }[] }[]> = {
+type NavIcon = ComponentType<{ className?: string }>;
+interface NavItem { label: string; href: string; icon: NavIcon; children?: { label: string; href: string; icon: NavIcon }[] }
+const capabilityNavMap: Record<string, NavItem[]> = {
   COMMERCE: [
     { label: "Orders", href: "/orders", icon: ShoppingCart },
     { label: "Products", href: "/products", icon: Package },
@@ -53,7 +55,7 @@ const capabilityNavMap: Record<string, { label: string; href: string; icon: any;
   ],
 };
 
-const defaultItems: { label: string; href: string; icon: any; children?: { label: string; href: string; icon: any }[] }[] = [
+const defaultItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Analytics", href: "/analytics", icon: ChartColumn },
   { label: "System", href: "/system", icon: Monitor },

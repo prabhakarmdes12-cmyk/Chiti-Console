@@ -188,7 +188,7 @@ function MarketplaceSection({ ceoMetrics, marketplaceHealth, customerFunnel, ven
           <ChitiCard padding="md" glass>
             <div className="flex items-center gap-2 mb-4">
               <AlertTriangle className="w-4 h-4 text-warning" />
-              <h2 className="text-sm font-medium text-text-main">Today's Priorities</h2>
+              <h2 className="text-sm font-medium text-text-main">Today&apos;s Priorities</h2>
             </div>
             <div className="space-y-2">
               {(!marketplacePriorities || marketplacePriorities.length === 0) && <p className="text-sm text-text-muted py-8 text-center">No marketplace blockers today</p>}
@@ -448,7 +448,7 @@ function ContentSection({ contentMetrics }: DashboardClientProps) {
 }
 
 export default function DashboardClient(props: DashboardClientProps) {
-  const { capabilities = [], sections = [], stats, attentionItems, expectedRevenue, monthlyData, recentOrders, projects } = props;
+  const { sections = [], stats, attentionItems, expectedRevenue, monthlyData, recentOrders, projects } = props;
 
   return (
     <>

@@ -27,7 +27,7 @@ export default async function VendorDetailPage({ params }: { params: Promise<{ i
     },
   });
   if (!vendor || !(await verifyProjectAccess(vendor.projectId))) notFound();
-  const documents = Array.isArray(vendor.documents) ? (vendor.documents as any[]) : [];
+  const documents = Array.isArray(vendor.documents) ? (vendor.documents as { name: string; status: string }[]) : [];
   const totalRevenue = vendor.orders.reduce((sum, order) => sum + Number(order.totalAmount), 0);
   const totalCommission = vendor.orders.reduce((sum, order) => sum + Number(order.commissionAmount), 0);
 

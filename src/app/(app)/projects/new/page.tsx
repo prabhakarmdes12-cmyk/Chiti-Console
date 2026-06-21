@@ -6,7 +6,8 @@ import { ArrowLeft, Info } from "lucide-react";
 import Link from "next/link";
 import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 
-const ALL_CAPABILITIES = [
+interface CapDef { id: string; label: string; description: string; dependsOn?: string[] }
+const ALL_CAPABILITIES: CapDef[] = [
   { id: "COMMERCE", label: "Commerce", description: "Orders, products, inventory" },
   { id: "MARKETPLACE", label: "Marketplace", description: "Vendors, listings, bookings", dependsOn: ["COMMERCE"] },
   { id: "CRM", label: "CRM", description: "Customers, leads, WhatsApp" },
@@ -14,7 +15,7 @@ const ALL_CAPABILITIES = [
   { id: "CONTENT", label: "Content", description: "CMS, blog, pages" },
   { id: "ANALYTICS", label: "Analytics", description: "Reports, dashboards" },
   { id: "AI", label: "AI", description: "Business assistant, automation" },
-] as const;
+];
 
 const PRESETS = [
   { label: "Marketplace", caps: ["COMMERCE", "MARKETPLACE", "CRM", "FINANCE", "ANALYTICS", "AI"] },
@@ -35,10 +36,10 @@ export default function NewProjectPage() {
       const next = new Set(prev);
       if (next.has(id)) {
         next.delete(id);
-        const dependent = ALL_CAPABILITIES.filter((c) => (c as any).dependsOn?.includes(id));
+        const dependent = ALL_CAPABILITIES.filter((c) => c.dependsOn?.includes(id));
         for (const d of dependent) next.delete(d.id);
       } else {
-        const def = ALL_CAPABILITIES.find((c) => c.id === id) as any;
+        const def = ALL_CAPABILITIES.find((c) => c.id === id);
         if (def?.dependsOn) for (const dep of def.dependsOn) next.add(dep);
         next.add(id);
       }
@@ -133,7 +134,7 @@ export default function NewProjectPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 min-w-0">
             {ALL_CAPABILITIES.map((cap) => {
               const enabled = selected.has(cap.id);
-              const blocked = (cap as any).dependsOn && !(cap as any).dependsOn.every((d: string) => selected.has(d));
+              const blocked = cap.dependsOn && !cap.dependsOn.every((d) => selected.has(d));
               return (
                 <button
                   key={cap.id}
@@ -155,7 +156,7 @@ export default function NewProjectPage() {
                   <div className="min-w-0">
                     <p className="text-sm font-medium truncate">{cap.label}</p>
                     <p className="text-xs text-text-muted truncate">{cap.description}</p>
-                    {blocked && <p className="text-[10px] text-text-muted/60 mt-0.5 truncate">Requires {(cap as any).dependsOn?.join(" + ")}</p>}
+                    {blocked && <p className="text-[10px] text-text-muted/60 mt-0.5 truncate">Requires {cap.dependsOn?.join(" + ")}</p>}
                   </div>
                 </button>
               );

@@ -6,7 +6,7 @@ import ChitiButton from "@/components/ui/ChitiButton";
 import FadeIn from "@/components/motion/FadeIn";
 import MonthlyRevenueChart from "@/components/charts/MonthlyRevenueChart";
 import SourcePieChart from "@/components/charts/SourcePieChart";
-import { Download, Save, Trash2, ChevronDown, RotateCcw, FileText, Printer } from "lucide-react";
+import { Download, Save, Trash2, ChevronDown, RotateCcw, Printer } from "lucide-react";
 
 interface MonthlyData { month: string; revenue: number; orders: number }
 interface SourceData { name: string; value: number; color: string }
@@ -82,13 +82,12 @@ function loadSavedReports(): SavedReport[] {
   try { return JSON.parse(localStorage.getItem("chiti_saved_reports") || "[]"); } catch { return []; }
 }
 
-export default function AnalyticsClient({ monthlyData, sourceData, revenue, orderCount, customerCount, avgOrder, gaSources, orders }: AnalyticsClientProps) {
+export default function AnalyticsClient({ revenue, orderCount, customerCount, avgOrder, gaSources, orders }: AnalyticsClientProps) {
   const [preset, setPreset] = useState<DatePreset>("30d");
   const [customStart, setCustomStart] = useState("");
   const [customEnd, setCustomEnd] = useState("");
   const [savedReports, setSavedReports] = useState<SavedReport[]>(loadSavedReports);
   const [showSaved, setShowSaved] = useState(false);
-  const [reportName, setReportName] = useState("");
 
   const reset = useCallback(() => { setCustomStart(""); setCustomEnd(""); setPreset("30d"); }, []);
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
@@ -176,13 +177,13 @@ async function main() {
   const v3 = await prisma.vendor.create({
     data: { id: "bj-v003", projectId: bj.id, businessName: "Jungle Cafe & Kitchen", ownerName: "Suman Toppo", category: "RESTAURANT", phone: "+91-7654321098", email: "suman@junglecafe.com", district: "Latehar", address: "Netarhat Main Road", status: "SUSPENDED", documents: [{ name: "GST Certificate", status: "not_uploaded" }, { name: "Aadhaar Card", status: "verified" }] as any, responseRate: 70, avgResponseTime: "4.5h" },
   });
-  const v4 = await prisma.vendor.create({
+  await prisma.vendor.create({
     data: { id: "bj-v004", projectId: bj.id, businessName: "Saranda Eco Resort", ownerName: "Mohan Lakra", category: "HOTEL", phone: "+91-6543210987", email: "mohan@sarandaresort.com", district: "West Singhbhum", address: "Saranda Forest, West Singhbhum", status: "PENDING", documents: [{ name: "GST Certificate", status: "pending" }, { name: "Aadhaar Card", status: "verified" }, { name: "Fire Safety", status: "not_uploaded" }] as any },
   });
   const v5 = await prisma.vendor.create({
     data: { id: "bj-v005", projectId: bj.id, businessName: "Betla Jungle Lodge", ownerName: "Suman Tigga", category: "HOTEL", phone: "+91-5432109876", email: "suman@betlalodge.com", district: "Palamu", address: "Betla National Park Road", status: "ACTIVE", documents: [{ name: "GST Certificate", status: "verified" }, { name: "Aadhaar Card", status: "verified" }, { name: "Wildlife Clearance", status: "verified" }] as any, responseRate: 88, avgResponseTime: "2.0h" },
   });
-  const v6 = await prisma.vendor.create({
+  await prisma.vendor.create({
     data: { id: "bj-v006", projectId: bj.id, businessName: "Patratu Lake Boating", ownerName: "Vikram Oraon", category: "EXPERIENCE", phone: "+91-4321098765", email: "vikram@patratuboats.com", district: "Ramgarh", address: "Patratu Lake, Ramgarh", status: "PENDING", documents: [{ name: "Aadhaar Card", status: "verified" }] as any },
   });
 

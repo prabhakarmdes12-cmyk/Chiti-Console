@@ -8,7 +8,7 @@ import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import QueryBar from "@/components/ai/QueryBar";
 import DashboardClient from "./DashboardClient";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
-import type { Capability } from "@/engines/registry";
+
 
 function getGreeting(name: string) {
   const hour = new Date().getHours();
@@ -237,11 +237,6 @@ async function fetchContentData(projectId: string | null) {
   return { ...shared, contentMetrics: { totalEntries: entries.length, published, draft: entries.length - published, totalViews: 0, avgViewsPerEntry: 0, subscribers: 0 } };
 }
 
-async function fetchGenericData(projectId: string | null) {
-  const shared = await fetchSharedData(projectId);
-  return shared;
-}
-
 export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
@@ -250,6 +245,7 @@ export default async function DashboardPage() {
   const capabilities = await getProjectCapabilities(projectId);
   const sections = getDashboardSections(capabilities);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let data: any = {};
   try {
     const shared = await fetchSharedData(projectId);

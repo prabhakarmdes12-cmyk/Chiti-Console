@@ -4,7 +4,7 @@ import ChitiPageHeader from "@/components/ui/ChitiPageHeader";
 import { fetchGAPageViews } from "@/lib/integrations/analytics";
 import AnalyticsClient from "./AnalyticsClient";
 
-function aggregateOrders(orders: { createdAt: Date; totalAmount: any; source: string }[]) {
+function aggregateOrders(orders: { createdAt: Date; totalAmount: number; source: string }[]) {
   const revenue = orders.reduce((s, o) => s + Number(o.totalAmount), 0);
   const orderCount = orders.length;
   const avgOrder = orderCount > 0 ? revenue / orderCount : 0;
@@ -50,7 +50,7 @@ export default async function AnalyticsPage() {
     getProject(),
   ]);
 
-  const stats = aggregateOrders(orders);
+  const stats = aggregateOrders(orders as unknown as { createdAt: Date; totalAmount: number; source: string }[]);
   stats.customerCount = customerCount;
 
   const revenue = Number(totalRevenue._sum.totalAmount ?? 0);

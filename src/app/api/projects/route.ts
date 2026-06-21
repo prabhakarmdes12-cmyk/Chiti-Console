@@ -11,12 +11,12 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    let body: any;
+    let body: Record<string, unknown>;
     try { body = await req.json(); } catch {
       return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
     }
 
-    const { name, domain, integrationType, logoUrl, capabilities } = body;
+    const { name, domain, integrationType, logoUrl, capabilities } = body as { name?: string; domain?: string; integrationType?: string; logoUrl?: string; capabilities?: string[] };
     if (!name?.trim()) {
       return NextResponse.json({ error: "Project name is required" }, { status: 400 });
     }
@@ -27,17 +27,17 @@ export async function POST(req: NextRequest) {
     }
 
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-    const caps: Capability[] = capabilities?.length > 0
-      ? capabilities
-      : projectTypeToCapabilities(body.type || "CUSTOM");
+    const caps: Capability[] = capabilities && capabilities.length > 0
+      ? (capabilities as Capability[])
+      : projectTypeToCapabilities((body.type as string) || "CUSTOM");
 
     const project = await prisma.project.create({
       data: {
         name,
         slug,
-        type: (body.type || "CUSTOM") as any,
+        type: ((body.type as string) || "CUSTOM") as "MARKETPLACE" | "ECOMMERCE" | "B2B_CATALOG" | "SAAS" | "CONTENT" | "CUSTOM",
         domain: domain || undefined,
-        integrationType: integrationType || "MANUAL",
+        integrationType: (integrationType || "MANUAL") as "API" | "WEBHOOK" | "MANUAL",
         logoUrl: logoUrl || undefined,
         capabilities: caps,
       },
