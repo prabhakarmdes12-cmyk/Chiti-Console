@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useMemo, type ComponentType } from "react";
+import { signOut } from "next-auth/react";
 import {
   LayoutDashboard, ShoppingCart, Users, Package, Target,
   MessageCircle, FileText, Wallet, ShieldCheck,
@@ -234,10 +235,10 @@ export default function Sidebar({ projects, onClose, userRole, capabilities = ["
           </Link>
         )}
         <div className="pt-2 space-y-1">
-          <Link href="/login" onClick={onClose} className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-text-muted hover:text-text-main hover:bg-surface-2 transition-all">
+          <button onClick={() => { signOut({ callbackUrl: "/login" }); onClose?.(); }} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-text-muted hover:text-text-main hover:bg-surface-2 transition-all">
             <LogOut className="w-4 h-4" />
             Logout
-          </Link>
+          </button>
         </div>
       </div>
     </aside>

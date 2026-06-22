@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { prisma } from "./prisma";
 import { auth } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
+import { jwtVerify } from "jose";
 
 const ADMIN_ROLES = ["SUPER_ADMIN", "PROJECT_ADMIN"] as const;
 const FINANCE_ROLES = ["SUPER_ADMIN", "PROJECT_ADMIN", "FINANCE_MANAGER"] as const;
@@ -9,10 +10,38 @@ const ALL_ROLES = ["SUPER_ADMIN", "PROJECT_ADMIN", "FINANCE_MANAGER", "SUPPORT_A
 
 export type UserRoleType = (typeof ALL_ROLES)[number];
 
+function getJWTSecret() {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error("JWT_SECRET is required");
+  return new TextEncoder().encode(secret);
+}
+
+async function getSessionFromCookie() {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("chiti_session")?.value;
+    if (!token) return null;
+    const { payload } = await jwtVerify(token, getJWTSecret());
+    if (!payload.sub) return null;
+    return payload as { sub: string; email?: string; role?: string };
+  } catch {
+    return null;
+  }
+}
+
 export async function getCurrentUser() {
   const session = await auth();
-  const userId = session?.user?.id;
-  const email = session?.user?.email;
+  let userId = session?.user?.id;
+  let email = session?.user?.email;
+
+  if (!userId) {
+    const cookieSession = await getSessionFromCookie();
+    if (cookieSession) {
+      userId = cookieSession.sub;
+      email = cookieSession.email;
+    }
+  }
+
   if (!userId && !email) return null;
 
   if (userId) {
@@ -28,7 +57,7 @@ export async function getCurrentUser() {
       where: { email },
       select: { id: true, name: true, email: true, role: true },
     });
-    return user;
+    if (user) return user;
   }
 
   return null;

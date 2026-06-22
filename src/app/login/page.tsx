@@ -1,23 +1,69 @@
 import { auth, signIn } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import { SignJWT } from "jose";
+import { prisma } from "@/lib/db/prisma";
 
 async function signInWithGoogle() {
   "use server";
   await signIn("google", { redirectTo: "/dashboard" });
 }
 
-async function signInWithCredentials(formData: FormData) {
-  "use server";
-  await signIn("credentials", {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-    redirectTo: "/dashboard",
-  });
+function getJWTSecret() {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error("JWT_SECRET is required");
+  return new TextEncoder().encode(secret);
 }
 
-export default async function LoginPage() {
+async function signInWithCredentials(formData: FormData) {
+  "use server";
+  const email = formData.get("email") as string | null;
+  const password = formData.get("password") as string | null;
+  const errorParam = new URLSearchParams();
+
+  if (!email || !password || email !== process.env.AUTH_DEV_EMAIL || password !== process.env.AUTH_DEV_PASSWORD) {
+    errorParam.set("error", "Invalid email or password");
+    redirect(`/login?${errorParam.toString()}`);
+  }
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    errorParam.set("error", "User not found");
+    redirect(`/login?${errorParam.toString()}`);
+  }
+
+  const token = await new SignJWT({
+    sub: user.id,
+    email: user.email,
+    role: user.role,
+  })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("24h")
+    .sign(getJWTSecret());
+
+  const cookieStore = await cookies();
+  cookieStore.set("chiti_session", token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 86400,
+  });
+
+  redirect("/dashboard");
+}
+
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   const session = await auth();
   if (session?.user) redirect("/dashboard");
+
+  const params = await searchParams;
+  const error = params.error;
 
   return (
     <div className="min-h-screen bg-bg-dark flex items-center justify-center p-8 relative overflow-hidden">
@@ -38,6 +84,12 @@ export default async function LoginPage() {
             </h1>
             <p className="text-sm text-text-muted">Sign in to your account</p>
           </div>
+
+          {error && (
+            <div className="px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+              {error === "CredentialsSignin" ? "Invalid email or password" : error}
+            </div>
+          )}
 
           <form action={signInWithGoogle}>
             <button

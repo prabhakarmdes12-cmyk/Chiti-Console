@@ -23,7 +23,7 @@ export default function ProjectSelector({ projects, currentId }: ProjectSelector
   const selected = currentId ? projects.find((p) => p.id === currentId) : null;
 
   const select = (id: string | null) => {
-    document.cookie = `chiti_project=${id || "all"}; path=/; max-age=86400`;
+    document.cookie = `chiti_project=${id || "all"}; path=/; max-age=86400; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
     setOpen(false);
     router.refresh();
   };

@@ -18,23 +18,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const email = credentials?.email as string | undefined;
-        const password = credentials?.password as string | undefined;
-        if (
-          !email ||
-          email !== process.env.AUTH_DEV_EMAIL ||
-          password !== process.env.AUTH_DEV_PASSWORD
-        ) {
+        try {
+          const email = credentials?.email as string | undefined;
+          const password = credentials?.password as string | undefined;
+          if (
+            !email ||
+            email !== process.env.AUTH_DEV_EMAIL ||
+            password !== process.env.AUTH_DEV_PASSWORD
+          ) {
+            return null;
+          }
+          const user = await prisma.user.findUnique({ where: { email } });
+          if (!user) return null;
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name ?? "Dev Admin",
+            role: user.role,
+          };
+        } catch (e) {
+          console.error("authorize error:", e);
           return null;
         }
-        const user = await prisma.user.findUnique({ where: { email } });
-        if (!user) return null;
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name ?? "Dev Admin",
-          role: user.role,
-        };
       },
     }),
     Google({
