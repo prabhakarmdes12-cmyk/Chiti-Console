@@ -29,6 +29,9 @@ async function main() {
   await prisma.contentEntry.deleteMany();
   await prisma.analyticsEvent.deleteMany();
   await prisma.enquiry.deleteMany();
+  await prisma.listing.deleteMany();
+  await prisma.promotion.deleteMany();
+  await prisma.destination.deleteMany();
   await prisma.vendor.deleteMany();
   await prisma.userProject.deleteMany();
   await prisma.session.deleteMany();
