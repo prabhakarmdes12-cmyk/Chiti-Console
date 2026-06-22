@@ -21,17 +21,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const email = credentials?.email as string | undefined;
         const password = credentials?.password as string | undefined;
         if (
-          email === process.env.AUTH_DEV_EMAIL &&
-          password === process.env.AUTH_DEV_PASSWORD
+          !email ||
+          email !== process.env.AUTH_DEV_EMAIL ||
+          password !== process.env.AUTH_DEV_PASSWORD
         ) {
-          return {
-            id: "dev-admin",
-            email,
-            name: "Dev Admin",
-            role: "SUPER_ADMIN",
-          };
+          return null;
         }
-        return null;
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (!user) return null;
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name ?? "Dev Admin",
+          role: user.role,
+        };
       },
     }),
     Google({
