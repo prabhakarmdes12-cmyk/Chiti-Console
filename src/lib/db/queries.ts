@@ -11,12 +11,27 @@ export type UserRoleType = (typeof ALL_ROLES)[number];
 
 export async function getCurrentUser() {
   const session = await auth();
-  if (!session?.user?.id) return null;
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { id: true, name: true, email: true, role: true },
-  });
-  return user;
+  const userId = session?.user?.id;
+  const email = session?.user?.email;
+  if (!userId && !email) return null;
+
+  if (userId) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, name: true, email: true, role: true },
+    });
+    if (user) return user;
+  }
+
+  if (email) {
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true, name: true, email: true, role: true },
+    });
+    return user;
+  }
+
+  return null;
 }
 
 export async function getCurrentUserRole(): Promise<UserRoleType | null> {
@@ -53,39 +68,25 @@ export function projectFilter(projectId: string | null) {
 }
 
 export async function verifyProjectAccess(projectId: string): Promise<boolean> {
-  const session = await auth();
-  const userId = session?.user?.id;
-  if (!userId) return false;
-
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { role: true },
-  });
+  const user = await getCurrentUser();
   if (!user) return false;
   if (user.role === "SUPER_ADMIN") return true;
 
   const membership = await prisma.userProject.findUnique({
-    where: { userId_projectId: { userId, projectId } },
+    where: { userId_projectId: { userId: user.id, projectId } },
   });
   return membership !== null;
 }
 
 export async function getAccessibleProjects() {
-  const session = await auth();
-  const userId = session?.user?.id;
-  if (!userId) return [];
-
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { role: true },
-  });
+  const user = await getCurrentUser();
   if (!user) return [];
   if (user.role === "SUPER_ADMIN") {
     return prisma.project.findMany({ select: { id: true, name: true, slug: true, capabilities: true }, orderBy: { name: "asc" } });
   }
 
   const memberships = await prisma.userProject.findMany({
-    where: { userId },
+    where: { userId: user.id },
     select: { project: { select: { id: true, name: true, slug: true, capabilities: true } } },
     orderBy: { project: { name: "asc" } },
   });
